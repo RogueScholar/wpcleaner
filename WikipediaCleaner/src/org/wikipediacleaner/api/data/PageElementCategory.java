@@ -10,9 +10,8 @@ package org.wikipediacleaner.api.data;
 import org.wikipediacleaner.api.constants.EnumCaseSensitiveness;
 import org.wikipediacleaner.api.constants.EnumWikipedia;
 
-
 /**
- * Class containing information about a category link ([[category:name|sort]]). 
+ * Class containing information about a category link ([[category:name|sort]]).
  */
 public class PageElementCategory extends PageElement {
 
@@ -27,14 +26,14 @@ public class PageElementCategory extends PageElement {
 
   /**
    * Analyze contents to check if it matches a language link.
-   * 
+   *
    * @param wikipedia Wikipedia.
    * @param contents Contents.
    * @param index Block start index.
    * @return Block details it there's a block.
    */
-  public static PageElementCategory analyzeBlock(
-      EnumWikipedia wikipedia, String contents, int index) {
+  public static PageElementCategory analyzeBlock(EnumWikipedia wikipedia,
+                                                 String contents, int index) {
     // Verify arguments
     if (contents == null) {
       return null;
@@ -50,7 +49,8 @@ public class PageElementCategory extends PageElement {
     int beginIndex = tmpIndex;
 
     // Possible white spaces characters
-    while ((tmpIndex < contents.length()) && (contents.charAt(tmpIndex) == ' ')) {
+    while ((tmpIndex < contents.length()) &&
+           (contents.charAt(tmpIndex) == ' ')) {
       tmpIndex++;
     }
 
@@ -68,8 +68,10 @@ public class PageElementCategory extends PageElement {
 
     // Check that name space is a category
     int colonIndex = tmpIndex;
-    Namespace categoryNS = wikipedia.getWikiConfiguration().getNamespace(Namespace.CATEGORY);
-    if (!categoryNS.isPossibleName(contents.substring(beginIndex, colonIndex).trim())) {
+    Namespace categoryNS =
+        wikipedia.getWikiConfiguration().getNamespace(Namespace.CATEGORY);
+    if (!categoryNS.isPossibleName(
+            contents.substring(beginIndex, colonIndex).trim())) {
       return null;
     }
 
@@ -90,8 +92,7 @@ public class PageElementCategory extends PageElement {
         return null;
       }
       return new PageElementCategory(
-          index, tmpIndex + 2,
-          contents.substring(beginIndex, colonIndex),
+          index, tmpIndex + 2, contents.substring(beginIndex, colonIndex),
           categoryName, categoryNS.getCaseSensitiveness(), null);
     }
 
@@ -101,41 +102,26 @@ public class PageElementCategory extends PageElement {
       return null;
     }
     return new PageElementCategory(
-        index, endIndex + 2,
-        contents.substring(beginIndex, colonIndex),
+        index, endIndex + 2, contents.substring(beginIndex, colonIndex),
         categoryName, categoryNS.getCaseSensitiveness(),
         contents.substring(tmpIndex + 1, endIndex));
   }
 
-  public String getCategory() {
-    return category;
-  }
+  public String getCategory() { return category; }
 
-  public String getCategoryNotTrimmed() {
-    return categoryNotTrimmed;
-  }
+  public String getCategoryNotTrimmed() { return categoryNotTrimmed; }
 
-  public String getName() {
-    return name;
-  }
+  public String getName() { return name; }
 
-  public String getNameNotTrimmed() {
-    return nameNotTrimmed;
-  }
+  public String getNameNotTrimmed() { return nameNotTrimmed; }
 
-  public String getSort() {
-    return sort;
-  }
+  public String getSort() { return sort; }
 
-  public String getSortNotTrimmed() {
-    return sortNotTrimmed;
-  }
+  public String getSortNotTrimmed() { return sortNotTrimmed; }
 
-  private PageElementCategory(
-      int beginIndex, int endIndex,
-      String category, String name,
-      EnumCaseSensitiveness caseSensitive,
-      String sort) {
+  private PageElementCategory(int beginIndex, int endIndex, String category,
+                              String name, EnumCaseSensitiveness caseSensitive,
+                              String sort) {
     super(beginIndex, endIndex);
     this.categoryNotTrimmed = category;
     this.category = caseSensitive.normalize(CharacterUtils.trim(category));
@@ -167,18 +153,18 @@ public class PageElementCategory extends PageElement {
 
   /**
    * Create a category.
-   * 
+   *
    * @param wiki Wiki.
    * @param category Category name.
    * @param sortKey Sort key.
    * @return Category.
    */
-  public static String createCategory(
-      EnumWikipedia wiki,
-      String category, String sortKey) {
+  public static String createCategory(EnumWikipedia wiki, String category,
+                                      String sortKey) {
     StringBuilder sb = new StringBuilder();
     sb.append("[[");
-    Namespace categoryNamespace = wiki.getWikiConfiguration().getNamespace(Namespace.CATEGORY);
+    Namespace categoryNamespace =
+        wiki.getWikiConfiguration().getNamespace(Namespace.CATEGORY);
     sb.append(categoryNamespace.getTitle());
     sb.append(":");
     sb.append(category);

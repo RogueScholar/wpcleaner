@@ -5,7 +5,6 @@
  *  See README.txt file for licensing information.
  */
 
-
 package org.wikipediacleaner.api.data;
 
 import java.util.HashMap;
@@ -17,7 +16,8 @@ import java.util.Map;
 public class CharacterUtils {
 
   /** Map of character conversion to upper case to override default behavior. */
-  private final static Map<Character, Character> UPPERCASE_CONVERSION = new HashMap<Character, Character>();
+  private final static Map<Character, Character> UPPERCASE_CONVERSION =
+      new HashMap<Character, Character>();
 
   /** Lower boundary of the override map */
   private final static int LOWER_BOUNDARY;
@@ -27,7 +27,7 @@ public class CharacterUtils {
 
   /**
    * Put the first letter to upper case following MediaWiki rules.
-   * 
+   *
    * @param text Original text.
    * @return Modified text with first letter to upper case.
    */
@@ -57,7 +57,7 @@ public class CharacterUtils {
 
   /**
    * Trim text with whitespace characters used by MediaWiki.
-   * 
+   *
    * @param text Original text.
    * @return Trimmed text.
    */
@@ -87,7 +87,8 @@ public class CharacterUtils {
 
   static {
     // Initialize map of character conversion to upper case
-    // Retrieved from: https://github.com/wikimedia/operations-mediawiki-config/blob/master/wmf-config/Php72ToUpper.php
+    // Retrieved from:
+    // https://github.com/wikimedia/operations-mediawiki-config/blob/master/wmf-config/Php72ToUpper.php
     UPPERCASE_CONVERSION.put('ƀ', 'ƀ');
     UPPERCASE_CONVERSION.put('ƚ', 'ƚ');
     UPPERCASE_CONVERSION.put('ǅ', 'ǅ');
