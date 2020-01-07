@@ -7,12 +7,12 @@
 
 package org.wikipediacleaner.api.request.templatedata;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.wikipediacleaner.api.APIException;
 import org.wikipediacleaner.api.constants.EnumWikipedia;
@@ -23,27 +23,23 @@ import org.wikipediacleaner.api.data.TemplateData.Parameter;
 import org.wikipediacleaner.api.request.ApiJsonResult;
 import org.wikipediacleaner.api.request.ApiRequest;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-
 /**
  * MediaWiki API JSON TemplateData results.
  */
-public class ApiJsonTemplateDataResult extends ApiJsonResult implements ApiTemplateDataResult {
+public class ApiJsonTemplateDataResult
+    extends ApiJsonResult implements ApiTemplateDataResult {
 
   /**
    * @param wiki Wiki on which requests are made.
    * @param httpClient HTTP client for making requests.
    */
-  public ApiJsonTemplateDataResult(
-      EnumWikipedia wiki,
-      HttpClient httpClient) {
+  public ApiJsonTemplateDataResult(EnumWikipedia wiki, HttpClient httpClient) {
     super(wiki, httpClient);
   }
 
   /**
    * Execute TemplateData request.
-   * 
+   *
    * @param properties Properties defining request.
    * @return TemplateData for the page.
    * @throws APIException Exception thrown by the API.
@@ -119,7 +115,7 @@ public class ApiJsonTemplateDataResult extends ApiJsonResult implements ApiTempl
 
   /**
    * Create an InterfaceText from a JSON node.
-   * 
+   *
    * @param node JSON node.
    * @return InterfaceText.
    */
@@ -131,7 +127,8 @@ public class ApiJsonTemplateDataResult extends ApiJsonResult implements ApiTempl
     Iterator<Entry<String, JsonNode>> itValues = node.fields();
     while (itValues.hasNext()) {
       Entry<String, JsonNode> value = itValues.next();
-      LanguageValue language = new LanguageValue(value.getKey(), value.getValue().asText());
+      LanguageValue language =
+          new LanguageValue(value.getKey(), value.getValue().asText());
       languageValues.add(language);
     }
     return new InterfaceText(languageValues);
