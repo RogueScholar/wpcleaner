@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.constants.EnumWikipedia;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
@@ -25,7 +24,6 @@ import org.wikipediacleaner.api.data.contents.ContentsElementComparator;
 import org.wikipediacleaner.utils.Configuration;
 import org.wikipediacleaner.utils.ConfigurationValueBoolean;
 import org.wikipediacleaner.utils.Performance;
-
 
 /**
  * An analysis of a page.
@@ -53,28 +51,24 @@ public class PageAnalysis {
    */
   PageAnalysis(Page page, String contents) {
     this.page = page;
-    this.contents = Contents.createContents((contents != null) ? contents : page.getContents());
+    this.contents = Contents.createContents(
+        (contents != null) ? contents : page.getContents());
     this.areas = new PageElementAreas();
 
     // Default configuration
     Configuration config = Configuration.getConfiguration();
-    checkSpelling = config.getBoolean(
-        null, ConfigurationValueBoolean.SPELLING);
+    checkSpelling = config.getBoolean(null, ConfigurationValueBoolean.SPELLING);
   }
 
   /**
    * @param trace True to force tracing time spent in analysis.
    */
-  public static void setTraceTime(boolean trace) {
-    traceTime = trace;
-  }
+  public static void setTraceTime(boolean trace) { traceTime = trace; }
 
   /**
    * @return Page.
    */
-  public Page getPage() {
-    return page;
-  }
+  public Page getPage() { return page; }
 
   /**
    * @return Wikipedia.
@@ -124,8 +118,7 @@ public class PageAnalysis {
    * @return true if the page is in the namespace.
    */
   public boolean isInNamespace(int namespace) {
-    if ((page != null) &&
-        (page.getNamespace() != null)) {
+    if ((page != null) && (page.getNamespace() != null)) {
       return (page.getNamespace().intValue() == namespace);
     }
     return false;
@@ -134,27 +127,21 @@ public class PageAnalysis {
   /**
    * @return Page contents.
    */
-  public String getContents() {
-    return contents.getText();
-  }
+  public String getContents() { return contents.getText(); }
 
   /**
    * @param check True if spelling should be checked.
    */
-  public void shouldCheckSpelling(boolean check) {
-    this.checkSpelling = check;
-  }
+  public void shouldCheckSpelling(boolean check) { this.checkSpelling = check; }
 
   /**
    * @return True if spelling should be checked.
    */
-  public boolean shouldCheckSpelling() {
-    return checkSpelling;
-  }
+  public boolean shouldCheckSpelling() { return checkSpelling; }
 
   /**
    * Perform page analysis.
-   * 
+   *
    * @param perf Performance analysis.
    */
   public void performFullPageAnalysis(AnalysisPerformance perf) {
@@ -262,7 +249,6 @@ public class PageAnalysis {
       result.append(")");
       return result.toString();
     }
-
   }
 
   // ==========================================================================
@@ -285,12 +271,16 @@ public class PageAnalysis {
   /**
    * @param withCategories True if categories should be included in the result.
    * @param withComments True if comments should be included in the result.
-   * @param withExternalLinks True if external links should be included in the result.
+   * @param withExternalLinks True if external links should be included in the
+   *     result.
    * @param withFunctions True if functions should be included in the result.
    * @param withImages True if images should be included in the result.
-   * @param withInternalLinks True if internal links should be included in the result.
-   * @param withInterwikiLinks True if interwiki links should be included in the result.
-   * @param withLanguageLinks True if language links should be included in the result.
+   * @param withInternalLinks True if internal links should be included in the
+   *     result.
+   * @param withInterwikiLinks True if interwiki links should be included in the
+   *     result.
+   * @param withLanguageLinks True if language links should be included in the
+   *     result.
    * @param withListItems True if list items should be included in the result.
    * @param withMagicWords True if magic words should be included in the result.
    * @param withParameters True if parameters should be included in the result.
@@ -300,15 +290,14 @@ public class PageAnalysis {
    * @param withTitles True if titles should be included in the result.
    * @return All elements.
    */
-  public List<ContentsElement> getElements(
-      boolean withCategories, boolean withComments,
-      boolean withExternalLinks, boolean withFunctions,
-      boolean withImages, boolean withInternalLinks,
-      boolean withInterwikiLinks, boolean withLanguageLinks,
-      boolean withListItems,
-      boolean withMagicWords, boolean withParameters,
-      boolean withTables, boolean withTags,
-      boolean withTemplates, boolean withTitles) {
+  public List<ContentsElement>
+  getElements(boolean withCategories, boolean withComments,
+              boolean withExternalLinks, boolean withFunctions,
+              boolean withImages, boolean withInternalLinks,
+              boolean withInterwikiLinks, boolean withLanguageLinks,
+              boolean withListItems, boolean withMagicWords,
+              boolean withParameters, boolean withTables, boolean withTags,
+              boolean withTemplates, boolean withTitles) {
     List<ContentsElement> elements = new ArrayList<>();
     if (withCategories) {
       elements.addAll(getCategories());
@@ -378,77 +367,84 @@ public class PageAnalysis {
     // Check if in template
     PageElementTemplate template = isInTemplate(currentIndex);
     if ((template != null) &&
-        ((element == null) || (element.getBeginIndex() < template.getBeginIndex()))) {
+        ((element == null) ||
+         (element.getBeginIndex() < template.getBeginIndex()))) {
       element = template;
     }
 
     // Check if in image
     PageElementImage image = isInImage(currentIndex);
-    if ((image != null) &&
-        ((element == null) || (element.getBeginIndex() < image.getBeginIndex()))) {
+    if ((image != null) && ((element == null) || (element.getBeginIndex() <
+                                                  image.getBeginIndex()))) {
       element = image;
     }
 
     // Check if in category
     PageElementCategory category = isInCategory(currentIndex);
     if ((category != null) &&
-        ((element == null) || (element.getBeginIndex() < category.getBeginIndex()))) {
+        ((element == null) ||
+         (element.getBeginIndex() < category.getBeginIndex()))) {
       element = category;
     }
 
     // Check if in interwiki
     PageElementInterwikiLink interwiki = isInInterwikiLink(currentIndex);
     if ((interwiki != null) &&
-        ((element == null) || (element.getBeginIndex() < interwiki.getBeginIndex()))) {
+        ((element == null) ||
+         (element.getBeginIndex() < interwiki.getBeginIndex()))) {
       element = interwiki;
     }
 
     // Check if in language link
     PageElementLanguageLink language = isInLanguageLink(currentIndex);
     if ((language != null) &&
-        ((element == null) || (element.getBeginIndex() < language.getBeginIndex()))) {
+        ((element == null) ||
+         (element.getBeginIndex() < language.getBeginIndex()))) {
       element = language;
     }
 
     // Check if in external link
     PageElementExternalLink externalLink = isInExternalLink(currentIndex);
     if ((externalLink != null) &&
-        ((element == null) || (element.getBeginIndex() < externalLink.getBeginIndex()))) {
+        ((element == null) ||
+         (element.getBeginIndex() < externalLink.getBeginIndex()))) {
       element = externalLink;
     }
 
     // Check if in tag
     PageElementTag tag = isInTag(currentIndex);
-    if ((tag != null) &&
-        ((element == null) || (element.getBeginIndex() < tag.getBeginIndex()))) {
+    if ((tag != null) && ((element == null) ||
+                          (element.getBeginIndex() < tag.getBeginIndex()))) {
       element = tag;
     }
 
     // Check if in parameter
     PageElementParameter parameter = isInParameter(currentIndex);
     if ((parameter != null) &&
-        ((element == null) || (element.getBeginIndex() < parameter.getBeginIndex()))) {
+        ((element == null) ||
+         (element.getBeginIndex() < parameter.getBeginIndex()))) {
       element = parameter;
     }
 
     // Check if in function
     PageElementFunction function = isInFunction(currentIndex);
     if ((function != null) &&
-        ((element == null) || (element.getBeginIndex() < function.getBeginIndex()))) {
+        ((element == null) ||
+         (element.getBeginIndex() < function.getBeginIndex()))) {
       element = function;
     }
 
     // Check if in ISBN
     PageElementISBN isbn = isInISBN(currentIndex);
-    if ((isbn != null) &&
-        ((element == null) || (element.getBeginIndex() < isbn.getBeginIndex()))) {
+    if ((isbn != null) && ((element == null) ||
+                           (element.getBeginIndex() < isbn.getBeginIndex()))) {
       element = isbn;
     }
 
     // Check if in table
     PageElementTable table = isInTable(currentIndex);
-    if ((table != null) &&
-        ((element == null) || (element.getBeginIndex() < table.getBeginIndex()))) {
+    if ((table != null) && ((element == null) || (element.getBeginIndex() <
+                                                  table.getBeginIndex()))) {
       element = table;
     }
 
@@ -457,7 +453,7 @@ public class PageAnalysis {
 
   /**
    * Check if two indexes are in the same area.
-   * 
+   *
    * @param beginIndex Begin index.
    * @param endIndex End index.
    * @return True if begin and end indexes are in the same area.
@@ -494,7 +490,8 @@ public class PageAnalysis {
       if (template.getEndIndex() < endIndex) {
         return false;
       }
-      PageElementTemplate.Parameter param = template.getParameterAtIndex(beginIndex);
+      PageElementTemplate.Parameter param =
+          template.getParameterAtIndex(beginIndex);
       if ((param != null) && (param.getEndIndex() < endIndex)) {
         return false;
       }
@@ -636,8 +633,8 @@ public class PageAnalysis {
 
       Performance perf = null;
       if (traceTime) {
-        perf = Performance.getInstance(
-            "PageAnalysis.level1Analysis", TRACE_THRESHOLD);
+        perf = Performance.getInstance("PageAnalysis.level1Analysis",
+                                       TRACE_THRESHOLD);
         perf.printStart();
       }
 
@@ -663,8 +660,8 @@ public class PageAnalysis {
 
       Performance perf = null;
       if (traceTime) {
-        perf = Performance.getInstance(
-            "PageAnalysis.level2Analysis", TRACE_THRESHOLD);
+        perf = Performance.getInstance("PageAnalysis.level2Analysis",
+                                       TRACE_THRESHOLD);
         perf.printStart();
       }
 
@@ -684,7 +681,8 @@ public class PageAnalysis {
           if (nextIndex > currentIndex) {
             currentIndex = nextIndex;
           } else {
-            PageElementTag tag = PageElementTag.analyzeBlock(text, currentIndex);
+            PageElementTag tag =
+                PageElementTag.analyzeBlock(text, currentIndex);
             if (tag != null) {
               if (tag.isEndTag() && !tag.isFullTag()) {
                 boolean found = false;
@@ -693,7 +691,8 @@ public class PageAnalysis {
                 while ((i > 0) && !found) {
                   i--;
                   PageElementTag tmpTag = tags.get(i);
-                  if (tag.getNormalizedName().equals(tmpTag.getNormalizedName())) {
+                  if (tag.getNormalizedName().equals(
+                          tmpTag.getNormalizedName())) {
                     if (!tmpTag.isFullTag()) {
                       if (tmpTag.isEndTag()) {
                         level++;
@@ -739,8 +738,8 @@ public class PageAnalysis {
 
       Performance perf = null;
       if (traceTime) {
-        perf = Performance.getInstance(
-            "PageAnalysis.level3Analysis", TRACE_THRESHOLD);
+        perf = Performance.getInstance("PageAnalysis.level3Analysis",
+                                       TRACE_THRESHOLD);
         perf.printStart();
         perf.startPart();
       }
@@ -851,8 +850,8 @@ public class PageAnalysis {
 
       Performance perf = null;
       if (traceTime) {
-        perf = Performance.getInstance(
-            "PageAnalysis.level4Analysis", TRACE_THRESHOLD);
+        perf = Performance.getInstance("PageAnalysis.level4Analysis",
+                                       TRACE_THRESHOLD);
         perf.printStart();
       }
 
@@ -917,8 +916,8 @@ public class PageAnalysis {
 
       Performance perf = null;
       if (traceTime) {
-        perf = Performance.getInstance(
-            "PageAnalysis.level5Analysis", TRACE_THRESHOLD);
+        perf = Performance.getInstance("PageAnalysis.level5Analysis",
+                                       TRACE_THRESHOLD);
         perf.printStart();
       }
 
@@ -950,8 +949,8 @@ public class PageAnalysis {
 
       Performance perf = null;
       if (traceTime) {
-        perf = Performance.getInstance(
-            "PageAnalysis.level5AnalysisISBN", TRACE_THRESHOLD);
+        perf = Performance.getInstance("PageAnalysis.level5AnalysisISBN",
+                                       TRACE_THRESHOLD);
         perf.printStart();
       }
 
@@ -977,8 +976,8 @@ public class PageAnalysis {
 
       Performance perf = null;
       if (traceTime) {
-        perf = Performance.getInstance(
-            "PageAnalysis.level5AnalysisISSN", TRACE_THRESHOLD);
+        perf = Performance.getInstance("PageAnalysis.level5AnalysisISSN",
+                                       TRACE_THRESHOLD);
         perf.printStart();
       }
 
@@ -1004,8 +1003,8 @@ public class PageAnalysis {
 
       Performance perf = null;
       if (traceTime) {
-        perf = Performance.getInstance(
-            "PageAnalysis.level5AnalysisPMID", TRACE_THRESHOLD);
+        perf = Performance.getInstance("PageAnalysis.level5AnalysisPMID",
+                                       TRACE_THRESHOLD);
         perf.printStart();
       }
 
@@ -1031,8 +1030,8 @@ public class PageAnalysis {
 
       Performance perf = null;
       if (traceTime) {
-        perf = Performance.getInstance(
-            "PageAnalysis.level5AnalysisRFC", TRACE_THRESHOLD);
+        perf = Performance.getInstance("PageAnalysis.level5AnalysisRFC",
+                                       TRACE_THRESHOLD);
         perf.printStart();
       }
 
@@ -1058,8 +1057,8 @@ public class PageAnalysis {
 
       Performance perf = null;
       if (traceTime) {
-        perf = Performance.getInstance(
-            "PageAnalysis.level6Analysis", TRACE_THRESHOLD);
+        perf = Performance.getInstance("PageAnalysis.level6Analysis",
+                                       TRACE_THRESHOLD);
         perf.printStart();
       }
 
@@ -1079,7 +1078,7 @@ public class PageAnalysis {
 
   /**
    * Part of the analysis when text is beginning with "[[".
-   * 
+   *
    * @param currentIndex Current index in the text.
    * @return Next index.
    */
@@ -1099,16 +1098,16 @@ public class PageAnalysis {
     }
 
     // Check if this is an image
-    PageElementImage image = PageElementImage.analyzeBlock(
-        getWikipedia(), text, currentIndex);
+    PageElementImage image =
+        PageElementImage.analyzeBlock(getWikipedia(), text, currentIndex);
     if (image != null) {
       images.add(image);
       return image.getBeginIndex() + 2 + image.getNamespace().length() + 1;
     }
 
     // Check if this is a category
-    PageElementCategory category = PageElementCategory.analyzeBlock(
-        getWikipedia(), text, currentIndex);
+    PageElementCategory category =
+        PageElementCategory.analyzeBlock(getWikipedia(), text, currentIndex);
     if (category != null) {
       categories.add(category);
       return category.getEndIndex();
@@ -1138,7 +1137,7 @@ public class PageAnalysis {
 
   /**
    * Part of the analysis when text is beginning with "[".
-   * 
+   *
    * @param currentIndex Current index in the text.
    * @return Next index.
    */
@@ -1161,7 +1160,7 @@ public class PageAnalysis {
 
   /**
    * Part of the analysis when text is beginning with "__".
-   * 
+   *
    * @param currentIndex Current index in the text.
    * @return Next index.
    */
@@ -1169,8 +1168,8 @@ public class PageAnalysis {
 
     // Check if this a magic word
     String text = contents.getText();
-    PageElementMagicWord magicWord = PageElementMagicWord.analyzeBlock(
-        getWikipedia(), text, currentIndex);
+    PageElementMagicWord magicWord =
+        PageElementMagicWord.analyzeBlock(getWikipedia(), text, currentIndex);
     if (magicWord != null) {
       magicWords.add(magicWord);
       return magicWord.getEndIndex();
@@ -1181,7 +1180,7 @@ public class PageAnalysis {
 
   /**
    * Part of the analysis for regular text.
-   * 
+   *
    * @param currentIndex Current index in the text.
    * @return Next index.
    */
@@ -1190,7 +1189,8 @@ public class PageAnalysis {
     // Check if this is an external link
     String text = contents.getText();
     if ((externalLinks.size() == 0) ||
-        (externalLinks.get(externalLinks.size() - 1).getEndIndex() <= currentIndex)) {
+        (externalLinks.get(externalLinks.size() - 1).getEndIndex() <=
+         currentIndex)) {
       PageElementExternalLink link = PageElementExternalLink.analyzeBlock(
           getWikipedia(), text, currentIndex, this);
       if (link != null) {
@@ -1204,7 +1204,7 @@ public class PageAnalysis {
 
   /**
    * Part of the analysis when text is beginning with "{{{".
-   * 
+   *
    * @param currentIndex Current index in the text.
    * @return Next index.
    */
@@ -1224,7 +1224,7 @@ public class PageAnalysis {
 
   /**
    * Part of the analysis when text is beginning with "{{".
-   * 
+   *
    * @param currentIndex Current index in the text.
    * @return Next index.
    */
@@ -1259,7 +1259,7 @@ public class PageAnalysis {
 
   /**
    * Part of the analysis when text is beginning with "=".
-   * 
+   *
    * @param currentIndex Current index in the text.
    * @return Next index.
    */
@@ -1452,7 +1452,8 @@ public class PageAnalysis {
   /**
    * Links count.
    */
-  private Map<String, InternalLinkCount> linksCount = new HashMap<String, InternalLinkCount>();
+  private Map<String, InternalLinkCount> linksCount =
+      new HashMap<String, InternalLinkCount>();
 
   /**
    * @param link Link.
@@ -1471,7 +1472,7 @@ public class PageAnalysis {
 
   /**
    * Count number of links in the page.
-   * 
+   *
    * @param links Links.
    */
   public void countLinks(List<Page> links) {
@@ -1485,7 +1486,8 @@ public class PageAnalysis {
       }
     }
     if (interestingLinks.size() > 0) {
-      InternalLinkCounter counter = new InternalLinkCounter(linksCount, interestingLinks);
+      InternalLinkCounter counter =
+          new InternalLinkCounter(linksCount, interestingLinks);
       PageAnalysisUtils.findInternalLinks(this, interestingLinks, counter);
     }
   }
@@ -1773,7 +1775,8 @@ public class PageAnalysis {
 
   /**
    * All complete tags in the page categorized by name.
-   * Complete tags are either full tags or opening tags associated with a closing tag.
+   * Complete tags are either full tags or opening tags associated with a
+   * closing tag.
    */
   private Map<String, List<PageElementTag>> completeTagsByName;
 
@@ -1855,8 +1858,7 @@ public class PageAnalysis {
     }
     PageElementTag result = null;
     for (PageElementTag tag : tmpTags) {
-      if ((!tag.isFullTag()) &&
-          (tag.getValueBeginIndex() <= currentIndex) &&
+      if ((!tag.isFullTag()) && (tag.getValueBeginIndex() <= currentIndex) &&
           (tag.getValueEndIndex() > currentIndex)) {
         if ((result == null) ||
             (tag.getBeginIndex() > result.getBeginIndex())) {
@@ -1924,7 +1926,8 @@ public class PageAnalysis {
     if (tmpFunctions == null) {
       return null;
     }
-    List<PageElementFunction> defaultSorts = new ArrayList<PageElementFunction>();
+    List<PageElementFunction> defaultSorts =
+        new ArrayList<PageElementFunction>();
     for (PageElementFunction function : tmpFunctions) {
       if (MagicWord.DEFAULT_SORT.equals(function.getMagicWord().getName())) {
         defaultSorts.add(function);
@@ -2118,7 +2121,6 @@ public class PageAnalysis {
     return null;
   }
 
-
   /**
    * All ISSNs in the page
    */
@@ -2147,7 +2149,6 @@ public class PageAnalysis {
     return null;
   }
 
-  
   /**
    * All PMIDs in the page
    */
@@ -2176,7 +2177,6 @@ public class PageAnalysis {
     return null;
   }
 
-  
   /**
    * All RFCs in the page
    */
@@ -2295,7 +2295,8 @@ public class PageAnalysis {
 
     Result(boolean found, List<CheckErrorResult> errors) {
       this.found = found;
-      this.errors = (errors != null) ? new ArrayList<CheckErrorResult>(errors) : null;
+      this.errors =
+          (errors != null) ? new ArrayList<CheckErrorResult>(errors) : null;
     }
 
     /**
@@ -2317,16 +2318,18 @@ public class PageAnalysis {
 
   /**
    * Memorize Check Wiki errors.
-   * 
+   *
    * @param errorNumber Error number.
    * @param found True if errors of this kind have been found.
    * @param errors List of errors found.
    */
-  public void setCheckWikiErrors(int errorNumber, boolean found, List<CheckErrorResult> errors) {
+  public void setCheckWikiErrors(int errorNumber, boolean found,
+                                 List<CheckErrorResult> errors) {
     if (checkWikiErrors == null) {
       checkWikiErrors = new HashMap<Integer, PageAnalysis.Result>();
     }
-    checkWikiErrors.put(Integer.valueOf(errorNumber), new Result(found, errors));
+    checkWikiErrors.put(Integer.valueOf(errorNumber),
+                        new Result(found, errors));
   }
 
   /**

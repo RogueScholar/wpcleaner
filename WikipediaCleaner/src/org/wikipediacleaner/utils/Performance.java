@@ -12,10 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * Utility class to measure performance.
@@ -55,9 +53,7 @@ public class Performance {
   /**
    * @param method Method name.
    */
-  private Performance(String method) {
-    this(method, 0);
-  }
+  private Performance(String method) { this(method, 0); }
 
   /**
    * @param method Method name.
@@ -69,7 +65,7 @@ public class Performance {
 
   /**
    * Initialize a performance instance.
-   * 
+   *
    * @param methodName Method name.
    * @param thresholdValue Threshold for printing results.
    */
@@ -83,7 +79,8 @@ public class Performance {
   }
 
   /** Available instances to measure performance. */
-  private final static List<Performance> availablePerformances = new LinkedList<>();
+  private final static List<Performance> availablePerformances =
+      new LinkedList<>();
 
   /** Instances currently used to measure performance. */
   private final static List<Performance> usedPerformances = new LinkedList<>();
@@ -118,9 +115,7 @@ public class Performance {
     }
 
     // Register instance
-    synchronized (usedPerformances) {
-      usedPerformances.add(0, perf);
-    }
+    synchronized (usedPerformances) { usedPerformances.add(0, perf); }
 
     return perf;
   }
@@ -129,20 +124,16 @@ public class Performance {
    * Release a performance instance from the pool of performance objects.
    */
   public void release() {
-    synchronized (usedPerformances) {
-      usedPerformances.remove(this);
-    }
+    synchronized (usedPerformances) { usedPerformances.remove(this); }
   }
   /**
    * @param threshold Threshold for printing duration.
    */
-  public void setThreshold(long threshold) {
-    this.threshold = threshold;
-  }
+  public void setThreshold(long threshold) { this.threshold = threshold; }
 
   /**
    * Print a message.
-   * 
+   *
    * @param message Message to be printed.
    */
   private void printMessage(String message) {
@@ -159,7 +150,7 @@ public class Performance {
 
   /**
    * Print a message.
-   * 
+   *
    * @param time Current time.
    * @param message Message to be printed.
    */
@@ -189,7 +180,7 @@ public class Performance {
 
   /**
    * Print a step message.
-   * 
+   *
    * @param message Message to be printed.
    */
   public void printStep(String message) {
@@ -201,13 +192,11 @@ public class Performance {
   /**
    * Start measuring time for a part of the execution.
    */
-  public void startPart() {
-    partInitialTime = currentTime();
-  }
+  public void startPart() { partInitialTime = currentTime(); }
 
   /**
    * Stop measuring time for a part of the execution.
-   * 
+   *
    * @param part Part name.
    */
   public void stopPart(String part) {
@@ -220,7 +209,8 @@ public class Performance {
     }
     Long previousTime = parts.get(part);
     if (previousTime != null) {
-      parts.put(part, Long.valueOf(time - partInitialTime + previousTime.longValue()));
+      parts.put(part, Long.valueOf(time - partInitialTime +
+                                   previousTime.longValue()));
     } else {
       parts.put(part, Long.valueOf(time - partInitialTime));
     }
@@ -247,7 +237,7 @@ public class Performance {
 
   /**
    * Print an end message.
-   * 
+   *
    * @param message Message.
    */
   public void printEnd(String message) {
@@ -259,27 +249,29 @@ public class Performance {
 
   /**
    * Print an end message.
-   * 
+   *
    * @param message Message.
    * @param message2 Second part of the message.
    */
   public void printEnd(String message, String message2) {
     long time = currentTime();
     if (time > initialTime + threshold) {
-      printDetail(message + ":" + message2 + "(" + (time - initialTime) + unit + ")");
+      printDetail(message + ":" + message2 + "(" + (time - initialTime) + unit +
+                  ")");
     }
   }
 
   /**
    * Print detail.
-   * 
-   * @param message Messgae. 
+   *
+   * @param message Messgae.
    */
   private void printDetail(String message) {
     printMessage(message);
     if (parts != null) {
       for (Entry<String, Long> entry : parts.entrySet()) {
-        printMessage("  " + entry.getKey() + "(" + entry.getValue() + unit + ")");
+        printMessage("  " + entry.getKey() + "(" + entry.getValue() + unit +
+                     ")");
       }
     }
   }

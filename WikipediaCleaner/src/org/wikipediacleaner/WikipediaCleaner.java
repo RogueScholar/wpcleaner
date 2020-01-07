@@ -24,7 +24,6 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-
 import javax.swing.InputMap;
 import javax.swing.KeyStroke;
 import javax.swing.RepaintManager;
@@ -33,7 +32,6 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.text.DefaultEditorKit;
-
 import org.wikipediacleaner.api.check.CheckError;
 import org.wikipediacleaner.api.constants.EnumLanguage;
 import org.wikipediacleaner.api.constants.EnumWikipedia;
@@ -47,7 +45,6 @@ import org.wikipediacleaner.utils.ConfigurationConstants;
 import org.wikipediacleaner.utils.ConfigurationValueBoolean;
 import org.wikipediacleaner.utils.ConfigurationValueInteger;
 import org.wikipediacleaner.utils.ConfigurationValueString;
-
 
 /**
  * Wikipedia Cleaner.
@@ -72,7 +69,8 @@ public class WikipediaCleaner {
 
     // Check that calls are made in the Event Dispatch Thread
     if (CHECK_EDT) {
-      RepaintManager.setCurrentManager(new CheckThreadViolationRepaintManager());
+      RepaintManager.setCurrentManager(
+          new CheckThreadViolationRepaintManager());
     }
 
     // Look & Feel
@@ -111,7 +109,7 @@ public class WikipediaCleaner {
       for (Object key : keys) {
         Font font = defaults.getFont(key);
         if (font != null) {
-          font = font.deriveFont((float) (font.getSize() + fontSize));
+          font = font.deriveFont((float)(font.getSize() + fontSize));
           defaults.put(key, font);
         }
       }
@@ -120,11 +118,14 @@ public class WikipediaCleaner {
     // Manage copy/paste for OS X
     int menuShortcut = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
     if (menuShortcut == InputEvent.META_DOWN_MASK) {
-      InputMap im = (InputMap) UIManager.get("TextField.focusInputMap");
+      InputMap im = (InputMap)UIManager.get("TextField.focusInputMap");
       if (im != null) {
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, menuShortcut), DefaultEditorKit.copyAction);
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_V, menuShortcut), DefaultEditorKit.pasteAction);
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_X, menuShortcut), DefaultEditorKit.cutAction);
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, menuShortcut),
+               DefaultEditorKit.copyAction);
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_V, menuShortcut),
+               DefaultEditorKit.pasteAction);
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_X, menuShortcut),
+               DefaultEditorKit.cutAction);
       }
     }
 
@@ -177,7 +178,8 @@ public class WikipediaCleaner {
     if ((wikiCode == null) && (args.length > currentArg)) {
       wikiCode = args[currentArg];
     }
-    EnumWikipedia wiki = (wikiCode != null) ? EnumWikipedia.getWikipedia(wikiCode) : null;
+    EnumWikipedia wiki =
+        (wikiCode != null) ? EnumWikipedia.getWikipedia(wikiCode) : null;
     currentArg++;
 
     // Retrieve user name and password
@@ -185,7 +187,8 @@ public class WikipediaCleaner {
     String password = null;
     if (credentials != null) {
       Properties properties = new Properties();
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(credentials), "UTF8"))) {
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+               new FileInputStream(credentials), "UTF8"))) {
         properties.load(reader);
       } catch (IOException e) {
         // Doing nothing
