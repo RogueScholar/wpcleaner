@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
-
 import org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithm;
 import org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithms;
 import org.wikipediacleaner.api.constants.CWConfigurationError;
@@ -26,7 +25,6 @@ import org.wikipediacleaner.api.data.Page;
 import org.wikipediacleaner.api.data.PageAnalysis;
 import org.wikipediacleaner.i18n.GT;
 import org.wikipediacleaner.utils.Performance;
-
 
 /**
  * Managing errors defined in the check wikipedia project.
@@ -39,55 +37,53 @@ public class CheckError {
   /**
    * @param trace True to force tracing time spent in analysis.
    */
-  public static void setTraceTime(boolean trace) {
-    traceTime = trace;
-  }
+  public static void setTraceTime(boolean trace) { traceTime = trace; }
 
   /**
    * Analyze a page to find error types.
-   * 
+   *
    * @param algorithms Possible algorithms.
    * @param pageAnalysis Page analysis.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Errors found in the page.
    */
-  public static List<CheckErrorPage> analyzeErrors(
-      Collection<CheckErrorAlgorithm> algorithms,
-      PageAnalysis pageAnalysis,
-      boolean onlyAutomatic) {
+  public static List<CheckErrorPage>
+  analyzeErrors(Collection<CheckErrorAlgorithm> algorithms,
+                PageAnalysis pageAnalysis, boolean onlyAutomatic) {
     Performance perf = null;
     if (traceTime) {
       perf = Performance.getInstance("CheckError.analyzeErrors");
       perf.printStart();
     }
     List<CheckErrorPage> errorsFound = new ArrayList<CheckErrorPage>();
-    if ((algorithms != null) &&
-        (pageAnalysis != null) &&
+    if ((algorithms != null) && (pageAnalysis != null) &&
         (pageAnalysis.getContents() != null)) {
       for (CheckErrorAlgorithm algorithm : algorithms) {
-        if ((algorithm != null) &&
-            (algorithm.isAvailable()) &&
+        if ((algorithm != null) && (algorithm.isAvailable()) &&
             (CWConfigurationError.isPriorityActive(algorithm.getPriority()))) {
           List<CheckErrorResult> results = new ArrayList<CheckErrorResult>();
           boolean errorFound = false;
           int errorNumber = algorithm.getErrorNumber();
-          PageAnalysis.Result result = pageAnalysis.getCheckWikiErrors(errorNumber);
+          PageAnalysis.Result result =
+              pageAnalysis.getCheckWikiErrors(errorNumber);
           if (result != null) {
             errorFound = result.getErrors(results);
           } else {
-            errorFound = algorithm.analyze(pageAnalysis, results, onlyAutomatic);
+            errorFound =
+                algorithm.analyze(pageAnalysis, results, onlyAutomatic);
             pageAnalysis.setCheckWikiErrors(errorNumber, errorFound, results);
           }
           if (errorFound) {
-            CheckErrorPage errorPage = new CheckErrorPage(pageAnalysis.getPage(), algorithm);
+            CheckErrorPage errorPage =
+                new CheckErrorPage(pageAnalysis.getPage(), algorithm);
             errorPage.setResults(true, results);
             errorsFound.add(errorPage);
           }
           if (perf != null) {
-            String message =
-                "Error n°" + algorithm.getErrorNumber() +
-                ", " + errorFound +
-                ", " + results.size() + " occurrences";
+            String message = "Error n°" + algorithm.getErrorNumber() + ", " +
+                             errorFound + ", " + results.size() +
+                             " occurrences";
             perf.printStep(message);
           }
         }
@@ -102,13 +98,13 @@ public class CheckError {
 
   /**
    * Analyze a page to find errors of a given type.
-   * 
+   *
    * @param algorithm Algorithm.
    * @param pageAnalysis Page analysis.
    * @return Error page.
    */
-  public static CheckErrorPage analyzeError(
-      CheckErrorAlgorithm algorithm, PageAnalysis pageAnalysis) {
+  public static CheckErrorPage analyzeError(CheckErrorAlgorithm algorithm,
+                                            PageAnalysis pageAnalysis) {
     if ((algorithm == null) || (pageAnalysis == null)) {
       return null;
     }
@@ -116,7 +112,8 @@ public class CheckError {
     if (traceTime) {
       perf = Performance.getInstance("CheckError.analyzeError");
     }
-    CheckErrorPage errorPage = new CheckErrorPage(pageAnalysis.getPage(), algorithm);
+    CheckErrorPage errorPage =
+        new CheckErrorPage(pageAnalysis.getPage(), algorithm);
     boolean errorFound = false;
     List<CheckErrorResult> errorsFound = new ArrayList<CheckErrorResult>();
     int errorNumber = algorithm.getErrorNumber();
@@ -141,9 +138,9 @@ public class CheckError {
    * @param shouldCheckSpelling True if spelling should be checked.
    * @return Information about errors fixed.
    */
-  public static List<Progress> computeErrorsFixed(
-      List<CheckErrorPage> initialErrors,
-      String contents, boolean shouldCheckSpelling) {
+  public static List<Progress>
+  computeErrorsFixed(List<CheckErrorPage> initialErrors, String contents,
+                     boolean shouldCheckSpelling) {
     final List<Progress> errorsFixed = new ArrayList<>();
     PageAnalysis analysis = null;
     if (initialErrors != null) {
@@ -152,11 +149,13 @@ public class CheckError {
           analysis = initialError.getPage().getAnalysis(contents, true);
           analysis.shouldCheckSpelling(shouldCheckSpelling);
         }
-        CheckErrorPage errorPage = analyzeError(
-            initialError.getAlgorithm(), analysis);
+        CheckErrorPage errorPage =
+            analyzeError(initialError.getAlgorithm(), analysis);
         if ((errorPage.getErrorFound() == false) ||
-            (errorPage.getActiveResultsCount() < initialError.getActiveResultsCount())) {
-          errorsFixed.add(new Progress(initialError.getAlgorithm(), errorPage.getErrorFound() == false));
+            (errorPage.getActiveResultsCount() <
+             initialError.getActiveResultsCount())) {
+          errorsFixed.add(new Progress(initialError.getAlgorithm(),
+                                       errorPage.getErrorFound() == false));
         }
       }
     }
@@ -169,9 +168,9 @@ public class CheckError {
    * @param errorNumber Error number.
    * @param stream Stream containing list of pages for the error number.
    */
-  public static void addCheckErrorClassic(
-      List<CheckError> errors,
-      EnumWikipedia wikipedia, int errorNumber, InputStream stream) {
+  public static void addCheckErrorClassic(List<CheckError> errors,
+                                          EnumWikipedia wikipedia,
+                                          int errorNumber, InputStream stream) {
 
     // Analyze properties to find informations about error number
     if (!CheckErrorAlgorithms.isAlgorithmActive(wikipedia, errorNumber)) {
@@ -185,10 +184,12 @@ public class CheckError {
       try {
         reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
         String line = null;
-        while (((line = reader.readLine()) != null) && !line.endsWith("<pre>")) {
+        while (((line = reader.readLine()) != null) &&
+               !line.endsWith("<pre>")) {
           // Waiting for <pre>
         }
-        while (((line = reader.readLine()) != null) && !line.startsWith("</pre>")) {
+        while (((line = reader.readLine()) != null) &&
+               !line.startsWith("</pre>")) {
           line = line.replaceAll(Pattern.quote("&#039;"), "'");
           line = line.replaceAll(Pattern.quote("&quot;"), "\"");
           line = line.replaceAll(Pattern.quote("&amp;"), "&");
@@ -224,9 +225,9 @@ public class CheckError {
    * @param errorNumber Error number.
    * @param stream Stream containing list of pages for the error number.
    */
-  public static void addCheckErrorBots(
-      List<CheckError> errors,
-      EnumWikipedia wikipedia, int errorNumber, InputStream stream) {
+  public static void addCheckErrorBots(List<CheckError> errors,
+                                       EnumWikipedia wikipedia, int errorNumber,
+                                       InputStream stream) {
 
     // Analyze properties to find informations about error number
     if (!CheckErrorAlgorithms.isAlgorithmActive(wikipedia, errorNumber)) {
@@ -310,10 +311,9 @@ public class CheckError {
    * @param errorNumber Error number.
    * @param pages List of pages in error.
    */
-  public static void addCheckErrorPages(
-      List<CheckError> errors,
-      EnumWikipedia wikipedia, int errorNumber,
-      List<Page> pages) {
+  public static void addCheckErrorPages(List<CheckError> errors,
+                                        EnumWikipedia wikipedia,
+                                        int errorNumber, List<Page> pages) {
 
     // Analyze properties to find informations about error number
     if (!CheckErrorAlgorithms.isAlgorithmActive(wikipedia, errorNumber)) {
@@ -347,38 +347,31 @@ public class CheckError {
 
   /**
    * Constructor
-   * 
+   *
    * @param wikipedia Wikipedia.
    * @param errorNumber Error number as defined in the check wikipedia project.
    */
-  private CheckError(
-      EnumWikipedia wikipedia, int errorNumber) {
+  private CheckError(EnumWikipedia wikipedia, int errorNumber) {
     this.wikipedia = wikipedia;
     this.algorithm = CheckErrorAlgorithms.getAlgorithm(wikipedia, errorNumber);
     this.errorNumber = errorNumber;
     this.errors = new ArrayList<Page>();
   }
-  
+
   /**
    * @return Error number as defined in the check wikipedia project.
    */
-  public int getErrorNumber() {
-    return errorNumber;
-  }
+  public int getErrorNumber() { return errorNumber; }
 
   /**
    * @return Algorithm.
    */
-  public CheckErrorAlgorithm getAlgorithm() {
-    return algorithm;
-  }
+  public CheckErrorAlgorithm getAlgorithm() { return algorithm; }
 
   /**
    * @return Number of error pages.
    */
-  public int getPageCount() {
-    return errors.size();
-  }
+  public int getPageCount() { return errors.size(); }
 
   /**
    * @param index Page index.
@@ -393,7 +386,7 @@ public class CheckError {
 
   /**
    * Add a page to the list of errors.
-   * 
+   *
    * @param page Page.
    * @param pageId Page id.
    */
@@ -416,16 +409,15 @@ public class CheckError {
       priority = algorithm.getPriority();
       description = algorithm.getShortDescriptionReplaced();
     }
-    return GT._T("Error n°{0} ({1} - {2}) - {3}", new Object[] {
-        Integer.valueOf(errorNumber),
-        count,
-        CWConfigurationError.getPriorityString(priority),
-        description });
+    return GT._T("Error n°{0} ({1} - {2}) - {3}",
+                 new Object[] {Integer.valueOf(errorNumber), count,
+                               CWConfigurationError.getPriorityString(priority),
+                               description});
   }
 
   /**
    * Remove a page from the list of errors.
-   * 
+   *
    * @param page Page.
    * @return True if a page has been removed from the list.
    */
