@@ -13,13 +13,11 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.Field;
-
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wikipediacleaner.Version;
@@ -31,7 +29,6 @@ import org.wikipediacleaner.i18n.GT;
 import org.wikipediacleaner.images.EnumImageSize;
 import org.wikipediacleaner.utils.Configuration;
 import org.wikipediacleaner.utils.StringChecker;
-
 
 /**
  * A base class for all Wikipedia Cleaner windows.
@@ -54,19 +51,21 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
       "This function is experimental. Use at your own risk.\nDo you want to proceed ?";
 
   static {
-    icon = Utilities.getImageIcon("commons-nuvola-web-broom.png", EnumImageSize.VERY_BIG);
+    icon = Utilities.getImageIcon("commons-nuvola-web-broom.png",
+                                  EnumImageSize.VERY_BIG);
   }
 
   /**
    * Constructor.
    */
   protected BasicWindow() {
-    this.glassPane = new ProgressPanel(GT._T("{0} is working...", Version.PROGRAM));
+    this.glassPane =
+        new ProgressPanel(GT._T("{0} is working...", Version.PROGRAM));
   }
 
   /**
    * Create a basic window.
-   * 
+   *
    * @param name Window name.
    * @param wikipedia Wikipedia.
    * @param closeOperation Sets the operation that will happen by default
@@ -75,19 +74,17 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
    * @param windowClass Class of the window.
    * @param creation Listener of creation events.
    */
-  protected static void createWindow(
-      final String              name,
-      final EnumWikipedia       wikipedia,
-      final int                 closeOperation,
-      final Class               windowClass,
-      final BasicWindowListener creation) {
+  protected static void createWindow(final String name,
+                                     final EnumWikipedia wikipedia,
+                                     final int closeOperation,
+                                     final Class windowClass,
+                                     final BasicWindowListener creation) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
         try {
-          internalCreateWindow(
-              name, wikipedia,
-              closeOperation, windowClass, creation);
+          internalCreateWindow(name, wikipedia, closeOperation, windowClass,
+                               creation);
         } catch (Throwable t) {
           static_log.error("Error displaying window " + name, t);
         }
@@ -97,7 +94,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
 
   /**
    * Create a basic window.
-   * 
+   *
    * @param name Window name.
    * @param wikipedia Wikipedia.
    * @param closeOperation Sets the operation that will happen by default
@@ -106,12 +103,9 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
    * @param windowClass Class of the window.
    * @param creation Listener of creation events.
    */
-  static void internalCreateWindow(
-      String              name,
-      EnumWikipedia       wikipedia,
-      int                 closeOperation,
-      Class               windowClass,
-      BasicWindowListener creation) {
+  static void internalCreateWindow(String name, EnumWikipedia wikipedia,
+                                   int closeOperation, Class windowClass,
+                                   BasicWindowListener creation) {
     // Window decorations
     JFrame.setDefaultLookAndFeelDecorated(true);
 
@@ -119,7 +113,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
     BasicWindow window;
     Logger log = LoggerFactory.getLogger(windowClass);
     try {
-      window = (BasicWindow) windowClass.newInstance();
+      window = (BasicWindow)windowClass.newInstance();
     } catch (InstantiationException e) {
       log.error("Error creating window: " + e.getMessage());
       return;
@@ -168,9 +162,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
   /**
    * @return Window title.
    */
-  public String getTitle() {
-    return "Wikipedia Cleaner";
-  }
+  public String getTitle() { return "Wikipedia Cleaner"; }
 
   /**
    * @param title Window title.
@@ -184,9 +176,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
   /**
    * @return Wikipedia.
    */
-  public EnumWikipedia getWikipedia() {
-    return wikipedia;
-  }
+  public EnumWikipedia getWikipedia() { return wikipedia; }
 
   /**
    * @return Wiki.
@@ -230,7 +220,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
       if (field != null) {
         Object object = field.get(null);
         if (object instanceof Integer) {
-          return (Integer) object;
+          return (Integer)object;
         }
       }
     } catch (IllegalAccessException e) {
@@ -249,21 +239,17 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
 
   /**
    * Create menu bar.
-   * 
+   *
    * @return Menu bar.
    */
-  protected JMenuBar createMenuBar() {
-    return null;
-  }
+  protected JMenuBar createMenuBar() { return null; }
 
   /**
    * Create components composing the window.
-   * 
+   *
    * @return Components.
    */
-  protected Component createComponents() {
-    return null;
-  }
+  protected Component createComponents() { return null; }
 
   /**
    * Update components states.
@@ -274,7 +260,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
 
   /**
    * Enable or disable a component.
-   * 
+   *
    * @param component Component.
    * @param enabled True to enable the component.
    */
@@ -286,7 +272,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
 
   /**
    * Make a component visible or invisible.
-   * 
+   *
    * @param component Component.
    * @param enabled True to make the component visible.
    */
@@ -299,9 +285,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
   /**
    * @return Glass pane.
    */
-  public ProgressPanel getGlassPane() {
-    return glassPane;
-  }
+  public ProgressPanel getGlassPane() { return glassPane; }
 
   /**
    * @param parent Parent window.
@@ -314,9 +298,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
   /**
    * @return Parent window.
    */
-  public JFrame getParentComponent() {
-    return parentComponent;
-  }
+  public JFrame getParentComponent() { return parentComponent; }
 
   /**
    * @param state State of the frame.
@@ -329,7 +311,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
   }
 
   /**
-   * Dispose window. 
+   * Dispose window.
    */
   public void dispose() {
     if (parentComponent != null) {
@@ -339,7 +321,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
 
   /**
    * Display an error message.
-   * 
+   *
    * @param exception Exception.
    */
   protected void displayError(Throwable exception) {
@@ -348,7 +330,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
 
   /**
    * Display a warning message.
-   * 
+   *
    * @param message Message.
    */
   public void displayWarning(String message) {
@@ -357,7 +339,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
 
   /**
    * Display a warning message.
-   * 
+   *
    * @param message Message.
    * @param focus Component to give focus to.
    */
@@ -367,9 +349,10 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
 
   /**
    * Display a question with Yes/No answers.
-   * 
+   *
    * @param message Message.
-   * @return Answer {@link JOptionPane#YES_OPTION} or {@link JOptionPane#NO_OPTION}.
+   * @return Answer {@link JOptionPane#YES_OPTION} or {@link
+   *     JOptionPane#NO_OPTION}.
    */
   public int displayYesNoWarning(String message) {
     return Utilities.displayYesNoWarning(parentComponent, message);
@@ -377,9 +360,10 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
 
   /**
    * Display a question with Yes/Yes all/No/No all answers.
-   * 
+   *
    * @param message Message.
-   * @return Answer {@link JOptionPane#YES_OPTION} or {@link JOptionPane#NO_OPTION}.
+   * @return Answer {@link JOptionPane#YES_OPTION} or {@link
+   *     JOptionPane#NO_OPTION}.
    */
   public int displayYesNoAllWarning(String message) {
     return Utilities.displayYesNoAllWarning(parentComponent, message);
@@ -387,7 +371,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
 
   /**
    * Display an information message.
-   * 
+   *
    * @param message Message.
    */
   protected void displayInformationMessage(String message) {
@@ -396,7 +380,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
 
   /**
    * Display an URL message.
-   * 
+   *
    * @param message Message.
    * @param url URL.
    */
@@ -407,26 +391,25 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
 
   /**
    * Ask the user to input a value.
-   * 
+   *
    * @param message Message.
    * @param value Default value.
    * @param checker String checker to verify the value.
    * @return Value provided by the user.
    */
-  public String askForValue(String message, String value, StringChecker checker) {
+  public String askForValue(String message, String value,
+                            StringChecker checker) {
     return Utilities.askForValue(parentComponent, message, value, checker);
   }
 
   /**
    * @return Logger.
    */
-  protected Logger getLog() {
-    return log;
-  }
+  protected Logger getLog() { return log; }
 
   /**
    * Log an error message.
-   * 
+   *
    * @param message Message.
    * @param error Error.
    */
@@ -440,7 +423,7 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
 
   /**
    * Invoked when an action occurs.
-   * 
+   *
    * @param e Event.
    */
   @Override
