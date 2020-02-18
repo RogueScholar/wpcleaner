@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-
 import org.wikipediacleaner.api.API;
 import org.wikipediacleaner.api.APIException;
 import org.wikipediacleaner.api.constants.wiki.AbstractWikiSettings;
@@ -35,7 +34,6 @@ import org.wikipediacleaner.api.data.Namespace;
 import org.wikipediacleaner.api.data.Page;
 import org.wikipediacleaner.api.data.PageRedirect;
 
-
 /**
  * Encapsulate possible Wikipedia sites.
  */
@@ -45,8 +43,10 @@ public enum EnumWikipedia {
   // For each wiki, a configuration object is required.
   AF(new Wikipedia("af", "Afrikaans Wikipedia")),
   ALS(new Wikipedia("als", "Alemannisch Wikipedia")),
-  AR(new Wikipedia("ar", "Arabic Wikipedia", ComponentOrientation.RIGHT_TO_LEFT)),
-  ARZ(new Wikipedia("arz", "Egyptian Arabic Wikipedia", ComponentOrientation.RIGHT_TO_LEFT)),
+  AR(new Wikipedia("ar", "Arabic Wikipedia",
+                   ComponentOrientation.RIGHT_TO_LEFT)),
+  ARZ(new Wikipedia("arz", "Egyptian Arabic Wikipedia",
+                    ComponentOrientation.RIGHT_TO_LEFT)),
   AST(new Wikipedia("ast", "Wikipedia n'asturianu")),
   BAR(new Wikipedia("bar", "Boarich Wikipedia")),
   BE(new Wikipedia("be", "Беларускай Вікіпедыяй")),
@@ -63,13 +63,15 @@ public enum EnumWikipedia {
   EN(new Wikipedia("en", "English Wikipedia")),
   EO(new Wikipedia("eo", "Esperanto Wikipedia")),
   ES(new Wikipedia("es", "Wikipedia en español")),
-  FA(new Wikipedia("fa", "Persian Wikipedia", ComponentOrientation.RIGHT_TO_LEFT)),
+  FA(new Wikipedia("fa", "Persian Wikipedia",
+                   ComponentOrientation.RIGHT_TO_LEFT)),
   FI(new Wikipedia("fi", "Finnish Wikipedia")),
   FR(new Wikipedia("fr", "Wikipédia en Français")),
   FY(new Wikipedia("fy", "West Frisian Wikipedia")),
   GD(new Wikipedia("gd", "Scottish Gaelic Wikipedia")),
   GL(new Wikipedia("gl", "Galipedia")),
-  HE(new Wikipedia("he", "ויקיפדיה העברית", ComponentOrientation.RIGHT_TO_LEFT)),
+  HE(new Wikipedia("he", "ויקיפדיה העברית",
+                   ComponentOrientation.RIGHT_TO_LEFT)),
   HIF(new Wikipedia("hif", "Fiji Hindi Wikipedia")),
   HR(new Wikipedia("hr", "Croatian Wikipedia")),
   HU(new Wikipedia("hu", "Magyar Wikipedia")),
@@ -106,7 +108,8 @@ public enum EnumWikipedia {
   UK(new Wikipedia("uk", "Ukrainian Wikipedia")),
   UR(new Wikipedia("ur", "Urdu Wikipedia", ComponentOrientation.RIGHT_TO_LEFT)),
   VI(new Wikipedia("vi", "Vietnamese Wikipedia")),
-  YI(new Wikipedia("yi", "Yiddish Wikipedia", ComponentOrientation.RIGHT_TO_LEFT)),
+  YI(new Wikipedia("yi", "Yiddish Wikipedia",
+                   ComponentOrientation.RIGHT_TO_LEFT)),
   ZH(new Wikipedia("zh", "维基百科")),
   COMMONS(new WikimediaCommons()),
 
@@ -123,11 +126,11 @@ public enum EnumWikipedia {
   WIKIVERSITY_FR(new Wikiversity("fr", "Wikiversité en français")),
 
   WIKIVOYAGE_FR(new Wikivoyage("fr", "Wikivoyage en français")),
-  
+
   WAZE(new Waze()),
   WAZEOPEDIA_USA(new WazeopediaUSA()),
   WIKISKRIPTA(new WikiSkripta()),
-  
+
   TEST(new Wikipedia("test", "Test Wikipedia"));
 
   private Set<String> disambiguationPages;
@@ -146,14 +149,16 @@ public enum EnumWikipedia {
     this.configPage = settings.getConfigurationPage();
     this.wikiConfiguration = new WikiConfiguration();
     this.WPCConfiguration = new WPCConfiguration(this);
-    this.CWConfiguration = new CWConfiguration(settings.getCodeCheckWiki(), this);
+    this.CWConfiguration =
+        new CWConfiguration(settings.getCodeCheckWiki(), this);
   }
 
   /**
    * @return Vector of all Wikipedia.
    */
   public static List<EnumWikipedia> getList() {
-    List<EnumWikipedia> list = new ArrayList<EnumWikipedia>(EnumWikipedia.values().length);
+    List<EnumWikipedia> list =
+        new ArrayList<EnumWikipedia>(EnumWikipedia.values().length);
     for (EnumWikipedia e : EnumWikipedia.values()) {
       list.add(e);
     }
@@ -223,30 +228,22 @@ public enum EnumWikipedia {
   /**
    * @return Wiki settings.
    */
-  public AbstractWikiSettings getSettings() {
-    return settings;
-  }
+  public AbstractWikiSettings getSettings() { return settings; }
 
   /**
    * @return Wiki configuration.
    */
-  public WikiConfiguration getWikiConfiguration() {
-    return wikiConfiguration;
-  }
+  public WikiConfiguration getWikiConfiguration() { return wikiConfiguration; }
 
   /**
    * @return WPCleaner configuration.
    */
-  public WPCConfiguration getConfiguration() {
-    return WPCConfiguration;
-  }
+  public WPCConfiguration getConfiguration() { return WPCConfiguration; }
 
   /**
    * @return Check Wiki project configuration.
    */
-  public CWConfiguration getCWConfiguration() {
-    return CWConfiguration;
-  }
+  public CWConfiguration getCWConfiguration() { return CWConfiguration; }
 
   /**
    * @return Configuration page.
@@ -261,7 +258,8 @@ public enum EnumWikipedia {
    */
   public String getUserConfigurationPage(String userName) {
     Namespace userNamespace = wikiConfiguration.getNamespace(Namespace.USER);
-    String userPrefix = (userNamespace != null) ? userNamespace.getTitle() : "User";
+    String userPrefix =
+        (userNamespace != null) ? userNamespace.getTitle() : "User";
     return userPrefix + ":" + userName + "/" + configPage;
   }
 
@@ -282,16 +280,12 @@ public enum EnumWikipedia {
   /**
    * @return Connection information.
    */
-  public ConnectionInformation getConnection() {
-    return connection;
-  }
+  public ConnectionInformation getConnection() { return connection; }
 
   /**
    * @return Contributions
    */
-  public Contributions getContributions() {
-    return contributions;
-  }
+  public Contributions getContributions() { return contributions; }
 
   /**
    * @param text Comment.
@@ -318,7 +312,7 @@ public enum EnumWikipedia {
 
   /**
    * Construct list of disambiguation pages.
-   * 
+   *
    * @param api Wikipedia API
    * @return List of disambiguation pages
    * @throws APIException Exception thrown by the API.
@@ -328,9 +322,11 @@ public enum EnumWikipedia {
     WPCConfiguration config = getConfiguration();
 
     // Use __DISAMBIG__ magic word if set
-    boolean useDisambig = config.getBoolean(WPCConfigurationBoolean.DAB_USE_DISAMBIG_MAGIC_WORD);
+    boolean useDisambig =
+        config.getBoolean(WPCConfigurationBoolean.DAB_USE_DISAMBIG_MAGIC_WORD);
     if (useDisambig) {
-      List<Page> tmpResult = api.retrievePagesWithProp(this, "disambiguation", false);
+      List<Page> tmpResult =
+          api.retrievePagesWithProp(this, "disambiguation", false);
       Iterator<Page> itPage = tmpResult.iterator();
       while (itPage.hasNext()) {
         Page page = itPage.next();
@@ -348,9 +344,10 @@ public enum EnumWikipedia {
     if ((dabCategories != null) && (dabCategories.size() > 0)) {
       ArrayList<Page> tmpResult = new ArrayList<Page>();
       for (Page dabCategory : dabCategories) {
-        api.retrieveCategoryMembers(
-            this, dabCategory, 0, false, Integer.MAX_VALUE);
-        List<Page> tmpPages = dabCategory.getRelatedPages(Page.RelatedPages.CATEGORY_MEMBERS);
+        api.retrieveCategoryMembers(this, dabCategory, 0, false,
+                                    Integer.MAX_VALUE);
+        List<Page> tmpPages =
+            dabCategory.getRelatedPages(Page.RelatedPages.CATEGORY_MEMBERS);
         if (tmpPages != null) {
           tmpResult.ensureCapacity(tmpResult.size() + tmpPages.size());
           for (Page page : tmpPages) {
@@ -367,11 +364,11 @@ public enum EnumWikipedia {
     if (disambiguationTemplates != null) {
       ArrayList<Page> tmpResult = new ArrayList<Page>();
       for (Page dabTemplate : disambiguationTemplates) {
-        api.retrieveEmbeddedIn(
-            this, dabTemplate,
-            Collections.singletonList(Namespace.MAIN),
-            false);
-        List<Page> tmpPages = dabTemplate.getRelatedPages(Page.RelatedPages.EMBEDDED_IN);
+        api.retrieveEmbeddedIn(this, dabTemplate,
+                               Collections.singletonList(Namespace.MAIN),
+                               false);
+        List<Page> tmpPages =
+            dabTemplate.getRelatedPages(Page.RelatedPages.EMBEDDED_IN);
         if (tmpPages != null) {
           tmpResult.ensureCapacity(tmpResult.size() + tmpPages.size());
           for (Page page : tmpPages) {
@@ -389,7 +386,7 @@ public enum EnumWikipedia {
 
   /**
    * Load all disambiguation pages.
-   * 
+   *
    * @param api Wikipedia API.
    * @throws APIException Exception thrown by the API.
    */
@@ -428,7 +425,7 @@ public enum EnumWikipedia {
 
   /**
    * Tell if a page is a disambiguation page.
-   * 
+   *
    * @param page Page
    * @return TRUE if it's a disambiguation page.
    */
@@ -459,15 +456,14 @@ public enum EnumWikipedia {
 
   /**
    * Load all disambiguation templates.
-   * 
+   *
    * @param api Wikipedia API.
    */
   public void initDisambiguationTemplates(API api) {
     if (disambiguationTemplates == null) {
       synchronized (api) {
-        Page page = DataManager.getPage(
-            this, "Mediawiki:Disambiguationspage",
-            null, null, null);
+        Page page = DataManager.getPage(this, "Mediawiki:Disambiguationspage",
+                                        null, null, null);
         try {
           api.retrieveLinks(this, Collections.singletonList(page));
         } catch (APIException e) {
@@ -477,7 +473,7 @@ public enum EnumWikipedia {
       }
     }
   }
-  
+
   /**
    * @param pageName Page name.
    * @param api Wikipedia API.
@@ -498,7 +494,7 @@ public enum EnumWikipedia {
   }
 
   /**
-   * @return List of disambiguation templates 
+   * @return List of disambiguation templates
    */
   public List<Page> getDisambiguationTemplates() {
     return disambiguationTemplates;
