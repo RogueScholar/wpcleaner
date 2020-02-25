@@ -19,11 +19,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.wikipediacleaner.utils.Configuration;
 import org.wikipediacleaner.utils.ConfigurationValueInteger;
 import org.wikipediacleaner.utils.NamedThreadFactory;
-
 
 /**
  * Centralization of access to MediaWiki.
@@ -39,7 +37,7 @@ public abstract class MediaWikiController implements MediaWikiListener {
 
   /**
    * Create a MediaWikiController.
-   * 
+   *
    * @param listener Listener to MediaWiki events.
    */
   protected MediaWikiController(MediaWikiListener listener) {
@@ -54,12 +52,10 @@ public abstract class MediaWikiController implements MediaWikiListener {
   static private synchronized ExecutorService getStaticExecutor() {
     if (staticExecutor == null) {
       Configuration config = Configuration.getConfiguration();
-      int nThreads = config.getInt(
-          null,
-          ConfigurationValueInteger.INTERROG_THREAD);
+      int nThreads =
+          config.getInt(null, ConfigurationValueInteger.INTERROG_THREAD);
       staticExecutor = new ThreadPoolExecutor(
-          nThreads, nThreads,
-          0L, TimeUnit.MILLISECONDS,
+          nThreads, nThreads, 0L, TimeUnit.MILLISECONDS,
           new LinkedBlockingQueue<Runnable>(maxTasks),
           new NamedThreadFactory(Executors.defaultThreadFactory(), "MW-{0}"));
     }
@@ -68,7 +64,8 @@ public abstract class MediaWikiController implements MediaWikiListener {
 
   /**
    * @param maxTasks Maximum number of tasks waiting in the executor.
-   *                 If this maximum is reached, adding new tasks blocks until previous tasks are finished.
+   *                 If this maximum is reached, adding new tasks blocks until
+   * previous tasks are finished.
    */
   static public void setMaxTasks(int maxTasks) {
     MediaWikiController.maxTasks = maxTasks;
@@ -84,7 +81,7 @@ public abstract class MediaWikiController implements MediaWikiListener {
 
   /**
    * Add a task in the queue of tasks to run.
-   * 
+   *
    * @param task The task itself.
    */
   protected void addTask(Callable<?> task) {
@@ -100,18 +97,14 @@ public abstract class MediaWikiController implements MediaWikiListener {
    * @return Flag indicating if there are remaining tasks to analyze.
    */
   protected boolean hasRemainingTask() {
-    synchronized (results) {
-      return !results.isEmpty();
-    }
+    synchronized (results) { return !results.isEmpty(); }
   }
 
   /**
    * @return Number of remaining tasks.
    */
   protected int getRemainingTasksCount() {
-    synchronized (results) {
-      return results.size();
-    }
+    synchronized (results) { return results.size(); }
   }
 
   /**
@@ -140,7 +133,7 @@ public abstract class MediaWikiController implements MediaWikiListener {
         } catch (ExecutionException e) {
           Throwable cause = e.getCause();
           if (cause instanceof APIException) {
-            throw (APIException) cause;
+            throw(APIException) cause;
           }
           return cause;
         } catch (TimeoutException e) {
