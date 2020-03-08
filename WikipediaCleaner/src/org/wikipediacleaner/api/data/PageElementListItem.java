@@ -5,12 +5,10 @@
  *  See README.txt file for licensing information.
  */
 
-
 package org.wikipediacleaner.api.data;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * Class containing information about a list item.
@@ -31,8 +29,7 @@ public class PageElementListItem extends PageElement {
    * @param analysis Page analysis.
    * @return List of tables.
    */
-  public static List<PageElementListItem> analyzePage(
-      PageAnalysis analysis) {
+  public static List<PageElementListItem> analyzePage(PageAnalysis analysis) {
     List<PageElementListItem> items = new ArrayList<>();
 
     // Analysis for possible list items
@@ -66,7 +63,8 @@ public class PageElementListItem extends PageElement {
    * @param items List of list items.
    * @return True if the current index is already in a table.
    */
-  public static PageElementListItem isInListItem(int index, List<PageElementListItem> items) {
+  public static PageElementListItem
+  isInListItem(int index, List<PageElementListItem> items) {
     if (items != null) {
       for (PageElementListItem tmpItem : items) {
         if ((tmpItem.getBeginIndex() <= index) &&
@@ -86,8 +84,7 @@ public class PageElementListItem extends PageElement {
    * @param endIndex End index.
    * @param depth Depth.
    */
-  private PageElementListItem(
-      int beginIndex, int endIndex, int depth) {
+  private PageElementListItem(int beginIndex, int endIndex, int depth) {
     super(beginIndex, endIndex);
     this.depth = depth;
   }
@@ -95,7 +92,5 @@ public class PageElementListItem extends PageElement {
   /**
    * @return Depth.
    */
-  public int getDepth() {
-    return depth;
-  }
+  public int getDepth() { return depth; }
 }
