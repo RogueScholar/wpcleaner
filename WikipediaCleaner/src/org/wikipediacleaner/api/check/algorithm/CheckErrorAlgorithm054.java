@@ -9,7 +9,6 @@ package org.wikipediacleaner.api.check.algorithm;
 
 import java.util.Collection;
 import java.util.List;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.CheckErrorResult.ErrorLevel;
 import org.wikipediacleaner.api.data.PageAnalysis;
@@ -22,7 +21,6 @@ import org.wikipediacleaner.api.data.PageElementTag;
 import org.wikipediacleaner.gui.swing.component.MWPane;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 54 of check wikipedia project.
  * Error 54: Break in list
@@ -33,25 +31,24 @@ public class CheckErrorAlgorithm054 extends CheckErrorAlgorithmBase {
    * Possible global fixes.
    */
   private final static String[] globalFixes = new String[] {
-    GT._T("Remove breaks in list"),
+      GT._T("Remove breaks in list"),
   };
 
-  public CheckErrorAlgorithm054() {
-    super("Break in list");
-  }
+  public CheckErrorAlgorithm054() { super("Break in list"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -125,7 +122,8 @@ public class CheckErrorAlgorithm054 extends CheckErrorAlgorithmBase {
           } else if (contents.charAt(currentPos) == ']') {
             boolean linkFound = false;
             if (!linkFound) {
-              PageElementInternalLink link = analysis.isInInternalLink(currentPos);
+              PageElementInternalLink link =
+                  analysis.isInInternalLink(currentPos);
               if ((link != null) && (link.getEndIndex() == currentPos + 1)) {
                 currentPos -= 2;
                 shouldStop = false;
@@ -146,7 +144,8 @@ public class CheckErrorAlgorithm054 extends CheckErrorAlgorithmBase {
               }
             }
             if (!linkFound) {
-              PageElementInterwikiLink link = analysis.isInInterwikiLink(currentPos);
+              PageElementInterwikiLink link =
+                  analysis.isInInterwikiLink(currentPos);
               if ((link != null) && (link.getEndIndex() == currentPos + 1)) {
                 currentPos -= 2;
                 shouldStop = false;
@@ -166,7 +165,8 @@ public class CheckErrorAlgorithm054 extends CheckErrorAlgorithmBase {
               }
             }
             if (!linkFound) {
-              PageElementExternalLink link = analysis.isInExternalLink(currentPos);
+              PageElementExternalLink link =
+                  analysis.isInExternalLink(currentPos);
               if ((link != null) && (link.getEndIndex() == currentPos + 1)) {
                 currentPos -= 1;
                 shouldStop = false;
@@ -199,7 +199,7 @@ public class CheckErrorAlgorithm054 extends CheckErrorAlgorithmBase {
 
   /**
    * Bot fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -218,7 +218,7 @@ public class CheckErrorAlgorithm054 extends CheckErrorAlgorithmBase {
 
   /**
    * Fix all the errors in the page.
-   * 
+   *
    * @param fixName Fix name (extracted from getGlobalFixes()).
    * @param analysis Page analysis.
    * @param textPane Text pane.
