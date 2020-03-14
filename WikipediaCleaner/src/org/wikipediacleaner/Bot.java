@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithm;
@@ -44,7 +43,6 @@ import org.wikipediacleaner.i18n.GT;
 import org.wikipediacleaner.utils.Configuration;
 import org.wikipediacleaner.utils.ConfigurationConstants;
 import org.wikipediacleaner.utils.ConfigurationValueString;
-
 
 /**
  * Wikipedia Cleaner running as a bot.
@@ -108,14 +106,16 @@ public class Bot implements BasicWorkerListener {
           currentArg += 2;
         } else if ("-credentials".equals(arg)) {
           if (args.length <= currentArg + 1) {
-            log.warn("When using parameter '-credentials', you must specify the file containing the credentials");
+            log.warn(
+                "When using parameter '-credentials', you must specify the file containing the credentials");
             return;
           }
           credentials = args[currentArg + 1];
           currentArg += 2;
         } else if ("-prefix".equals(arg)) {
           if (args.length <= currentArg + 1) {
-            log.warn("When using parameter '-prefix', you must specify the prefix used for the comments");
+            log.warn(
+                "When using parameter '-prefix', you must specify the prefix used for the comments");
             return;
           }
           prefix = args[currentArg + 1];
@@ -145,7 +145,8 @@ public class Bot implements BasicWorkerListener {
     String password = null;
     if (credentials != null) {
       Properties properties = new Properties();
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(credentials), "UTF8"))) {
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+               new FileInputStream(credentials), "UTF8"))) {
         properties.load(reader);
       } catch (IOException e) {
         log.warn("Unable to load credentials file " + credentials);
@@ -171,11 +172,8 @@ public class Bot implements BasicWorkerListener {
     currentArg++;
 
     // Check arguments
-    if ((wiki == null) ||
-        (userName == null) ||
-        (password == null) ||
-        (actions.isEmpty()) ||
-        (actions.get(0).length == 0)) {
+    if ((wiki == null) || (userName == null) || (password == null) ||
+        (actions.isEmpty()) || (actions.get(0).length == 0)) {
       log.warn("Some parameters are incorrect");
       return;
     }
@@ -186,8 +184,8 @@ public class Bot implements BasicWorkerListener {
     // Login
     loginDone = false;
     LoginWorker loginWorker = new LoginWorker(
-        wiki, null, null, EnumLanguage.getDefaultLanguage(),
-        userName, password.toCharArray(),
+        wiki, null, null, EnumLanguage.getDefaultLanguage(), userName,
+        password.toCharArray(),
         ConfigurationConstants.VALUE_SAVE_USER_NO_CHANGE, true, false);
     loginWorker.setListener(this);
     loginWorker.start();
@@ -195,7 +193,7 @@ public class Bot implements BasicWorkerListener {
 
   /**
    * Execute an action.
-   * 
+   *
    * @param args Action and arguments.
    */
   void executeAction(String[] args) {
@@ -217,7 +215,8 @@ public class Bot implements BasicWorkerListener {
       actionDone = true;
       if (args.length > currentArg) {
         File tasks = new File(args[currentArg]);
-        try (BufferedReader reader = new BufferedReader(new FileReader(tasks))) {
+        try (BufferedReader reader =
+                 new BufferedReader(new FileReader(tasks))) {
           String line = null;
           while ((line = reader.readLine()) != null) {
             String[] tmpArgs = line.split(" +");
@@ -231,7 +230,8 @@ public class Bot implements BasicWorkerListener {
       }
     } else if ("UpdateDabWarnings".equalsIgnoreCase(action)) {
       Configuration config = Configuration.getConfiguration();
-      String start = config.getString(null, ConfigurationValueString.LAST_DAB_WARNING);
+      String start =
+          config.getString(null, ConfigurationValueString.LAST_DAB_WARNING);
       if (args.length > currentArg) {
         if (args[currentArg].equals("*")) {
           start = null;
@@ -251,34 +251,40 @@ public class Bot implements BasicWorkerListener {
     } else if ("UpdateDuplicateArgsWarnings".equalsIgnoreCase(action)) {
       worker = new UpdateDuplicateArgsWarningWorker(wiki, null, false);
     } else if ("FixCheckWiki".equalsIgnoreCase(action)) {
-      List<CheckErrorAlgorithm> algorithms = new ArrayList<CheckErrorAlgorithm>();
-      List<CheckErrorAlgorithm> allAlgorithms = new ArrayList<CheckErrorAlgorithm>();
+      List<CheckErrorAlgorithm> algorithms =
+          new ArrayList<CheckErrorAlgorithm>();
+      List<CheckErrorAlgorithm> allAlgorithms =
+          new ArrayList<CheckErrorAlgorithm>();
       if (args.length > currentArg) {
         extractAlgorithms(algorithms, allAlgorithms, args, currentArg);
       }
-      worker = new AutomaticCWWorker(
-          wiki, null, algorithms, 10000, true, allAlgorithms, null, true, false);
+      worker = new AutomaticCWWorker(wiki, null, algorithms, 10000, true,
+                                     allAlgorithms, null, true, false);
     } else if ("FixListCheckWiki".equalsIgnoreCase(action)) {
       Page page = null;
       if (args.length > currentArg) {
         page = DataManager.getPage(wiki, args[currentArg], null, null, null);
         currentArg++;
       }
-      List<CheckErrorAlgorithm> algorithms = new ArrayList<CheckErrorAlgorithm>();
-      List<CheckErrorAlgorithm> allAlgorithms = new ArrayList<CheckErrorAlgorithm>();
+      List<CheckErrorAlgorithm> algorithms =
+          new ArrayList<CheckErrorAlgorithm>();
+      List<CheckErrorAlgorithm> allAlgorithms =
+          new ArrayList<CheckErrorAlgorithm>();
       if (args.length > currentArg) {
         extractAlgorithms(algorithms, allAlgorithms, args, currentArg);
       }
-      worker = new AutomaticListCWWorker(
-          wiki, null, page, algorithms, allAlgorithms, null, true, false);
+      worker = new AutomaticListCWWorker(wiki, null, page, algorithms,
+                                         allAlgorithms, null, true, false);
     } else if ("MarkCheckWiki".equalsIgnoreCase(action)) {
-      List<CheckErrorAlgorithm> algorithms = new ArrayList<CheckErrorAlgorithm>();
-      List<CheckErrorAlgorithm> allAlgorithms = new ArrayList<CheckErrorAlgorithm>();
+      List<CheckErrorAlgorithm> algorithms =
+          new ArrayList<CheckErrorAlgorithm>();
+      List<CheckErrorAlgorithm> allAlgorithms =
+          new ArrayList<CheckErrorAlgorithm>();
       if (args.length > currentArg) {
         extractAlgorithms(algorithms, allAlgorithms, args, currentArg);
       }
-      worker = new AutomaticCWWorker(
-          wiki, null, algorithms, 10000, true, allAlgorithms, null, false, false);
+      worker = new AutomaticCWWorker(wiki, null, algorithms, 10000, true,
+                                     allAlgorithms, null, false, false);
     } else if ("ListCheckWiki".equalsIgnoreCase(action)) {
       boolean check = true;
       boolean onlyRecheck = false;
@@ -296,18 +302,17 @@ public class Bot implements BasicWorkerListener {
       }
       if (args.length > currentArg + 2) {
         File dumpFile = getDumpFile(args[currentArg]);
-        List<CheckErrorAlgorithm> algorithms = new ArrayList<CheckErrorAlgorithm>();
+        List<CheckErrorAlgorithm> algorithms =
+            new ArrayList<CheckErrorAlgorithm>();
         extractAlgorithms(algorithms, null, args, currentArg + 2);
         if (args[currentArg + 1].startsWith("wiki:")) {
           String pageName = args[currentArg + 1].substring(5);
-          worker = new ListCWWorker(
-              wiki, null, dumpFile, pageName,
-              algorithms, check, onlyRecheck);
+          worker = new ListCWWorker(wiki, null, dumpFile, pageName, algorithms,
+                                    check, onlyRecheck);
         } else {
           File output = new File(args[currentArg + 1]);
-          worker = new ListCWWorker(
-              wiki, null, dumpFile, output,
-              algorithms, check);
+          worker =
+              new ListCWWorker(wiki, null, dumpFile, output, algorithms, check);
         }
       }
     } else if ("Set".equalsIgnoreCase(action)) {
@@ -347,10 +352,9 @@ public class Bot implements BasicWorkerListener {
    * @param args Arguments.
    * @param startIndex Start index in the arguments.
    */
-  private void extractAlgorithms(
-      List<CheckErrorAlgorithm> algorithms,
-      List<CheckErrorAlgorithm> allAlgorithms,
-      String[] args, int startIndex) {
+  private void extractAlgorithms(List<CheckErrorAlgorithm> algorithms,
+                                 List<CheckErrorAlgorithm> allAlgorithms,
+                                 String[] args, int startIndex) {
 
     // Create list based on arguments
     for (int i = startIndex; i < args.length; i++) {
@@ -363,28 +367,26 @@ public class Bot implements BasicWorkerListener {
       if (algorithmNumber.equals("*") || algorithmNumber.equals("!")) {
         // NOTE: Allowing "!" because of Eclipse bug with "*"
         // https://bugs.eclipse.org/bugs/show_bug.cgi?id=212264
-        List<CheckErrorAlgorithm> possibleAlgorithms = CheckErrorAlgorithms.getAlgorithms(wiki);
+        List<CheckErrorAlgorithm> possibleAlgorithms =
+            CheckErrorAlgorithms.getAlgorithms(wiki);
         for (CheckErrorAlgorithm algorithm : possibleAlgorithms) {
           if ((algorithm != null) && algorithm.isAvailable()) {
-            if (!addition &&
-                !algorithms.contains(algorithm)) {
+            if (!addition && !algorithms.contains(algorithm)) {
               algorithms.add(algorithm);
             }
-            if ((allAlgorithms != null)  &&
-                !allAlgorithms.contains(algorithm)) {
+            if ((allAlgorithms != null) && !allAlgorithms.contains(algorithm)) {
               allAlgorithms.add(algorithm);
             }
           }
         }
       } else {
-        CheckErrorAlgorithm algorithm = CheckErrorAlgorithms.getAlgorithm(wiki, Integer.parseInt(algorithmNumber));
+        CheckErrorAlgorithm algorithm = CheckErrorAlgorithms.getAlgorithm(
+            wiki, Integer.parseInt(algorithmNumber));
         if (algorithm != null) {
-          if (!addition &&
-              !algorithms.contains(algorithm)) {
+          if (!addition && !algorithms.contains(algorithm)) {
             algorithms.add(algorithm);
           }
-          if ((allAlgorithms != null) &&
-              !allAlgorithms.contains(algorithm)) {
+          if ((allAlgorithms != null) && !allAlgorithms.contains(algorithm)) {
             allAlgorithms.add(algorithm);
           }
         }
@@ -420,7 +422,6 @@ public class Bot implements BasicWorkerListener {
       return null;
     }
     String[] filenames = parent.list(new FilenameFilter() {
-      
       @Override
       public boolean accept(@SuppressWarnings("unused") File dir, String name) {
         if (name.startsWith(filename.substring(0, starIndex)) &&
@@ -439,7 +440,8 @@ public class Bot implements BasicWorkerListener {
 
   /**
    * @param worker Worker.
-   * @see org.wikipediacleaner.gui.swing.basic.BasicWorkerListener#beforeStart(org.wikipediacleaner.gui.swing.basic.BasicWorker)
+   * @see
+   *     org.wikipediacleaner.gui.swing.basic.BasicWorkerListener#beforeStart(org.wikipediacleaner.gui.swing.basic.BasicWorker)
    */
   @Override
   public void beforeStart(BasicWorker worker) {
@@ -448,7 +450,8 @@ public class Bot implements BasicWorkerListener {
 
   /**
    * @param worker Worker.
-   * @see org.wikipediacleaner.gui.swing.basic.BasicWorkerListener#afterStart(org.wikipediacleaner.gui.swing.basic.BasicWorker)
+   * @see
+   *     org.wikipediacleaner.gui.swing.basic.BasicWorkerListener#afterStart(org.wikipediacleaner.gui.swing.basic.BasicWorker)
    */
   @Override
   public void afterStart(BasicWorker worker) {
@@ -457,7 +460,8 @@ public class Bot implements BasicWorkerListener {
 
   /**
    * @param worker Worker.
-   * @see org.wikipediacleaner.gui.swing.basic.BasicWorkerListener#beforeFinished(org.wikipediacleaner.gui.swing.basic.BasicWorker)
+   * @see
+   *     org.wikipediacleaner.gui.swing.basic.BasicWorkerListener#beforeFinished(org.wikipediacleaner.gui.swing.basic.BasicWorker)
    */
   @Override
   public void beforeFinished(BasicWorker worker) {
@@ -467,7 +471,9 @@ public class Bot implements BasicWorkerListener {
   /**
    * @param worker Worker.
    * @param ok True if it finished OK.
-   * @see org.wikipediacleaner.gui.swing.basic.BasicWorkerListener#afterFinished(org.wikipediacleaner.gui.swing.basic.BasicWorker, boolean)
+   * @see
+   *     org.wikipediacleaner.gui.swing.basic.BasicWorkerListener#afterFinished(org.wikipediacleaner.gui.swing.basic.BasicWorker,
+   *     boolean)
    */
   @Override
   public void afterFinished(BasicWorker worker, boolean ok) {
