@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.HtmlCharacters;
 import org.wikipediacleaner.api.data.CharacterUtils;
@@ -23,7 +22,6 @@ import org.wikipediacleaner.api.data.PageElementTemplate;
 import org.wikipediacleaner.gui.swing.component.MWPane;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 16 of check wikipedia project.
  * Error 16: Unicode control characters
@@ -34,31 +32,31 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
    * Possible global fixes.
    */
   private final static String[] globalFixes = new String[] {
-    GT._T("Remove all control characters"),
+      GT._T("Remove all control characters"),
   };
 
-  public CheckErrorAlgorithm016() {
-    super("Unicode control characters");
-  }
+  public CheckErrorAlgorithm016() { super("Unicode control characters"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
 
     // Retrieve configuration
-    boolean onlyTemplates = Boolean.valueOf(getSpecificProperty("only_templates", true, true, false));
+    boolean onlyTemplates = Boolean.valueOf(
+        getSpecificProperty("only_templates", true, true, false));
 
     boolean result = false;
     String contents = analysis.getContents();
@@ -91,7 +89,7 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page area to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param contents Page contents.
    * @param beginArea Begin index of the area.
@@ -99,9 +97,9 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
    * @param errors Errors found in the page.
    * @return Flag indicating if the error was found.
    */
-  public boolean analyzeArea(
-      PageAnalysis analysis, String contents, int beginArea, int endArea,
-      Collection<CheckErrorResult> errors) {
+  public boolean analyzeArea(PageAnalysis analysis, String contents,
+                             int beginArea, int endArea,
+                             Collection<CheckErrorResult> errors) {
     boolean result = false;
 
     // Check every character
@@ -118,7 +116,8 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
         // Find extent of the area to highlight
         int begin = index;
         if (begin > beginArea) {
-          begin = Math.max(index - Character.charCount(contents.codePointBefore(index)), 0);
+          begin = Math.max(
+              index - Character.charCount(contents.codePointBefore(index)), 0);
         }
         List<Integer> controls = new ArrayList<Integer>();
         controls.add(Integer.valueOf(codePoint));
@@ -134,12 +133,13 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
         }
 
         // Report error
-        CheckErrorResult errorResult = createCheckErrorResult(analysis, begin, end);
+        CheckErrorResult errorResult =
+            createCheckErrorResult(analysis, begin, end);
         for (Integer controlFound : controls) {
           ControlCharacter found = getControlCharacter(controlFound.intValue());
           if (found != null) {
-            errorResult.addText(
-                Integer.toHexString(controlFound.intValue()) + " - " + GT._T(found.description));
+            errorResult.addText(Integer.toHexString(controlFound.intValue()) +
+                                " - " + GT._T(found.description));
           }
         }
         StringBuilder replacementB = new StringBuilder();
@@ -179,7 +179,8 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
               }
             }
             checkUnsafe |= !control.safe;
-            List<String> replacements = ControlCharacter.getReplacements(codePoint);
+            List<String> replacements =
+                ControlCharacter.getReplacements(codePoint);
             if (replacements != null) {
               for (String replacement : replacements) {
                 StringBuilder otherReplacement = new StringBuilder();
@@ -213,16 +214,21 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
             okInRedirect = true;
           }
 
-          // Redirects themselves can be fixed depending on the control character
+          // Redirects themselves can be fixed depending on the control
+          // character
           if (!unsafeInRedirect) {
             PageElementInternalLink iLink = analysis.isInInternalLink(index);
             if (iLink != null) {
               int tmpIndex = iLink.getBeginIndex();
-              while ((tmpIndex > 0) && CharacterUtils.isWhitespace(contents.charAt(tmpIndex - 1))) {
+              while ((tmpIndex > 0) && CharacterUtils.isWhitespace(
+                                           contents.charAt(tmpIndex - 1))) {
                 tmpIndex--;
               }
-              MagicWord magicWord = analysis.getWikiConfiguration().getMagicWordByName(MagicWord.REDIRECT);
-              if (magicWord.isPossibleAlias(contents.substring(0, tmpIndex).trim())) {
+              MagicWord magicWord =
+                  analysis.getWikiConfiguration().getMagicWordByName(
+                      MagicWord.REDIRECT);
+              if (magicWord.isPossibleAlias(
+                      contents.substring(0, tmpIndex).trim())) {
                 okInRedirect = true;
               }
             }
@@ -238,9 +244,7 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
         String replacement = replacementB.toString();
         if (!replacement.equals(original)) {
           errorResult.addReplacement(
-              replacement,
-              GT._T("Remove all control characters"),
-              automatic);
+              replacement, GT._T("Remove all control characters"), automatic);
         }
         for (String otherReplacement : otherReplacements) {
           if ((!automatic || replacement.equals(original)) &&
@@ -263,12 +267,21 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
    * Authorized characters for automatic replacement.
    */
   private final static String automaticChars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-      "abcdefghijklmnopqrstuvwxyz" +
-      "0123456789" +
-      "áàâäåãÀ" + "éèêëÉ" + "íìîïĩ" + "óôöōŌ" + "úùûü" + "ý" +
-      "ćč" + "ńň" + "š" + "ź" + "Ø" +
-      " []|(){}<>,.!¡?;:--–—=+*#/%'\"«»\n\t→‘﻿’°@&​";
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      + "abcdefghijklmnopqrstuvwxyz"
+      + "0123456789"
+      + "áàâäåãÀ"
+      + "éèêëÉ"
+      + "íìîïĩ"
+      + "óôöōŌ"
+      + "úùûü"
+      + "ý"
+      + "ćč"
+      + "ńň"
+      + "š"
+      + "ź"
+      + "Ø"
+      + " []|(){}<>,.!¡?;:--–—=+*#/%'\"«»\n\t→‘﻿’°@&​";
 
   /**
    * @param codePoint Code point.
@@ -277,7 +290,8 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
   private ControlCharacter getControlCharacter(int codePoint) {
     ControlCharacter control = ControlCharacter.getControlCharacter(codePoint);
     if (control != null) {
-      String propertyName = "use_" + Integer.toHexString(codePoint).toUpperCase();
+      String propertyName =
+          "use_" + Integer.toHexString(codePoint).toUpperCase();
       String filter = getSpecificProperty(propertyName, true, true, false);
       if ((filter != null) && (Boolean.FALSE.equals(Boolean.valueOf(filter)))) {
         control = null;
@@ -288,7 +302,7 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -307,7 +321,7 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
 
   /**
    * Fix all the errors in the page.
-   * 
+   *
    * @param fixName Fix name (extracted from getGlobalFixes()).
    * @param analysis Page analysis.
    * @param textPane Text pane.
@@ -320,12 +334,14 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put("only_templates", GT._T("To report control characters only in templates"));
+    parameters.put("only_templates",
+                   GT._T("To report control characters only in templates"));
     return parameters;
   }
 
@@ -333,28 +349,44 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
    * Control characters characteristics.
    */
   private enum ControlCharacter {
-    DELETE                      (0x007F,   0x007F,   true,  false, null,          GT._No("Delete")),
-    NON_BREAKING_SPACE          (0x00A0,   0x00A0,   false, true,  null,          GT._No("Non-breaking space")),
-    SOFT_HYPHEN                 (0x00AD,   0x00AD,   true,  false, Boolean.FALSE, GT._No("Soft hyphen")),
-    THREE_PER_EM_SPACE          (0x2004,   0x2004,   false, false, null,          GT._No("Thee-per-em space")),
-    FOUR_PER_EM_SPACE           (0x2005,   0x2005,   false, false, null,          GT._No("Four-per-em space")),
-    SIX_PER_EM_SPACE            (0x2006,   0x2006,   false, false, null,          GT._No("Six-per-em space")),
-    FIGURE_SPACE                (0x2007,   0x2007,   false, false, null,          GT._No("Figure space")),
-    PUNCTUATION_SPACE           (0x2008,   0x2008,   false, false, null,          GT._No("Punctuation space")),
-    ZERO_WIDTH_SPACE            (0x200B,   0x200B,   true,  false, null,          GT._No("Zero-width space")),
-    LEFT_TO_RIGHT_MARK          (0x200E,   0x200E,   true,  false, Boolean.TRUE,  GT._No("Left-to-right mark")),
-    RIGHT_TO_LEFT_MARK          (0x200F,   0x200F,   true,  false, Boolean.TRUE,  GT._No("Right-to-left mark")),
-    LINE_SEPARATOR              (0x2028,   0x2028,   true,  false, null,          GT._No("Line separator")),
-    LEFT_TO_RIGHT_EMBEDDING     (0x202A,   0x202A,   true,  false, null,          GT._No("Left-to-right embedding")),
-    RIGHT_TO_LEFT_EMBEDDING     (0x202B,   0x202B,   true,  false, null,          GT._No("Right-to-left embedding")),
-    POP_DIRECTIONAL_FORMATTING  (0x202C,   0x202C,   true,  false, null,          GT._No("Pop directional formatting")),
-    LEFT_TO_RIGHT_OVERRIDE      (0x202D,   0x202D,   true,  false, null,          GT._No("Left-to-right override")),
-    RIGHT_TO_LEFT_OVERRIDE      (0x202E,   0x202E,   true,  false, null,          GT._No("Right-to-left override")),
-    BYTE_ORDER_MARK             (0xFEFF,   0xFEFF,   true,  false, null,          GT._No("Byte order mark")),
-    OBJECT_REPLACEMENT_CHARACTER(0xFFFC,   0xFFFC,   true,  false, null,          GT._No("Object replacement character")),
-    PUA                         (0xE000,   0xF8FF,   false, false, null,          GT._No("Private use area")),
-    PUA_A                       (0XF0000,  0xFFFFD,  false, false, null,          GT._No("Private use area A")),
-    PUA_B                       (0x100000, 0x10FFFD, false, false, null,          GT._No("Private use area B"));
+    DELETE(0x007F, 0x007F, true, false, null, GT._No("Delete")),
+    NON_BREAKING_SPACE(0x00A0, 0x00A0, false, true, null,
+                       GT._No("Non-breaking space")),
+    SOFT_HYPHEN(0x00AD, 0x00AD, true, false, Boolean.FALSE,
+                GT._No("Soft hyphen")),
+    THREE_PER_EM_SPACE(0x2004, 0x2004, false, false, null,
+                       GT._No("Thee-per-em space")),
+    FOUR_PER_EM_SPACE(0x2005, 0x2005, false, false, null,
+                      GT._No("Four-per-em space")),
+    SIX_PER_EM_SPACE(0x2006, 0x2006, false, false, null,
+                     GT._No("Six-per-em space")),
+    FIGURE_SPACE(0x2007, 0x2007, false, false, null, GT._No("Figure space")),
+    PUNCTUATION_SPACE(0x2008, 0x2008, false, false, null,
+                      GT._No("Punctuation space")),
+    ZERO_WIDTH_SPACE(0x200B, 0x200B, true, false, null,
+                     GT._No("Zero-width space")),
+    LEFT_TO_RIGHT_MARK(0x200E, 0x200E, true, false, Boolean.TRUE,
+                       GT._No("Left-to-right mark")),
+    RIGHT_TO_LEFT_MARK(0x200F, 0x200F, true, false, Boolean.TRUE,
+                       GT._No("Right-to-left mark")),
+    LINE_SEPARATOR(0x2028, 0x2028, true, false, null, GT._No("Line separator")),
+    LEFT_TO_RIGHT_EMBEDDING(0x202A, 0x202A, true, false, null,
+                            GT._No("Left-to-right embedding")),
+    RIGHT_TO_LEFT_EMBEDDING(0x202B, 0x202B, true, false, null,
+                            GT._No("Right-to-left embedding")),
+    POP_DIRECTIONAL_FORMATTING(0x202C, 0x202C, true, false, null,
+                               GT._No("Pop directional formatting")),
+    LEFT_TO_RIGHT_OVERRIDE(0x202D, 0x202D, true, false, null,
+                           GT._No("Left-to-right override")),
+    RIGHT_TO_LEFT_OVERRIDE(0x202E, 0x202E, true, false, null,
+                           GT._No("Right-to-left override")),
+    BYTE_ORDER_MARK(0xFEFF, 0xFEFF, true, false, null,
+                    GT._No("Byte order mark")),
+    OBJECT_REPLACEMENT_CHARACTER(0xFFFC, 0xFFFC, true, false, null,
+                                 GT._No("Object replacement character")),
+    PUA(0xE000, 0xF8FF, false, false, null, GT._No("Private use area")),
+    PUA_A(0XF0000, 0xFFFFD, false, false, null, GT._No("Private use area A")),
+    PUA_B(0x100000, 0x10FFFD, false, false, null, GT._No("Private use area B"));
 
     public final int begin;
     public final int end;
@@ -370,10 +402,9 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
      * @param safe True if removing the control character is safe.
      * @param description Description of the control character.
      */
-    private ControlCharacter(
-        int begin, int end,
-        boolean removable, boolean safe, Boolean safeInRedirect,
-        String description) {
+    private ControlCharacter(int begin, int end, boolean removable,
+                             boolean safe, Boolean safeInRedirect,
+                             String description) {
       this.begin = begin;
       this.end = end;
       this.removable = removable;
@@ -418,12 +449,14 @@ public class CheckErrorAlgorithm016 extends CheckErrorAlgorithmBase {
       List<String> replacements = null;
       // TODO: Test replacing left to right mark with HTML character
       /*if (codePoint == HtmlCharacters.LEFT_TO_RIGHT_MARK.getValue()) {
-        replacements = Collections.singletonList(HtmlCharacters.LEFT_TO_RIGHT_MARK.getFullEntity());
+        replacements =
+      Collections.singletonList(HtmlCharacters.LEFT_TO_RIGHT_MARK.getFullEntity());
       }*/
       if (codePoint == HtmlCharacters.SYMBOL_NON_BREAKING_SPACE.getValue()) {
         replacements = new ArrayList<>();
         replacements.add(" ");
-        replacements.add(HtmlCharacters.SYMBOL_NON_BREAKING_SPACE.getFullEntity());
+        replacements.add(
+            HtmlCharacters.SYMBOL_NON_BREAKING_SPACE.getFullEntity());
       }
       if (codePoint == HtmlCharacters.SYMBOL_SOFT_HYPHEN.getValue()) {
         replacements = new ArrayList<>();

@@ -10,7 +10,6 @@ package org.wikipediacleaner.gui.swing.bot;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.wikipediacleaner.api.API;
 import org.wikipediacleaner.api.APIException;
 import org.wikipediacleaner.api.APIFactory;
@@ -31,7 +30,6 @@ import org.wikipediacleaner.gui.swing.basic.BasicWindow;
 import org.wikipediacleaner.gui.swing.basic.BasicWorker;
 import org.wikipediacleaner.gui.swing.basic.Utilities;
 import org.wikipediacleaner.i18n.GT;
-
 
 /**
  * SwingWorker for automatic Check Wiki fixing on a list of pages.
@@ -73,15 +71,15 @@ public class AutomaticListCWWorker extends BasicWorker {
    * @param allAlgorithms List of possible algorithms.
    * @param extraComment Extra comment.
    * @param saveModifications True if modifications should be saved.
-   * @param analyzeNonFixed True if pages that couldn't be fixed should be analyzed.
+   * @param analyzeNonFixed True if pages that couldn't be fixed should be
+   *     analyzed.
    */
-  public AutomaticListCWWorker(
-      EnumWikipedia wiki, BasicWindow window,
-      Page list,
-      List<CheckErrorAlgorithm> selectedAlgorithms,
-      List<CheckErrorAlgorithm> allAlgorithms,
-      String extraComment,
-      boolean saveModifications, boolean analyzeNonFixed) {
+  public AutomaticListCWWorker(EnumWikipedia wiki, BasicWindow window,
+                               Page list,
+                               List<CheckErrorAlgorithm> selectedAlgorithms,
+                               List<CheckErrorAlgorithm> allAlgorithms,
+                               String extraComment, boolean saveModifications,
+                               boolean analyzeNonFixed) {
     super(wiki, window);
     this.list = list;
     this.selectedAlgorithms = selectedAlgorithms;
@@ -94,9 +92,9 @@ public class AutomaticListCWWorker extends BasicWorker {
     this.countMarkedOther = 0;
   }
 
-  /** 
-   * Compute the value to be returned by the <code>get</code> method. 
-   * 
+  /**
+   * Compute the value to be returned by the <code>get</code> method.
+   *
    * @return Object returned by the <code>get</code> method.
    * @see org.wikipediacleaner.gui.swing.basic.BasicWorker#construct()
    */
@@ -132,7 +130,7 @@ public class AutomaticListCWWorker extends BasicWorker {
 
   /**
    * Analyze and fix a page.
-   * 
+   *
    * @param page Page.
    * @throws APIException
    */
@@ -140,21 +138,23 @@ public class AutomaticListCWWorker extends BasicWorker {
 
     setText(GT._T("Analyzing page {0}", page.getTitle()));
 
-    // Retrieve page content 
+    // Retrieve page content
     API api = APIFactory.getAPI();
-    api.retrieveContents(getWikipedia(), Collections.singletonList(page), true, false);
+    api.retrieveContents(getWikipedia(), Collections.singletonList(page), true,
+                         false);
     PageAnalysis analysis = page.getAnalysis(page.getContents(), true);
 
     // Check that robots are authorized to change this page
     boolean preventBot = false;
     if (saveModifications) {
       WPCConfiguration config = getWikipedia().getConfiguration();
-      List<String[]> nobotTemplates = config.getStringArrayList(
-          WPCConfigurationStringList.NOBOT_TEMPLATES);
+      List<String[]> nobotTemplates =
+          config.getStringArrayList(WPCConfigurationStringList.NOBOT_TEMPLATES);
       if ((nobotTemplates != null) && (!nobotTemplates.isEmpty())) {
         for (String[] nobotTemplate : nobotTemplates) {
           String templateName = nobotTemplate[0];
-          List<PageElementTemplate> templates = analysis.getTemplates(templateName);
+          List<PageElementTemplate> templates =
+              analysis.getTemplates(templateName);
           if ((templates != null) && (!templates.isEmpty())) {
             preventBot = true;
           }
@@ -163,7 +163,8 @@ public class AutomaticListCWWorker extends BasicWorker {
     }
 
     // Analyze page to check if an error has been found
-    List<CheckErrorPage> errorPages = CheckError.analyzeErrors(selectedAlgorithms, analysis, true);
+    List<CheckErrorPage> errorPages =
+        CheckError.analyzeErrors(selectedAlgorithms, analysis, true);
     boolean found = false;
     if (errorPages != null) {
       for (CheckErrorPage errorPage : errorPages) {
@@ -183,7 +184,8 @@ public class AutomaticListCWWorker extends BasicWorker {
       String newContents = page.getContents();
       List<CheckError.Progress> errorsFixed = new ArrayList<>();
       if (!preventBot) {
-        newContents = AutomaticFormatter.tidyArticle(page, newContents, allAlgorithms, true, errorsFixed);
+        newContents = AutomaticFormatter.tidyArticle(
+            page, newContents, allAlgorithms, true, errorsFixed);
       }
 
       // Check if error has been fixed
@@ -203,16 +205,16 @@ public class AutomaticListCWWorker extends BasicWorker {
           comment.append(extraComment.trim());
           comment.append(" - ");
         }
-        comment.append(getWikipedia().getCWConfiguration().getComment(errorsFixed));
+        comment.append(
+            getWikipedia().getCWConfiguration().getComment(errorsFixed));
         setText(GT._T("Fixing page {0}", page.getTitle()));
-        api.updatePage(
-            getWikipedia(), page, newContents,
-            comment.toString(),
-            true, true, false);
+        api.updatePage(getWikipedia(), page, newContents, comment.toString(),
+                       true, true, false);
         countModified++;
         for (CheckError.Progress errorFixed : errorsFixed) {
           CheckErrorAlgorithm usedAlgorithm = errorFixed.algorithm;
-          CheckErrorPage errorPage = CheckError.analyzeError(usedAlgorithm, page.getAnalysis(newContents, true));
+          CheckErrorPage errorPage = CheckError.analyzeError(
+              usedAlgorithm, page.getAnalysis(newContents, true));
           if ((errorPage != null) && (!errorPage.getErrorFound())) {
             checkWiki.markAsFixed(page, usedAlgorithm.getErrorNumberString());
             if (selectedAlgorithms.contains(usedAlgorithm)) {
@@ -231,7 +233,7 @@ public class AutomaticListCWWorker extends BasicWorker {
   /**
    * Called on the event dispatching thread (not on the worker thread)
    * after the <code>construct</code> method has returned.
-   * 
+   *
    * @see org.wikipediacleaner.gui.swing.basic.BasicWorker#finished()
    */
   @Override
@@ -239,23 +241,21 @@ public class AutomaticListCWWorker extends BasicWorker {
     super.finished();
     if (getWindow() != null) {
       StringBuilder message = new StringBuilder();
-      message.append(GT.__(
-          "{0} page has been modified",
-          "{0} pages have been modified",
-          countModified, Integer.toString(countModified)));
+      message.append(GT.__("{0} page has been modified",
+                           "{0} pages have been modified", countModified,
+                           Integer.toString(countModified)));
       message.append("\n");
       message.append(GT.__(
           "{0} page has been marked as fixed for the selected algorithms",
           "{0} pages have been marked as fixed for the selected algorithms",
           countMarked, Integer.toString(countMarked)));
       message.append("\n");
-      message.append(GT.__(
-          "{0} page has been marked as fixed for other algorithms",
-          "{0} pages have been marked as fixed for other algorithms",
-          countMarkedOther, Integer.toString(countMarkedOther)));
-      Utilities.displayInformationMessage(
-          getWindow().getParentComponent(), message.toString());
+      message.append(
+          GT.__("{0} page has been marked as fixed for other algorithms",
+                "{0} pages have been marked as fixed for other algorithms",
+                countMarkedOther, Integer.toString(countMarkedOther)));
+      Utilities.displayInformationMessage(getWindow().getParentComponent(),
+                                          message.toString());
     }
   }
-
 }
