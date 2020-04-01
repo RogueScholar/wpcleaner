@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.CheckErrorResult.ErrorLevel;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
@@ -22,29 +21,27 @@ import org.wikipediacleaner.api.data.PageElementTemplate;
 import org.wikipediacleaner.api.data.contents.IntervalComparator;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 544 of check wikipedia project.
  * Error 544: Missing end model of a pair.
  */
 public class CheckErrorAlgorithm544 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm544() {
-    super("Missing end model of a pair");
-  }
+  public CheckErrorAlgorithm544() { super("Missing end model of a pair"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -53,7 +50,7 @@ public class CheckErrorAlgorithm544 extends CheckErrorAlgorithmBase {
     if (pairs.isEmpty()) {
       return false;
     }
-    
+
     // Analyze each pair
     boolean result = false;
     for (String[] pair : pairs) {
@@ -63,35 +60,38 @@ public class CheckErrorAlgorithm544 extends CheckErrorAlgorithmBase {
     return result;
   }
 
-  private boolean analyzePair(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors,
-      String[] pair) {
+  private boolean analyzePair(PageAnalysis analysis,
+                              Collection<CheckErrorResult> errors,
+                              String[] pair) {
     if ((pair == null) || (pair.length < 2)) {
       return false;
     }
-    
+
     // Retrieve open templates
     List<PageElementTemplate> openTemplates = analysis.getTemplates(pair[0]);
     if ((openTemplates == null) || (openTemplates.isEmpty())) {
       return false;
     }
-    
+
     // Retrieve close templates
     List<PageElementTemplate> closeTemplates = new ArrayList<>();
     for (int i = 1; i < pair.length; i++) {
       String closeTemplate = pair[i];
-      List<PageElementTemplate> tmpTemplates = analysis.getTemplates(closeTemplate);
+      List<PageElementTemplate> tmpTemplates =
+          analysis.getTemplates(closeTemplate);
       if (tmpTemplates != null) {
         closeTemplates.addAll(tmpTemplates);
       }
     }
     closeTemplates.sort(new IntervalComparator());
-    
+
     // Match templates together
     for (int i = openTemplates.size(); i > 0; i--) {
       PageElementTemplate openTemplate = openTemplates.get(i - 1);
-      PageElementTemplate closeTemplate = closeTemplates.isEmpty() ? null : closeTemplates.get(closeTemplates.size() - 1);
+      PageElementTemplate closeTemplate =
+          closeTemplates.isEmpty()
+              ? null
+              : closeTemplates.get(closeTemplates.size() - 1);
       if ((closeTemplate != null) &&
           (closeTemplate.getBeginIndex() >= openTemplate.getEndIndex())) {
         closeTemplates.remove(closeTemplates.size() - 1);
@@ -109,8 +109,8 @@ public class CheckErrorAlgorithm544 extends CheckErrorAlgorithmBase {
     for (PageElementTemplate openTemplate : openTemplates) {
       int beginIndex = openTemplate.getBeginIndex();
       int endIndex = openTemplate.getEndIndex();
-      CheckErrorResult errorResult = createCheckErrorResult(
-          analysis, beginIndex, endIndex);
+      CheckErrorResult errorResult =
+          createCheckErrorResult(analysis, beginIndex, endIndex);
       errors.add(errorResult);
 
       // Check if the open template is just after a tag of some sort
@@ -120,10 +120,11 @@ public class CheckErrorAlgorithm544 extends CheckErrorAlgorithmBase {
               (CharacterUtils.isWhitespace(contents.charAt(beginIndex - 1))))) {
         beginIndex--;
       }
-      if ((beginIndex >0) && (contents.charAt(beginIndex - 1) == '>')) {
+      if ((beginIndex > 0) && (contents.charAt(beginIndex - 1) == '>')) {
         PageElementTag tag = analysis.isInTag(beginIndex - 1);
         PageElementTag endTag = null;
-        if ((tag != null) && tag.isComplete() && !tag.isFullTag() && !tag.isEndTag()) {
+        if ((tag != null) && tag.isComplete() && !tag.isFullTag() &&
+            !tag.isEndTag()) {
           if (PageElementTag.TAG_HTML_CENTER.equals(tag.getNormalizedName())) {
             endTag = tag.getMatchingTag();
           }
@@ -132,7 +133,8 @@ public class CheckErrorAlgorithm544 extends CheckErrorAlgorithmBase {
           beginIndex = endTag.getBeginIndex();
           endIndex = endTag.getEndIndex();
           boolean newLine = (contents.charAt(beginIndex - 1) == '\n');
-          errorResult = createCheckErrorResult(analysis, beginIndex, endIndex, ErrorLevel.WARNING);
+          errorResult = createCheckErrorResult(analysis, beginIndex, endIndex,
+                                               ErrorLevel.WARNING);
           StringBuilder replacement = new StringBuilder();
           replacement.append(PageElementTemplate.createTemplate(pair[1]));
           if (newLine) {
@@ -156,15 +158,18 @@ public class CheckErrorAlgorithm544 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
-    String tmp = getSpecificProperty(PARAMETER_PAIR_TEMPLATES, true, true, false);
+    String tmp =
+        getSpecificProperty(PARAMETER_PAIR_TEMPLATES, true, true, false);
     pairs.clear();
     if (tmp != null) {
-      List<String[]> tmpPairs = WPCConfiguration.convertPropertyToStringArrayList(tmp);
+      List<String[]> tmpPairs =
+          WPCConfiguration.convertPropertyToStringArrayList(tmp);
       if (tmpPairs != null) {
         pairs.addAll(tmpPairs);
       }
@@ -176,12 +181,15 @@ public class CheckErrorAlgorithm544 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(PARAMETER_PAIR_TEMPLATES, GT._T("Pairs of templates: for each opening template, all possible closing templates"));
+    parameters.put(
+        PARAMETER_PAIR_TEMPLATES,
+        GT._T("Pairs of templates: for each opening template, all possible closing templates"));
     return parameters;
   }
 }

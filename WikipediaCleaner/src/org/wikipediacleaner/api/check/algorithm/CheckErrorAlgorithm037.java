@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.CheckErrorResult.ErrorLevel;
 import org.wikipediacleaner.api.check.SpecialCharacters;
@@ -23,7 +22,6 @@ import org.wikipediacleaner.api.data.PageElementFunction;
 import org.wikipediacleaner.api.data.PageElementTemplate;
 import org.wikipediacleaner.api.data.PageElementTitle;
 import org.wikipediacleaner.i18n.GT;
-
 
 /**
  * Algorithm for analyzing error 37 of check wikipedia project.
@@ -37,16 +35,17 @@ public class CheckErrorAlgorithm037 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -61,7 +60,8 @@ public class CheckErrorAlgorithm037 extends CheckErrorAlgorithmBase {
       char character = title.charAt(currentPos);
       if (!SpecialCharacters.isAuthorized(character, wiki)) {
         characterFound = true;
-        String replacement = SpecialCharacters.proposeReplacement(character, wiki);
+        String replacement =
+            SpecialCharacters.proposeReplacement(character, wiki);
         for (int i = 0; i < replacement.length(); i++) {
           if (!SpecialCharacters.isAuthorized(replacement.charAt(i), wiki)) {
             replaceable = false;
@@ -104,9 +104,8 @@ public class CheckErrorAlgorithm037 extends CheckErrorAlgorithmBase {
     int beginIndex = category.getBeginIndex();
     int endIndex = category.getEndIndex();
     String contents = analysis.getContents();
-    String replacement =
-        createDefaultSort(analysis) + "\n" +
-        contents.substring(beginIndex, endIndex);
+    String replacement = createDefaultSort(analysis) + "\n" +
+                         contents.substring(beginIndex, endIndex);
     boolean automatic = replaceable;
     if (automatic) {
       int index = beginIndex;
@@ -126,7 +125,8 @@ public class CheckErrorAlgorithm037 extends CheckErrorAlgorithmBase {
       String templates = getSpecificProperty("templates", true, false, false);
       if (templates != null) {
         for (String template : templatesList) {
-          List<PageElementTemplate> foundTemplates = analysis.getTemplates(template);
+          List<PageElementTemplate> foundTemplates =
+              analysis.getTemplates(template);
           if ((foundTemplates != null) && (foundTemplates.size() > 0)) {
             automatic = false;
             errorLevel = ErrorLevel.WARNING;
@@ -157,16 +157,17 @@ public class CheckErrorAlgorithm037 extends CheckErrorAlgorithmBase {
       }
     }
 
-    CheckErrorResult errorResult = createCheckErrorResult(
-        analysis, beginIndex, endIndex, errorLevel);
-    errorResult.addReplacement(replacement, GT._T("Add DEFAULTSORT"), automatic);
+    CheckErrorResult errorResult =
+        createCheckErrorResult(analysis, beginIndex, endIndex, errorLevel);
+    errorResult.addReplacement(replacement, GT._T("Add DEFAULTSORT"),
+                               automatic);
     errors.add(errorResult);
     return true;
   }
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -187,12 +188,14 @@ public class CheckErrorAlgorithm037 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
-    String tmp = getSpecificProperty(PARAMETER_FIRST_CHARACTERS, true, false, false);
+    String tmp =
+        getSpecificProperty(PARAMETER_FIRST_CHARACTERS, true, false, false);
     limit = 5;
     if (tmp != null) {
       try {
@@ -220,15 +223,14 @@ public class CheckErrorAlgorithm037 extends CheckErrorAlgorithmBase {
 
   /**
    * Return the parameters used to configure the algorithm.
-   * 
+   *
    * @return Map of parameters (key=name, value=description).
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_FIRST_CHARACTERS,
-        GT._T("Restrict the detection to the first characters"));
+    parameters.put(PARAMETER_FIRST_CHARACTERS,
+                   GT._T("Restrict the detection to the first characters"));
     parameters.put(
         PARAMETER_TEMPLATES,
         GT._T("List of templates that prevent automatic fixing of this error"));

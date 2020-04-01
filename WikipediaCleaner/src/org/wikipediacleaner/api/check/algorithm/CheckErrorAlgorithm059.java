@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.CheckErrorResult.ErrorLevel;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
@@ -24,7 +23,6 @@ import org.wikipediacleaner.api.data.contents.ContentsComment;
 import org.wikipediacleaner.gui.swing.component.MWPane;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 59 of check wikipedia project.
  * Error 59: Template value end with break
@@ -35,25 +33,24 @@ public class CheckErrorAlgorithm059 extends CheckErrorAlgorithmBase {
    * Possible global fixes.
    */
   private final static String[] globalFixes = new String[] {
-    GT._T("Delete all"),
+      GT._T("Delete all"),
   };
 
-  public CheckErrorAlgorithm059() {
-    super("Template value end with break");
-  }
+  public CheckErrorAlgorithm059() { super("Template value end with break"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -80,8 +77,9 @@ public class CheckErrorAlgorithm059 extends CheckErrorAlgorithmBase {
 
       // Analyze template
       if (analyzeTemplate) {
-        for (int paramNum = 0; paramNum < template.getParameterCount(); paramNum++) {
-  
+        for (int paramNum = 0; paramNum < template.getParameterCount();
+             paramNum++) {
+
           // Search for <br> at the end of the parameter
           Parameter param = template.getParameter(paramNum);
           String paramValue = param.getValue();
@@ -95,12 +93,12 @@ public class CheckErrorAlgorithm059 extends CheckErrorAlgorithmBase {
           String replacement = "";
           while (!shouldStop) {
             shouldStop = true;
-            currentValuePos = getLastIndexBeforeWhiteSpace(paramValue, currentValuePos);
+            currentValuePos =
+                getLastIndexBeforeWhiteSpace(paramValue, currentValuePos);
             if ((currentValuePos > 0) &&
                 (paramValue.charAt(currentValuePos) == '>')) {
-              PageElementTag tag = analysis.isInTag(
-                  paramValueStartIndex +
-                  currentValuePos);
+              PageElementTag tag =
+                  analysis.isInTag(paramValueStartIndex + currentValuePos);
               if (tag != null) {
                 String name = tag.getNormalizedName();
                 if (PageElementTag.TAG_HTML_BR.equals(name)) {
@@ -117,22 +115,26 @@ public class CheckErrorAlgorithm059 extends CheckErrorAlgorithmBase {
                     tagAfter = true;
                     shouldStop = false;
                     endError = tag.getCompleteBeginIndex();
-                    currentValuePos -= tag.getEndIndex() - tag.getCompleteBeginIndex();
+                    currentValuePos -=
+                        tag.getEndIndex() - tag.getCompleteBeginIndex();
                   }
                 }
               } else {
-                ContentsComment comment = analysis.isInComment(paramValueStartIndex + currentValuePos);
+                ContentsComment comment = analysis.isInComment(
+                    paramValueStartIndex + currentValuePos);
                 if (comment != null) {
                   if (endError > 0) {
-                    replacement += analysis.getContents().substring(comment.getBeginIndex(), comment.getEndIndex());
+                    replacement += analysis.getContents().substring(
+                        comment.getBeginIndex(), comment.getEndIndex());
                   }
                   shouldStop = false;
-                  currentValuePos -= comment.getEndIndex() - comment.getBeginIndex();
+                  currentValuePos -=
+                      comment.getEndIndex() - comment.getBeginIndex();
                 }
               }
             }
           }
-  
+
           // Report error
           if (breakFound) {
             if (errors == null) {
@@ -156,7 +158,7 @@ public class CheckErrorAlgorithm059 extends CheckErrorAlgorithmBase {
 
   /**
    * Bot fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -175,7 +177,7 @@ public class CheckErrorAlgorithm059 extends CheckErrorAlgorithmBase {
 
   /**
    * Fix all the errors in the page.
-   * 
+   *
    * @param fixName Fix name (extracted from getGlobalFixes()).
    * @param analysis Page analysis.
    * @param textPane Text pane.
@@ -195,8 +197,9 @@ public class CheckErrorAlgorithm059 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -215,15 +218,14 @@ public class CheckErrorAlgorithm059 extends CheckErrorAlgorithmBase {
 
   /**
    * Return the parameters used to configure the algorithm.
-   * 
+   *
    * @return Map of parameters (key=name, value=description).
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_TEMPLATES,
-        GT._T("A list of templates that should be ignored"));
+    parameters.put(PARAMETER_TEMPLATES,
+                   GT._T("A list of templates that should be ignored"));
     return parameters;
   }
 }
