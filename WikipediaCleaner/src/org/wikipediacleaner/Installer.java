@@ -10,17 +10,14 @@ package org.wikipediacleaner;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
-
 import org.slf4j.LoggerFactory;
 import org.wikipediacleaner.api.constants.EnumLanguage;
 import org.wikipediacleaner.gui.swing.InstallerWindow;
 import org.wikipediacleaner.i18n.GT;
 import org.wikipediacleaner.utils.Configuration;
-
 
 /**
  * Installer for WPCleaner.
@@ -28,7 +25,8 @@ import org.wikipediacleaner.utils.Configuration;
 public class Installer {
 
   /** Logger */
-  private static final org.slf4j.Logger log = LoggerFactory.getLogger(Installer.class);
+  private static final org.slf4j.Logger log =
+      LoggerFactory.getLogger(Installer.class);
 
   /**
    * @param args Command line arguments.
