@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
 import org.wikipediacleaner.api.data.CharacterUtils;
@@ -24,32 +23,30 @@ import org.wikipediacleaner.api.data.PageElementInternalLink;
 import org.wikipediacleaner.api.data.PageElementInterwikiLink;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 548 of check wikipedia project.
  * Error 548: Punctuation in link.
  */
 public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm548() {
-    super("Punctuation in link");
-  }
+  public CheckErrorAlgorithm548() { super("Punctuation in link"); }
 
   /** Characters recognized as punctuation */
   private static final String PUNCTUATIONS = ",;"; // Avoid ":" and "."
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -71,14 +68,13 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present in internal links.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
    * @return Flag indicating if the error was found.
    */
-  private boolean analyzeInternalLinks(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors) {
+  private boolean analyzeInternalLinks(PageAnalysis analysis,
+                                       Collection<CheckErrorResult> errors) {
 
     List<PageElementInternalLink> links = analysis.getInternalLinks();
     if (links == null) {
@@ -89,7 +85,8 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
       if (link.getText() != null) {
         int beginText = link.getBeginIndex() + link.getTextOffset();
         int endText = link.getEndIndex() - 2;
-        result |= analyzeLink(analysis, errors, link, link.getLink(), ignoreLinks, beginText, endText);
+        result |= analyzeLink(analysis, errors, link, link.getLink(),
+                              ignoreLinks, beginText, endText);
       }
     }
     return result;
@@ -97,14 +94,13 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present in external links.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
    * @return Flag indicating if the error was found.
    */
-  private boolean analyzeExternalLinks(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors) {
+  private boolean analyzeExternalLinks(PageAnalysis analysis,
+                                       Collection<CheckErrorResult> errors) {
 
     List<PageElementExternalLink> links = analysis.getExternalLinks();
     if (links == null) {
@@ -115,7 +111,8 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
       if (link.getText() != null) {
         int beginText = link.getBeginIndex() + link.getTextOffset();
         int endText = link.getEndIndex() - 1;
-        result |= analyzeLink(analysis, errors, link, null, null, beginText, endText);
+        result |=
+            analyzeLink(analysis, errors, link, null, null, beginText, endText);
       }
     }
     return result;
@@ -123,14 +120,13 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present in interwiki links.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
    * @return Flag indicating if the error was found.
    */
-  private boolean analyzeInterwikiLinks(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors) {
+  private boolean analyzeInterwikiLinks(PageAnalysis analysis,
+                                        Collection<CheckErrorResult> errors) {
 
     List<PageElementInterwikiLink> links = analysis.getInterwikiLinks();
     if (links == null) {
@@ -141,7 +137,8 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
       if (link.getText() != null) {
         int beginText = link.getBeginIndex() + link.getTextOffset();
         int endText = link.getEndIndex() - 2;
-        result |= analyzeLink(analysis, errors, link, null, null, beginText, endText);
+        result |=
+            analyzeLink(analysis, errors, link, null, null, beginText, endText);
       }
     }
     return result;
@@ -149,7 +146,7 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a link to check if a punctuation is inside it.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
    * @param link Link to analyze.
@@ -159,26 +156,28 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
    * @param endText End of the text to analyze.
    * @return Flag indicating if the error was found.
    */
-  private boolean analyzeLink(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors,
-      PageElement link, String linkTarget, Set<String> linksToIgnore,
-      int beginText, int endText) {
+  private boolean analyzeLink(PageAnalysis analysis,
+                              Collection<CheckErrorResult> errors,
+                              PageElement link, String linkTarget,
+                              Set<String> linksToIgnore, int beginText,
+                              int endText) {
 
     // Analyze text
     String contents = analysis.getContents();
-    int punctuationLength = findPunctuationAtEnd(contents.substring(beginText, endText));
+    int punctuationLength =
+        findPunctuationAtEnd(contents.substring(beginText, endText));
     if (punctuationLength == 0) {
       return false;
     }
-    // Note: special trick to avoid modifying incorrectly parsed links (a link should finish by a ])
-    if ((endText + 1 >= contents.length()) || (contents.charAt(endText) != ']')) {
+    // Note: special trick to avoid modifying incorrectly parsed links (a link
+    // should finish by a ])
+    if ((endText + 1 >= contents.length()) ||
+        (contents.charAt(endText) != ']')) {
       return false;
     }
 
     // Check ignore cases
-    if ((linkTarget != null) &&
-        (linksToIgnore != null) &&
+    if ((linkTarget != null) && (linksToIgnore != null) &&
         (linksToIgnore.contains(linkTarget))) {
       return false;
     }
@@ -189,12 +188,13 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
     }
     CheckErrorResult errorResult = createCheckErrorResult(
         analysis, link.getBeginIndex(), link.getEndIndex());
-    String punctuationText = contents.substring(endText - punctuationLength, endText);
+    String punctuationText =
+        contents.substring(endText - punctuationLength, endText);
     if (punctuationLength < endText - beginText) {
-      String replacement =
-          contents.substring(link.getBeginIndex(), endText - punctuationLength) +
-          contents.substring(endText, link.getEndIndex()) +
-          punctuationText;
+      String replacement = contents.substring(link.getBeginIndex(),
+                                              endText - punctuationLength) +
+                           contents.substring(endText, link.getEndIndex()) +
+                           punctuationText;
       boolean automatic = true;
       if (punctuationText.indexOf('.') >= 0) {
         automatic = false;
@@ -209,7 +209,7 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
 
   /**
    * Find the length of text including a punctuation at the end.
-   * 
+   *
    * @param text Text to analyze.
    * @return Number of characters that could be extracted.
    */
@@ -220,7 +220,8 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
 
     // Trim final white space characters
     int endIndex = text.length() - 1;
-    while ((endIndex >= 0) && CharacterUtils.isWhitespace(text.charAt(endIndex))) {
+    while ((endIndex >= 0) &&
+           CharacterUtils.isWhitespace(text.charAt(endIndex))) {
       endIndex--;
     }
     if (endIndex < 0) {
@@ -237,7 +238,8 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
     // Handle HTML characters like &nbsp;
     if (lastChar == ';') {
       int tmpIndex = endIndex;
-      while ((tmpIndex > 0) && Character.isLetterOrDigit(text.charAt(tmpIndex))) {
+      while ((tmpIndex > 0) &&
+             Character.isLetterOrDigit(text.charAt(tmpIndex))) {
         tmpIndex--;
       }
       if ((tmpIndex >= 0) && ("&#".indexOf(text.charAt(tmpIndex)) >= 0)) {
@@ -246,7 +248,8 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
     }
 
     // Remove extra white space characters
-    while ((endIndex > 0) && CharacterUtils.isWhitespace(text.charAt(endIndex))) {
+    while ((endIndex > 0) &&
+           CharacterUtils.isWhitespace(text.charAt(endIndex))) {
       endIndex--;
     }
 
@@ -255,7 +258,7 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -277,8 +280,9 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -297,7 +301,8 @@ public class CheckErrorAlgorithm548 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {

@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.CheckErrorResult.ErrorLevel;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
@@ -33,29 +32,33 @@ public class CheckErrorAlgorithm003 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
 
     // Analyzing text for <ref> tags
     PageElementTag lastRefTag = null;
-    List<PageElementTag> refTags = analysis.getTags(PageElementTag.TAG_WIKI_REF);
+    List<PageElementTag> refTags =
+        analysis.getTags(PageElementTag.TAG_WIKI_REF);
     if ((refTags != null) && (refTags.size() > 0)) {
-      for (int numTag = refTags.size() - 1; (numTag >= 0) && (lastRefTag == null); numTag--) {
+      for (int numTag = refTags.size() - 1;
+           (numTag >= 0) && (lastRefTag == null); numTag--) {
         boolean usefulRef = true;
         PageElementTag refTag = refTags.get(numTag);
-        if (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_NOWIKI, refTag.getBeginIndex()) != null) {
-          usefulRef =  false;
+        if (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_NOWIKI,
+                                       refTag.getBeginIndex()) != null) {
+          usefulRef = false;
         }
         if (usefulRef) {
           lastRefTag = refTag;
@@ -68,7 +71,8 @@ public class CheckErrorAlgorithm003 extends CheckErrorAlgorithmBase {
     boolean referencesFound = false;
 
     // Analyzing text for <references> tags
-    List<PageElementTag> referencesTags = analysis.getTags(PageElementTag.TAG_WIKI_REFERENCES);
+    List<PageElementTag> referencesTags =
+        analysis.getTags(PageElementTag.TAG_WIKI_REFERENCES);
     if (referencesTags != null) {
       for (PageElementTag referencesTag : referencesTags) {
         if (referencesTag.isComplete()) {
@@ -86,7 +90,8 @@ public class CheckErrorAlgorithm003 extends CheckErrorAlgorithmBase {
         templateNum--;
         PageElementTemplate template = allTemplates.get(templateNum);
         for (String referencesTemplate : referencesTemplates) {
-          if (Page.areSameTitle(template.getTemplateName(), referencesTemplate)) {
+          if (Page.areSameTitle(template.getTemplateName(),
+                                referencesTemplate)) {
             return false;
           }
         }
@@ -98,8 +103,7 @@ public class CheckErrorAlgorithm003 extends CheckErrorAlgorithmBase {
       return true;
     }
     CheckErrorResult errorResult = createCheckErrorResult(
-        analysis,
-        lastRefTag.getCompleteBeginIndex(),
+        analysis, lastRefTag.getCompleteBeginIndex(),
         lastRefTag.getCompleteEndIndex(),
         referencesFound ? ErrorLevel.WARNING : ErrorLevel.ERROR);
     errors.add(errorResult);
@@ -109,11 +113,13 @@ public class CheckErrorAlgorithm003 extends CheckErrorAlgorithmBase {
     if (referencesTags != null) {
       for (PageElementTag referencesTag : referencesTags) {
         if (!referencesTag.isComplete()) {
-          errorResult = createCheckErrorResult(
-              analysis, referencesTag.getBeginIndex(), referencesTag.getEndIndex());
+          errorResult =
+              createCheckErrorResult(analysis, referencesTag.getBeginIndex(),
+                                     referencesTag.getEndIndex());
           if (referencesTags.size() == 1) {
             errorResult.addReplacement(
-                PageElementTag.createTag(PageElementTag.TAG_WIKI_REFERENCES, true, true),
+                PageElementTag.createTag(PageElementTag.TAG_WIKI_REFERENCES,
+                                         true, true),
                 GT._T("Close tag"));
           }
           errors.add(errorResult);
@@ -128,15 +134,17 @@ public class CheckErrorAlgorithm003 extends CheckErrorAlgorithmBase {
             index++;
           } else if (currentChar == '<') {
             PageElementTag tag = analysis.isInTag(index);
-            if ((tag != null) &&
-                (tag.getBeginIndex() == index) &&
+            if ((tag != null) && (tag.getBeginIndex() == index) &&
                 (PageElementTag.TAG_WIKI_REF.equals(tag.getNormalizedName()))) {
               index = tag.getCompleteEndIndex();
             } else {
               if (contents.startsWith("</references/>", index)) {
-                errorResult = createCheckErrorResult(analysis, index, index + 14);
-                errorResult.addReplacement(PageElementTag.createTag(
-                    PageElementTag.TAG_WIKI_REFERENCES, true, false), true);
+                errorResult =
+                    createCheckErrorResult(analysis, index, index + 14);
+                errorResult.addReplacement(
+                    PageElementTag.createTag(PageElementTag.TAG_WIKI_REFERENCES,
+                                             true, false),
+                    true);
                 errors.add(errorResult);
               }
               ok = false;
@@ -153,7 +161,7 @@ public class CheckErrorAlgorithm003 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -170,18 +178,21 @@ public class CheckErrorAlgorithm003 extends CheckErrorAlgorithmBase {
   private static final String PARAMETER_TEMPLATES = "templates";
 
   /** List of templates including references tag */
-  private static final String PARAMETER_REFERENCES_TEMPLATES = "references_templates";
+  private static final String PARAMETER_REFERENCES_TEMPLATES =
+      "references_templates";
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
     String tmp = getSpecificProperty(PARAMETER_TEMPLATES, true, true, false);
     if (tmp == null) {
-      tmp = getSpecificProperty(PARAMETER_REFERENCES_TEMPLATES, true, true, false);
+      tmp = getSpecificProperty(PARAMETER_REFERENCES_TEMPLATES, true, true,
+                                false);
     }
     referencesTemplates.clear();
     if (tmp != null) {
@@ -197,17 +208,20 @@ public class CheckErrorAlgorithm003 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
     parameters.put(
         PARAMETER_REFERENCES_TEMPLATES,
-        GT._T("A list of templates resulting in the inclusion of {0}", "&lt;references/&gt;"));
+        GT._T("A list of templates resulting in the inclusion of {0}",
+              "&lt;references/&gt;"));
     parameters.put(
         PARAMETER_TEMPLATES,
-        GT._T("A list of templates resulting in the inclusion of {0}", "&lt;references/&gt;"));
+        GT._T("A list of templates resulting in the inclusion of {0}",
+              "&lt;references/&gt;"));
     return parameters;
   }
 }

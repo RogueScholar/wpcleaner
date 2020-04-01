@@ -10,7 +10,6 @@ package org.wikipediacleaner.api.check.algorithm;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.constants.WPCConfigurationString;
 import org.wikipediacleaner.api.data.Page;
@@ -22,7 +21,6 @@ import org.wikipediacleaner.api.data.PageElementTitle;
 import org.wikipediacleaner.gui.swing.component.MWPane;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 48 of check wikipedia project.
  * Error 48: Title linked in text
@@ -33,26 +31,25 @@ public class CheckErrorAlgorithm048 extends CheckErrorAlgorithmBase {
    * Possible global fixes.
    */
   private final static String[] globalFixes = new String[] {
-    GT._T("Remove all links to title (first in bold)"),
-    GT._T("Remove all links to title"),
+      GT._T("Remove all links to title (first in bold)"),
+      GT._T("Remove all links to title"),
   };
 
-  public CheckErrorAlgorithm048() {
-    super("Title linked in text");
-  }
+  public CheckErrorAlgorithm048() { super("Title linked in text"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -80,9 +77,12 @@ public class CheckErrorAlgorithm048 extends CheckErrorAlgorithmBase {
 
       // Check if is in some tags
       if (errorFound) {
-        if ((analysis.getSurroundingTag(PageElementTag.TAG_WIKI_INCLUDEONLY, link.getBeginIndex()) != null) ||
-            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_MAPFRAME, link.getBeginIndex()) != null) ||
-            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_TIMELINE, link.getBeginIndex()) != null)) {
+        if ((analysis.getSurroundingTag(PageElementTag.TAG_WIKI_INCLUDEONLY,
+                                        link.getBeginIndex()) != null) ||
+            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_MAPFRAME,
+                                        link.getBeginIndex()) != null) ||
+            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_TIMELINE,
+                                        link.getBeginIndex()) != null)) {
           errorFound = false;
         }
       }
@@ -106,9 +106,10 @@ public class CheckErrorAlgorithm048 extends CheckErrorAlgorithmBase {
         if (tagImagemap != null) {
           int previousCR = getPreviousCR(contents, link.getBeginIndex());
           int nextCR = getNextCR(contents, link.getEndIndex());
-          nextCR = Math.min(nextCR, tagImagemap.getMatchingTag().getBeginIndex());
-          CheckErrorResult errorResult = createCheckErrorResult(
-              analysis, previousCR, nextCR);
+          nextCR =
+              Math.min(nextCR, tagImagemap.getMatchingTag().getBeginIndex());
+          CheckErrorResult errorResult =
+              createCheckErrorResult(analysis, previousCR, nextCR);
           if ((previousCR > tagImagemap.getEndIndex()) &&
               (contents.charAt(nextCR) == '\n')) {
             errorResult.addReplacement("", GT._T("Delete"));
@@ -132,20 +133,21 @@ public class CheckErrorAlgorithm048 extends CheckErrorAlgorithmBase {
           boolean inBold = true;
           if ((beginIndex < 3) || !contents.startsWith("'''", beginIndex - 3)) {
             inBold = false;
-          } else if ((beginIndex > 3) && (contents.charAt(beginIndex - 4) == '\'')) {
+          } else if ((beginIndex > 3) &&
+                     (contents.charAt(beginIndex - 4) == '\'')) {
             inBold = false;
           }
           if (!contents.startsWith("'''", endIndex)) {
             inBold = false;
-          } else if ((contents.length() > endIndex + 4) && (contents.charAt(endIndex + 4) == '\'')) {
+          } else if ((contents.length() > endIndex + 4) &&
+                     (contents.charAt(endIndex + 4) == '\'')) {
             inBold = false;
           }
 
           // Apostrophe before
           String prefix = "";
           boolean apostropheBefore = false;
-          if ((beginIndex > 1) &&
-              (contents.charAt(beginIndex - 1) == '\'') &&
+          if ((beginIndex > 1) && (contents.charAt(beginIndex - 1) == '\'') &&
               (contents.charAt(beginIndex - 2) != '\'')) {
             apostropheBefore = true;
             prefix = "'";
@@ -153,20 +155,23 @@ public class CheckErrorAlgorithm048 extends CheckErrorAlgorithmBase {
           }
 
           // Suggestions
-          CheckErrorResult errorResult = createCheckErrorResult(
-              analysis, beginIndex, endIndex);
-          errorResult.addReplacement(prefix + link.getDisplayedText(), beforeFirstTitle && inBold);
+          CheckErrorResult errorResult =
+              createCheckErrorResult(analysis, beginIndex, endIndex);
+          errorResult.addReplacement(prefix + link.getDisplayedText(),
+                                     beforeFirstTitle && inBold);
           if (!inBold) {
             if (apostropheBefore) {
-              String apostropheTemplate = analysis.getWPCConfiguration().getString(
-                  WPCConfigurationString.APOSTROPHE_TEMPLATE);
+              String apostropheTemplate =
+                  analysis.getWPCConfiguration().getString(
+                      WPCConfigurationString.APOSTROPHE_TEMPLATE);
               if (apostropheTemplate != null) {
                 errorResult.addReplacement(
                     PageElementTemplate.createTemplate(apostropheTemplate) +
                     "'''" + link.getDisplayedText() + "'''");
               }
             }
-            errorResult.addReplacement(prefix + "'''" + link.getDisplayedText() + "'''");
+            errorResult.addReplacement(prefix + "'''" +
+                                       link.getDisplayedText() + "'''");
           }
 
           errors.add(errorResult);
@@ -178,7 +183,7 @@ public class CheckErrorAlgorithm048 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -197,7 +202,7 @@ public class CheckErrorAlgorithm048 extends CheckErrorAlgorithmBase {
 
   /**
    * Fix all the errors in the page.
-   * 
+   *
    * @param fixName Fix name (extracted from getGlobalFixes()).
    * @param analysis Page analysis.
    * @param textPane Text pane.
@@ -230,7 +235,8 @@ public class CheckErrorAlgorithm048 extends CheckErrorAlgorithmBase {
         if (tagImagemap != null) {
           int previousCR = getPreviousCR(contents, link.getBeginIndex());
           int nextCR = getNextCR(contents, link.getEndIndex());
-          nextCR = Math.min(nextCR, tagImagemap.getMatchingTag().getBeginIndex());
+          nextCR =
+              Math.min(nextCR, tagImagemap.getMatchingTag().getBeginIndex());
           if ((previousCR > tagImagemap.getEndIndex()) &&
               (contents.charAt(nextCR) == '\n')) {
             if (previousCR > currentIndex) {
@@ -240,7 +246,8 @@ public class CheckErrorAlgorithm048 extends CheckErrorAlgorithmBase {
           }
         } else {
           if (link.getBeginIndex() > currentIndex) {
-            newContents.append(contents.substring(currentIndex, link.getBeginIndex()));
+            newContents.append(
+                contents.substring(currentIndex, link.getBeginIndex()));
           }
           if ((currentIndex == 0) && (link.getBeginIndex() < firstTitle)) {
             newContents.append("'''");
@@ -261,7 +268,7 @@ public class CheckErrorAlgorithm048 extends CheckErrorAlgorithmBase {
 
   /**
    * Find position of previous carriage return.
-   * 
+   *
    * @param contents Page contents.
    * @param currentIndex Current index.
    * @return Index of previous carriage return.
@@ -279,7 +286,7 @@ public class CheckErrorAlgorithm048 extends CheckErrorAlgorithmBase {
 
   /**
    * Find position of next carriage return.
-   * 
+   *
    * @param contents Page contents.
    * @param currentIndex Current index.
    * @return Index of next carriage return.
@@ -305,8 +312,9 @@ public class CheckErrorAlgorithm048 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -319,14 +327,14 @@ public class CheckErrorAlgorithm048 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_IMAGEMAP,
-        GT._T("Set to true to report also links in <imagemap>"));
+    parameters.put(PARAMETER_IMAGEMAP,
+                   GT._T("Set to true to report also links in <imagemap>"));
     return parameters;
   }
 }

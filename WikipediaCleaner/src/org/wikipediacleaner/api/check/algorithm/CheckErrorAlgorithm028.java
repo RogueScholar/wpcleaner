@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.CheckErrorResult.ErrorLevel;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
@@ -21,29 +20,27 @@ import org.wikipediacleaner.api.data.PageElementTag;
 import org.wikipediacleaner.api.data.PageElementTemplate;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 28 of check wikipedia project.
  * Error 28: Table not correct end
  */
 public class CheckErrorAlgorithm028 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm028() {
-    super("Table not correct end");
-  }
+  public CheckErrorAlgorithm028() { super("Table not correct end"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -86,7 +83,8 @@ public class CheckErrorAlgorithm028 extends CheckErrorAlgorithmBase {
     for (TableElement element : starts) {
       CheckErrorResult errorResult = createCheckErrorResult(
           analysis, element.beginIndex, element.endIndex,
-          (element.begin && !element.hasMatch) ? ErrorLevel.ERROR : ErrorLevel.CORRECT);
+          (element.begin && !element.hasMatch) ? ErrorLevel.ERROR
+                                               : ErrorLevel.CORRECT);
       errors.add(errorResult);
     }
     return result;
@@ -94,12 +92,13 @@ public class CheckErrorAlgorithm028 extends CheckErrorAlgorithmBase {
 
   /**
    * Construct list of table starts.
-   * 
+   *
    * @param analysis Page analysis.
    * @return List of table starts.
    */
   private List<TableElement> getTableStarts(PageAnalysis analysis) {
-    List<TableElement> list = new ArrayList<CheckErrorAlgorithm028.TableElement>();
+    List<TableElement> list =
+        new ArrayList<CheckErrorAlgorithm028.TableElement>();
 
     // Find tables beginning by {|
     String contents = analysis.getContents();
@@ -118,7 +117,8 @@ public class CheckErrorAlgorithm028 extends CheckErrorAlgorithmBase {
     for (PageElementTag tag : tags) {
       if (!tag.isFullTag() && !tag.isEndTag()) {
         if (shouldCount(analysis, index)) {
-          list.add(new TableElement(tag.getBeginIndex(), tag.getEndIndex(), true));
+          list.add(
+              new TableElement(tag.getBeginIndex(), tag.getEndIndex(), true));
         }
       }
     }
@@ -129,12 +129,13 @@ public class CheckErrorAlgorithm028 extends CheckErrorAlgorithmBase {
 
   /**
    * Construct list of table ends.
-   * 
+   *
    * @param analysis Page analysis.
    * @return List of table ends.
    */
   private List<TableElement> getTableEnds(PageAnalysis analysis) {
-    List<TableElement> list = new ArrayList<CheckErrorAlgorithm028.TableElement>();
+    List<TableElement> list =
+        new ArrayList<CheckErrorAlgorithm028.TableElement>();
 
     // Find tables ending by |}
     String contents = analysis.getContents();
@@ -142,8 +143,7 @@ public class CheckErrorAlgorithm028 extends CheckErrorAlgorithmBase {
     while (index >= 0) {
       if (shouldCount(analysis, index)) {
         PageElementTemplate template = analysis.isInTemplate(index);
-        if ((template == null) ||
-            (template.getEndIndex() != index + 3)) {
+        if ((template == null) || (template.getEndIndex() != index + 3)) {
           list.add(new TableElement(index, index + 2, false));
         }
       }
@@ -155,7 +155,8 @@ public class CheckErrorAlgorithm028 extends CheckErrorAlgorithmBase {
     for (PageElementTag tag : tags) {
       if (!tag.isFullTag() && tag.isEndTag()) {
         if (shouldCount(analysis, index)) {
-          list.add(new TableElement(tag.getBeginIndex(), tag.getEndIndex(), false));
+          list.add(
+              new TableElement(tag.getBeginIndex(), tag.getEndIndex(), false));
         }
       }
     }
@@ -164,7 +165,8 @@ public class CheckErrorAlgorithm028 extends CheckErrorAlgorithmBase {
     for (String templateName : templateNames) {
       List<PageElementTemplate> templates = analysis.getTemplates(templateName);
       for (PageElementTemplate template : templates) {
-        list.add(new TableElement(template.getBeginIndex(), template.getEndIndex(), false));
+        list.add(new TableElement(template.getBeginIndex(),
+                                  template.getEndIndex(), false));
       }
     }
 
@@ -178,14 +180,22 @@ public class CheckErrorAlgorithm028 extends CheckErrorAlgorithmBase {
    * @return True if this place should count for the detection.
    */
   private boolean shouldCount(PageAnalysis analysis, int index) {
-    if ((analysis.getSurroundingTag(PageElementTag.TAG_HTML_CODE, index) != null) ||
-        (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_CHEM, index) != null) ||
-        (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_MATH, index) != null) ||
-        (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_MATH_CHEM, index) != null) ||
-        (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_NOWIKI, index) != null) ||
-        (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_PRE, index) != null) ||
-        (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SOURCE, index) != null) ||
-        (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SYNTAXHIGHLIGHT, index) != null)) {
+    if ((analysis.getSurroundingTag(PageElementTag.TAG_HTML_CODE, index) !=
+         null) ||
+        (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_CHEM, index) !=
+         null) ||
+        (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_MATH, index) !=
+         null) ||
+        (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_MATH_CHEM, index) !=
+         null) ||
+        (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_NOWIKI, index) !=
+         null) ||
+        (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_PRE, index) !=
+         null) ||
+        (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SOURCE, index) !=
+         null) ||
+        (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SYNTAXHIGHLIGHT,
+                                    index) != null)) {
       return false;
     }
     if (analysis.isInComment(index) != null) {
@@ -203,8 +213,9 @@ public class CheckErrorAlgorithm028 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -218,7 +229,7 @@ public class CheckErrorAlgorithm028 extends CheckErrorAlgorithmBase {
           if (tmpName.startsWith("{{")) {
             tmpName = tmpName.substring(2);
             if (tmpName.endsWith("}}")) {
-              tmpName = tmpName.substring(0,  tmpName.length() - 2);
+              tmpName = tmpName.substring(0, tmpName.length() - 2);
             }
           }
           tmpName = tmpName.trim();
@@ -235,14 +246,14 @@ public class CheckErrorAlgorithm028 extends CheckErrorAlgorithmBase {
 
   /**
    * Return the parameters used to configure the algorithm.
-   * 
+   *
    * @return Map of parameters (key=name, value=description).
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_TEMPLATES, GT._T("Templates that can replace the end of a table"));
+    parameters.put(PARAMETER_TEMPLATES,
+                   GT._T("Templates that can replace the end of a table"));
     return parameters;
   }
 
