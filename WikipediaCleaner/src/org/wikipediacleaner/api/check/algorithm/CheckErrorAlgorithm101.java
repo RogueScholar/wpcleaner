@@ -12,13 +12,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
 import org.wikipediacleaner.api.data.PageAnalysis;
 import org.wikipediacleaner.api.data.PageElementTag;
 import org.wikipediacleaner.i18n.GT;
-
 
 /**
  * Algorithm for analyzing error 101 of check wikipedia project.
@@ -32,22 +30,24 @@ public class CheckErrorAlgorithm101 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
 
     // Check every <sup> tag
-    List<PageElementTag> supTags = analysis.getCompleteTags(PageElementTag.TAG_HTML_SUP);
+    List<PageElementTag> supTags =
+        analysis.getCompleteTags(PageElementTag.TAG_HTML_SUP);
     String contents = analysis.getContents();
     boolean result = false;
     for (PageElementTag supTag : supTags) {
@@ -66,7 +66,10 @@ public class CheckErrorAlgorithm101 extends CheckErrorAlgorithmBase {
         String value = null;
         boolean ordinal = false;
         if (digitBefore) {
-          value = contents.substring(supTag.getValueBeginIndex(), supTag.getValueEndIndex()).trim();
+          value = contents
+                      .substring(supTag.getValueBeginIndex(),
+                                 supTag.getValueEndIndex())
+                      .trim();
           for (String suffix : listSuffixes) {
             if (suffix.equalsIgnoreCase(value)) {
               ordinal = true;
@@ -80,10 +83,10 @@ public class CheckErrorAlgorithm101 extends CheckErrorAlgorithmBase {
             return true;
           }
           result = true;
-          String digits = contents.substring(beginIndex, supTag.getBeginIndex());
+          String digits =
+              contents.substring(beginIndex, supTag.getBeginIndex());
           CheckErrorResult errorResult = createCheckErrorResult(
-              analysis,
-              beginIndex, supTag.getCompleteEndIndex());
+              analysis, beginIndex, supTag.getCompleteEndIndex());
           if (replacements != null) {
             String replacement = replacements.get(digits + value);
             if (replacement != null) {
@@ -110,8 +113,9 @@ public class CheckErrorAlgorithm101 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -136,7 +140,8 @@ public class CheckErrorAlgorithm101 extends CheckErrorAlgorithmBase {
         for (String tmpItem : tmpList) {
           int equalIndex = tmpItem.indexOf('=');
           if ((equalIndex > 0) && (equalIndex < tmpItem.length() - 1)) {
-            replacements.put(tmpItem.substring(0, equalIndex), tmpItem.substring(equalIndex + 1));
+            replacements.put(tmpItem.substring(0, equalIndex),
+                             tmpItem.substring(equalIndex + 1));
           }
         }
       }
@@ -151,17 +156,15 @@ public class CheckErrorAlgorithm101 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_TEMPLATES,
-        GT._T("List of ordinal suffixes"));
-    parameters.put(
-        PARAMETER_REPLACEMENTS,
-        GT._T("List of possible replacements"));
+    parameters.put(PARAMETER_TEMPLATES, GT._T("List of ordinal suffixes"));
+    parameters.put(PARAMETER_REPLACEMENTS,
+                   GT._T("List of possible replacements"));
     return parameters;
   }
 }

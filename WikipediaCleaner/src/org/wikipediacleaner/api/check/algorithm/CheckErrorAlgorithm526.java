@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.API;
 import org.wikipediacleaner.api.APIException;
 import org.wikipediacleaner.api.APIFactory;
@@ -28,16 +27,13 @@ import org.wikipediacleaner.i18n.GT;
 import org.wikipediacleaner.utils.Configuration;
 import org.wikipediacleaner.utils.ConfigurationValueInteger;
 
-
 /**
  * Algorithm for analyzing error 526 of check wikipedia project.
  * Error 526: Incorrect link
  */
 public class CheckErrorAlgorithm526 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm526() {
-    super("Incorrect date link");
-  }
+  public CheckErrorAlgorithm526() { super("Incorrect date link"); }
 
   /** Minimum length of the year */
   private static final int MIN_LENGTH = 3;
@@ -47,16 +43,17 @@ public class CheckErrorAlgorithm526 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if ((analysis == null) || (analysis.getPage() == null)) {
       return false;
     }
@@ -74,14 +71,12 @@ public class CheckErrorAlgorithm526 extends CheckErrorAlgorithmBase {
       String target = link.getFullLink();
       String text = link.getText();
       boolean isProblematic = false;
-      if ((target != null) &&
-          (text != null) &&
+      if ((target != null) && (text != null) &&
           !Page.areSameTitle(target, text)) {
 
         // Check text first (only digits)
         int yearDisplayed = -1;
-        if ((text.length() >= MIN_LENGTH) &&
-            (text.length() <= MAX_LENGTH)) {
+        if ((text.length() >= MIN_LENGTH) && (text.length() <= MAX_LENGTH)) {
           boolean onlyDigits = true;
           for (int pos = 0; pos < text.length(); pos++) {
             if (!Character.isDigit(text.charAt(pos))) {
@@ -101,8 +96,7 @@ public class CheckErrorAlgorithm526 extends CheckErrorAlgorithmBase {
             nbDigits++;
           }
           int yearLinked = -1;
-          if ((nbDigits >= MIN_LENGTH) &&
-              (nbDigits <= MAX_LENGTH)) {
+          if ((nbDigits >= MIN_LENGTH) && (nbDigits <= MAX_LENGTH)) {
             yearLinked = Integer.valueOf(target.substring(0, nbDigits));
           }
           if ((yearLinked > 0) && (yearLinked != yearDisplayed)) {
@@ -140,8 +134,10 @@ public class CheckErrorAlgorithm526 extends CheckErrorAlgorithmBase {
         }
         CheckErrorResult errorResult = createCheckErrorResult(
             analysis, link.getBeginIndex(), link.getEndIndex(), errorLevel);
-        errorResult.addReplacement(PageElementInternalLink.createInternalLink(target, target));
-        errorResult.addReplacement(PageElementInternalLink.createInternalLink(text, text));
+        errorResult.addReplacement(
+            PageElementInternalLink.createInternalLink(target, target));
+        errorResult.addReplacement(
+            PageElementInternalLink.createInternalLink(text, text));
         if (!askHelpList.isEmpty()) {
           boolean firstReplacement = true;
           for (String askHelpElement : askHelpList) {
@@ -155,21 +151,19 @@ public class CheckErrorAlgorithm526 extends CheckErrorAlgorithmBase {
                   (link.getEndIndex() < contents.length())) {
                 char nextChar = contents.charAt(link.getEndIndex());
                 if (nextChar != '{') {
-                  if ((target != null) &&
-                      (target.indexOf('#') < 0) &&
-                      (target.indexOf('(') < 0) &&
-                      (target.indexOf(')') < 0)) {
+                  if ((target != null) && (target.indexOf('#') < 0) &&
+                      (target.indexOf('(') < 0) && (target.indexOf(')') < 0)) {
                     botReplace = true;
                   }
                 }
               }
               String replacement =
-                  analysis.getContents().substring(link.getBeginIndex(), link.getEndIndex()) +
+                  analysis.getContents().substring(link.getBeginIndex(),
+                                                   link.getEndIndex()) +
                   suffix;
-              errorResult.addReplacement(
-                  replacement,
-                  askHelpElement.substring(0, pipeIndex),
-                  false, firstReplacement && botReplace);
+              errorResult.addReplacement(replacement,
+                                         askHelpElement.substring(0, pipeIndex),
+                                         false, firstReplacement && botReplace);
               firstReplacement = false;
             }
           }
@@ -191,7 +185,7 @@ public class CheckErrorAlgorithm526 extends CheckErrorAlgorithmBase {
 
   /**
    * Retrieve the list of pages in error.
-   * 
+   *
    * @param wiki Wiki.
    * @param limit Maximum number of pages to retrieve.
    * @return List of pages in error.
@@ -204,7 +198,8 @@ public class CheckErrorAlgorithm526 extends CheckErrorAlgorithmBase {
     if (abuseFilter != null) {
       API api = APIFactory.getAPI();
       Configuration config = Configuration.getConfiguration();
-      int maxDays = config.getInt(wiki, ConfigurationValueInteger.MAX_DAYS_ABUSE_LOG);
+      int maxDays =
+          config.getInt(wiki, ConfigurationValueInteger.MAX_DAYS_ABUSE_LOG);
       try {
         List<Page> tmpResult = api.retrieveAbuseLog(wiki, abuseFilter, maxDays);
         if (tmpResult != null) {
@@ -242,7 +237,8 @@ public class CheckErrorAlgorithm526 extends CheckErrorAlgorithmBase {
   /**
    * @param analysis Page analysis
    * @return Modified page content after bot fixing.
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#internalBotFix(org.wikipediacleaner.api.data.PageAnalysis)
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#internalBotFix(org.wikipediacleaner.api.data.PageAnalysis)
    */
   @Override
   protected String internalBotFix(PageAnalysis analysis) {
@@ -264,8 +260,9 @@ public class CheckErrorAlgorithm526 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -288,7 +285,8 @@ public class CheckErrorAlgorithm526 extends CheckErrorAlgorithmBase {
       }
     }
 
-    dumpAnalysis = getSpecificProperty(PARAMETER_DUMP_ANALYSIS, true, true, false);
+    dumpAnalysis =
+        getSpecificProperty(PARAMETER_DUMP_ANALYSIS, true, true, false);
   }
 
   /** Identifier of abuse filter */
@@ -302,9 +300,10 @@ public class CheckErrorAlgorithm526 extends CheckErrorAlgorithmBase {
 
   /**
    * Return the parameters used to configure the algorithm.
-   * 
+   *
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
@@ -312,12 +311,10 @@ public class CheckErrorAlgorithm526 extends CheckErrorAlgorithmBase {
     parameters.put(
         PARAMETER_ABUSE_FILTER,
         GT._T("An identifier of an abuse filter that is triggered by incorrect year links."));
-    parameters.put(
-        PARAMETER_ASK_HELP,
-        GT._T("Text added after the link to ask for help."));
-    parameters.put(
-        PARAMETER_DUMP_ANALYSIS,
-        GT._T("A page containing a dump analysis for this error."));
+    parameters.put(PARAMETER_ASK_HELP,
+                   GT._T("Text added after the link to ask for help."));
+    parameters.put(PARAMETER_DUMP_ANALYSIS,
+                   GT._T("A page containing a dump analysis for this error."));
     return parameters;
   }
 }

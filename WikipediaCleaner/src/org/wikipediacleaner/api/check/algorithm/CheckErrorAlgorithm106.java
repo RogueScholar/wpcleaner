@@ -10,7 +10,6 @@ package org.wikipediacleaner.api.check.algorithm;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
 import org.wikipediacleaner.api.constants.WPCConfigurationStringList;
@@ -24,29 +23,27 @@ import org.wikipediacleaner.api.data.PageElementTemplate.Parameter;
 import org.wikipediacleaner.api.data.Replacement;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 106 of check wikipedia project.
  * Error 106: ISSN wrong syntax
  */
 public class CheckErrorAlgorithm106 extends CheckErrorAlgorithmISSN {
 
-  public CheckErrorAlgorithm106() {
-    super("ISSN wrong syntax");
-  }
+  public CheckErrorAlgorithm106() { super("ISSN wrong syntax"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -61,22 +58,23 @@ public class CheckErrorAlgorithm106 extends CheckErrorAlgorithmISSN {
       }
 
       // Exclude special configured values for ISSN
-      if (isError &&
-          issn.isTemplateParameter()) {
+      if (isError && issn.isTemplateParameter()) {
         WPCConfiguration config = analysis.getWPCConfiguration();
         List<String[]> specialValues = config.getStringArrayList(
             WPCConfigurationStringList.ISSN_SPECIAL_VALUES);
         if ((specialValues != null) && !specialValues.isEmpty()) {
-          PageElementTemplate template = analysis.isInTemplate(issn.getBeginIndex());
+          PageElementTemplate template =
+              analysis.isInTemplate(issn.getBeginIndex());
           if (template != null) {
-            Parameter param = template.getParameterAtIndex(issn.getBeginIndex());
-            if ((param != null) &&
-                (param.getName() != null) &&
+            Parameter param =
+                template.getParameterAtIndex(issn.getBeginIndex());
+            if ((param != null) && (param.getName() != null) &&
                 (param.getName().trim().length() > 0)) {
               String name = param.getName().trim();
               for (String[] specialValue : specialValues) {
                 if ((specialValue.length > 2) &&
-                    (Page.areSameTitle(template.getTemplateName(), specialValue[0])) &&
+                    (Page.areSameTitle(template.getTemplateName(),
+                                       specialValue[0])) &&
                     (name.equals(specialValue[1])) &&
                     (issn.getISSNNotTrimmed().equals(specialValue[2]))) {
                   isError = false;
@@ -88,10 +86,10 @@ public class CheckErrorAlgorithm106 extends CheckErrorAlgorithmISSN {
       }
 
       // Exclude parameters in templates
-      if (isError &&
-          issn.isTemplateParameter() &&
+      if (isError && issn.isTemplateParameter() &&
           analysis.isInNamespace(Namespace.TEMPLATE)) {
-        PageElementTemplate template = analysis.isInTemplate(issn.getBeginIndex());
+        PageElementTemplate template =
+            analysis.isInTemplate(issn.getBeginIndex());
         if (template != null) {
           Parameter param = template.getParameterAtIndex(issn.getBeginIndex());
           if (param != null) {
@@ -115,7 +113,8 @@ public class CheckErrorAlgorithm106 extends CheckErrorAlgorithmISSN {
           return true;
         }
         result = true;
-        CheckErrorResult errorResult = createCheckErrorResult(analysis, issn, false);
+        CheckErrorResult errorResult =
+            createCheckErrorResult(analysis, issn, false);
         addSuggestions(analysis, errorResult, issn);
         errors.add(errorResult);
         List<Replacement> replacements = issn.getCorrectISSN();
@@ -123,7 +122,8 @@ public class CheckErrorAlgorithm106 extends CheckErrorAlgorithmISSN {
           for (Replacement replacement : replacements) {
             String newText = replacement.replacement;
             if ((newText != null) &&
-                !newText.equals(analysis.getContents().substring(issn.getBeginIndex(), issn.getEndIndex()))) {
+                !newText.equals(analysis.getContents().substring(
+                    issn.getBeginIndex(), issn.getEndIndex()))) {
               errorResult.addReplacement(replacement);
             }
           }
@@ -148,7 +148,7 @@ public class CheckErrorAlgorithm106 extends CheckErrorAlgorithmISSN {
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -169,8 +169,9 @@ public class CheckErrorAlgorithm106 extends CheckErrorAlgorithmISSN {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -182,16 +183,15 @@ public class CheckErrorAlgorithm106 extends CheckErrorAlgorithmISSN {
 
   /**
    * Return the parameters used to configure the algorithm.
-   * 
+   *
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_REASON,
-        GT._T("An explanation of the problem"));
+    parameters.put(PARAMETER_REASON, GT._T("An explanation of the problem"));
     return parameters;
   }
 }

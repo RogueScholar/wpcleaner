@@ -10,7 +10,6 @@ package org.wikipediacleaner.api.check.algorithm;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.API;
 import org.wikipediacleaner.api.APIException;
 import org.wikipediacleaner.api.APIFactory;
@@ -23,16 +22,13 @@ import org.wikipediacleaner.i18n.GT;
 import org.wikipediacleaner.utils.Configuration;
 import org.wikipediacleaner.utils.ConfigurationValueInteger;
 
-
 /**
  * Algorithm for analyzing error 520 of check wikipedia project.
  * Error 520: Weird characters (pawns, snowmen) in main namespace
  */
 public class CheckErrorAlgorithm520 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm520() {
-    super("Weird characters");
-  }
+  public CheckErrorAlgorithm520() { super("Weird characters"); }
 
   /**
    * Weird characters to look for.
@@ -41,16 +37,17 @@ public class CheckErrorAlgorithm520 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if ((analysis == null) || (analysis.getPage() == null)) {
       return false;
     }
@@ -68,8 +65,8 @@ public class CheckErrorAlgorithm520 extends CheckErrorAlgorithmBase {
           return true;
         }
         result = true;
-        CheckErrorResult errorResult = createCheckErrorResult(
-            analysis, index, index + 1);
+        CheckErrorResult errorResult =
+            createCheckErrorResult(analysis, index, index + 1);
         errorResult.addReplacement("");
         errors.add(errorResult);
       }
@@ -88,7 +85,7 @@ public class CheckErrorAlgorithm520 extends CheckErrorAlgorithmBase {
 
   /**
    * Retrieve the list of pages in error.
-   * 
+   *
    * @param wiki Wiki.
    * @param limit Maximum number of pages to retrieve.
    * @return List of pages in error.
@@ -100,7 +97,8 @@ public class CheckErrorAlgorithm520 extends CheckErrorAlgorithmBase {
     }
     API api = APIFactory.getAPI();
     Configuration config = Configuration.getConfiguration();
-    int maxDays = config.getInt(wiki, ConfigurationValueInteger.MAX_DAYS_ABUSE_LOG);
+    int maxDays =
+        config.getInt(wiki, ConfigurationValueInteger.MAX_DAYS_ABUSE_LOG);
     try {
       return api.retrieveAbuseLog(wiki, abuseFilter, maxDays);
     } catch (APIException e) {
@@ -118,8 +116,9 @@ public class CheckErrorAlgorithm520 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -139,9 +138,10 @@ public class CheckErrorAlgorithm520 extends CheckErrorAlgorithmBase {
 
   /**
    * Return the parameters used to configure the algorithm.
-   * 
+   *
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {

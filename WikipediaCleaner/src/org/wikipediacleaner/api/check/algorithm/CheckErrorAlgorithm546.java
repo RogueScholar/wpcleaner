@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
 import org.wikipediacleaner.api.data.Namespace;
@@ -20,29 +19,27 @@ import org.wikipediacleaner.api.data.PageElementCategory;
 import org.wikipediacleaner.api.data.PageElementTemplate;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 546 of check wikipedia project.
  * Error 546: Article without categories.
  */
 public class CheckErrorAlgorithm546 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm546() {
-    super("Article without categories");
-  }
+  public CheckErrorAlgorithm546() { super("Article without categories"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -69,13 +66,16 @@ public class CheckErrorAlgorithm546 extends CheckErrorAlgorithmBase {
     for (String[] categorizingTemplate : categorizingTemplates) {
       if (categorizingTemplate.length > 0) {
         String templateName = categorizingTemplate[0];
-        List<PageElementTemplate> templates = analysis.getTemplates(templateName);
+        List<PageElementTemplate> templates =
+            analysis.getTemplates(templateName);
         if ((templates != null) && !templates.isEmpty()) {
           if (categorizingTemplate.length < 2) {
             return false;
           }
           String paramName = categorizingTemplate[1];
-          String paramValue = (categorizingTemplate.length > 2) ? categorizingTemplate[2] : null;
+          String paramValue = (categorizingTemplate.length > 2)
+                                  ? categorizingTemplate[2]
+                                  : null;
           for (PageElementTemplate template : templates) {
             int paramIndex = template.getParameterIndex(paramName);
             if (paramIndex >= 0) {
@@ -104,15 +104,17 @@ public class CheckErrorAlgorithm546 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
     String tmp = getSpecificProperty(PARAMETER_TEMPLATES, true, true, false);
     categorizingTemplates.clear();
     if (tmp != null) {
-      List<String[]> tmpList = WPCConfiguration.convertPropertyToStringArrayList(tmp);
+      List<String[]> tmpList =
+          WPCConfiguration.convertPropertyToStringArrayList(tmp);
       if (tmpList != null) {
         categorizingTemplates.addAll(tmpList);
       }
@@ -124,14 +126,14 @@ public class CheckErrorAlgorithm546 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_TEMPLATES,
-        GT._T("List of categorizing templates"));
+    parameters.put(PARAMETER_TEMPLATES,
+                   GT._T("List of categorizing templates"));
     return parameters;
   }
 }

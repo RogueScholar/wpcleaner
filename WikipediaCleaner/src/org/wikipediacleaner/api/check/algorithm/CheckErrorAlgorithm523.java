@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.CheckErrorResult.ErrorLevel;
 import org.wikipediacleaner.api.data.MagicWord;
@@ -22,29 +21,27 @@ import org.wikipediacleaner.api.data.PageElementImage;
 import org.wikipediacleaner.api.data.PageElementTag;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 523 of check wikipedia project.
  * Error 523: Duplicated image
  */
 public class CheckErrorAlgorithm523 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm523() {
-    super("Duplicated image");
-  }
+  public CheckErrorAlgorithm523() { super("Duplicated image"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if ((analysis == null) || (analysis.getPage() == null)) {
       return false;
     }
@@ -57,7 +54,8 @@ public class CheckErrorAlgorithm523 extends CheckErrorAlgorithmBase {
 
       // Only images that respect a minimum size
       if (shouldAdd) {
-        PageElementImage.Parameter paramWidth = image.getParameter(MagicWord.IMG_WIDTH);
+        PageElementImage.Parameter paramWidth =
+            image.getParameter(MagicWord.IMG_WIDTH);
         if ((paramWidth != null) && (paramWidth.getContents() != null)) {
           String contents = paramWidth.getContents().replaceAll("\\D", "");
           try {
@@ -73,21 +71,25 @@ public class CheckErrorAlgorithm523 extends CheckErrorAlgorithmBase {
 
       // Ignore images with a page parameter
       if (shouldAdd) {
-        PageElementImage.Parameter paramPage = image.getParameter(MagicWord.IMG_PAGE);
+        PageElementImage.Parameter paramPage =
+            image.getParameter(MagicWord.IMG_PAGE);
         if (paramPage != null) {
           shouldAdd = false;
         }
       }
 
       if (shouldAdd) {
-        addImage(imagesMap, image.getImage(), image.getBeginIndex(), image.getEndIndex());
+        addImage(imagesMap, image.getImage(), image.getBeginIndex(),
+                 image.getEndIndex());
       }
     }
 
     // Memorize where each image in a gallery is
-    List<PageElementTag> galleryTags = analysis.getCompleteTags(PageElementTag.TAG_WIKI_GALLERY);
+    List<PageElementTag> galleryTags =
+        analysis.getCompleteTags(PageElementTag.TAG_WIKI_GALLERY);
     String contents = analysis.getContents();
-    Namespace imageNamespace = analysis.getWikiConfiguration().getNamespace(Namespace.IMAGE);
+    Namespace imageNamespace =
+        analysis.getWikiConfiguration().getNamespace(Namespace.IMAGE);
     for (PageElementTag galleryTag : galleryTags) {
       if (galleryTag.getMatchingTag() != null) {
         PageElementTag endTag = galleryTag.getMatchingTag();
@@ -98,14 +100,16 @@ public class CheckErrorAlgorithm523 extends CheckErrorAlgorithmBase {
               (contents.charAt(tmpIndex) == '\n')) {
             String line = contents.substring(beginIndex, tmpIndex).trim();
             int colonIndex = line.indexOf(':');
-            if ((colonIndex > 0) && (imageNamespace.isPossibleName(line.substring(0, colonIndex)))) {
+            if ((colonIndex > 0) && (imageNamespace.isPossibleName(
+                                        line.substring(0, colonIndex)))) {
               String imageName = line.substring(colonIndex + 1);
               int pipeIndex = imageName.indexOf('|', colonIndex);
               if (pipeIndex > 0) {
                 imageName = imageName.substring(0, pipeIndex);
               }
               int beginImageIndex = beginIndex;
-              int endImageIndex = beginImageIndex + colonIndex + 1 + imageName.length();
+              int endImageIndex =
+                  beginImageIndex + colonIndex + 1 + imageName.length();
               addImage(imagesMap, imageName, beginImageIndex, endImageIndex);
             }
             beginIndex = tmpIndex + 1;
@@ -138,16 +142,14 @@ public class CheckErrorAlgorithm523 extends CheckErrorAlgorithmBase {
 
   /**
    * Add an image in the map.
-   * 
+   *
    * @param imagesMap Map of images.
    * @param imageName Name of the image.
    * @param beginIndex Begin index of the image position.
    * @param endIndex End index of the image position.
    */
-  private void addImage(
-      Map<String, List<Element>> imagesMap,
-      String imageName,
-      int beginIndex, int endIndex) {
+  private void addImage(Map<String, List<Element>> imagesMap, String imageName,
+                        int beginIndex, int endIndex) {
     if ((imagesMap == null) || (imageName == null)) {
       return;
     }
@@ -189,8 +191,9 @@ public class CheckErrorAlgorithm523 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -210,7 +213,8 @@ public class CheckErrorAlgorithm523 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {

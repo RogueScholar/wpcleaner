@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.AddInternalLinkActionProvider;
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.constants.ArticleUrl;
@@ -24,15 +23,14 @@ import org.wikipediacleaner.api.data.Page;
 import org.wikipediacleaner.api.data.PageAnalysis;
 import org.wikipediacleaner.api.data.PageElementExternalLink;
 import org.wikipediacleaner.api.data.PageElementImage;
-import org.wikipediacleaner.api.data.PageElementTag;
 import org.wikipediacleaner.api.data.PageElementImage.Parameter;
 import org.wikipediacleaner.api.data.PageElementInternalLink;
+import org.wikipediacleaner.api.data.PageElementTag;
 import org.wikipediacleaner.api.data.PageElementTemplate;
 import org.wikipediacleaner.api.data.SpecialPage;
 import org.wikipediacleaner.i18n.GT;
 import org.wikipediacleaner.utils.StringChecker;
 import org.wikipediacleaner.utils.StringCheckerUnauthorizedCharacters;
-
 
 /**
  * Algorithm for analyzing error 090 of check wikipedia project.
@@ -52,16 +50,17 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -79,15 +78,16 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze external links.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
-  private boolean analyzeExternalLinks(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  private boolean analyzeExternalLinks(PageAnalysis analysis,
+                                       Collection<CheckErrorResult> errors,
+                                       boolean onlyAutomatic) {
 
     // Analyze each external link
     boolean result = false;
@@ -100,9 +100,12 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
       ArticleUrl articleUrl = ArticleUrl.isArticleUrl(wiki, link.getLink());
       if (articleUrl != null) {
         int index = link.getBeginIndex();
-        if ((analysis.getSurroundingTag(PageElementTag.TAG_HTML_CODE, index) != null) ||
-            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SOURCE, index) != null) ||
-            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SYNTAXHIGHLIGHT, index) != null)) {
+        if ((analysis.getSurroundingTag(PageElementTag.TAG_HTML_CODE, index) !=
+             null) ||
+            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SOURCE,
+                                        index) != null) ||
+            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SYNTAXHIGHLIGHT,
+                                        index) != null)) {
           articleUrl = null;
         }
       }
@@ -112,8 +115,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
         }
         result = true;
         boolean errorReported = false;
-        AnalysisInformation info = new AnalysisInformation(
-            analysis, link, articleUrl, wiki, errors);
+        AnalysisInformation info =
+            new AnalysisInformation(analysis, link, articleUrl, wiki, errors);
 
         // Check if link is in image as a link attribute
         if (!errorReported) {
@@ -168,7 +171,7 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze cases of external link in image link attribute.
-   * 
+   *
    * @param info Analysis information.
    * @return True if error has been reported.
    */
@@ -194,26 +197,29 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
     if ((info.articleUrl.getAttributes() != null) ||
         (info.articleUrl.getFragment() != null)) {
       info.automatic = Boolean.FALSE;
-    } else  if (info.link.hasSquare()) {
+    } else if (info.link.hasSquare()) {
       info.automatic = Boolean.FALSE;
     } else {
       String article = info.articleUrl.getTitle();
       int colonIndex = article.indexOf(':');
       if (colonIndex <= 0) {
         info.automatic = Boolean.FALSE;
-      } else if (!Page.areSameTitle(article.substring(colonIndex + 1), image.getImage())) {
+      } else if (!Page.areSameTitle(article.substring(colonIndex + 1),
+                                    image.getImage())) {
         info.automatic = Boolean.FALSE;
       } else {
-        Namespace imageNamespace = info.analysis.getWikiConfiguration().getNamespace(Namespace.IMAGE);
-        if (!imageNamespace.isPossibleName(article.substring(0, colonIndex).trim())) {
+        Namespace imageNamespace =
+            info.analysis.getWikiConfiguration().getNamespace(Namespace.IMAGE);
+        if (!imageNamespace.isPossibleName(
+                article.substring(0, colonIndex).trim())) {
           info.automatic = Boolean.FALSE;
         }
       }
     }
 
     // Report error
-    CheckErrorResult errorResult = createCheckErrorResult(
-        info.analysis, beginParam - 1, endParam);
+    CheckErrorResult errorResult =
+        createCheckErrorResult(info.analysis, beginParam - 1, endParam);
     errorResult.addReplacement("", Boolean.TRUE.equals(info.automatic));
     info.errors.add(errorResult);
     return true;
@@ -221,12 +227,11 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze cases of link inside timeline tags.
-   * 
+   *
    * @param info Analysis information.
    * @return True if error has been reported.
    */
-  private boolean checkTimeline(
-      AnalysisInformation info) {
+  private boolean checkTimeline(AnalysisInformation info) {
     PageElementTag timelineTag = info.analysis.getSurroundingTag(
         PageElementTag.TAG_WIKI_TIMELINE, info.beginIndex);
     if (timelineTag == null) {
@@ -268,8 +273,7 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
                ("\"\n".indexOf(info.contents.charAt(tmpIndex - 1)) < 0)) {
           tmpIndex--;
         }
-        if ((tmpIndex > 0) &&
-            (info.contents.charAt(tmpIndex - 1) == '\"')) {
+        if ((tmpIndex > 0) && (info.contents.charAt(tmpIndex - 1) == '\"')) {
           displayedText = info.contents.substring(tmpIndex, timelineBegin);
         }
         timelineBegin = tmpIndex - 1;
@@ -299,8 +303,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
     }
 
     if (timelineOk) {
-      CheckErrorResult errorResult = createCheckErrorResult(
-          info.analysis, timelineBegin, timelineEnd);
+      CheckErrorResult errorResult =
+          createCheckErrorResult(info.analysis, timelineBegin, timelineEnd);
       errorResult.addReplacement(
           "text:\"" +
           PageElementInternalLink.createInternalLink(
@@ -315,7 +319,7 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze cases of links inside ref tags.
-   * 
+   *
    * @param info Analysis information.
    * @return True if error has been reported.
    */
@@ -350,27 +354,30 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
     // Check if there's an equivalent link or text before
     tmpIndex = refTag.getCompleteBeginIndex();
-    while ((tmpIndex > 0) &&
-           (info.contents.charAt(tmpIndex - 1) == ' ')) {
+    while ((tmpIndex > 0) && (info.contents.charAt(tmpIndex - 1) == ' ')) {
       tmpIndex--;
     }
     if (tmpIndex > 0) {
-      PageElementInternalLink previousLink = info.analysis.isInInternalLink(tmpIndex - 1);
+      PageElementInternalLink previousLink =
+          info.analysis.isInInternalLink(tmpIndex - 1);
       if ((previousLink != null) &&
           Page.areSameTitle(previousLink.getLink(), info.article)) {
-        CheckErrorResult errorResult = createCheckErrorResult(
-            info.analysis, previousLink.getBeginIndex(), refTag.getCompleteEndIndex());
-        errorResult.addReplacement(
-            info.contents.substring(previousLink.getBeginIndex(), previousLink.getEndIndex()));
+        CheckErrorResult errorResult =
+            createCheckErrorResult(info.analysis, previousLink.getBeginIndex(),
+                                   refTag.getCompleteEndIndex());
+        errorResult.addReplacement(info.contents.substring(
+            previousLink.getBeginIndex(), previousLink.getEndIndex()));
         info.errors.add(errorResult);
         return true;
       } else if (tmpIndex > info.article.length()) {
-        String textBefore = info.contents.substring(tmpIndex - info.article.length(), tmpIndex);
+        String textBefore =
+            info.contents.substring(tmpIndex - info.article.length(), tmpIndex);
         if (Page.areSameTitle(info.article, textBefore)) {
           CheckErrorResult errorResult = createCheckErrorResult(
-              info.analysis, tmpIndex - info.article.length(), refTag.getCompleteEndIndex());
-          errorResult.addReplacement(
-              PageElementInternalLink.createInternalLink(info.article, info.articleUrl.getFragment(), textBefore));
+              info.analysis, tmpIndex - info.article.length(),
+              refTag.getCompleteEndIndex());
+          errorResult.addReplacement(PageElementInternalLink.createInternalLink(
+              info.article, info.articleUrl.getFragment(), textBefore));
           info.errors.add(errorResult);
           return true;
         }
@@ -382,7 +389,7 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze cases of links with Special:PrefixIndex.
-   * 
+   *
    * @param info Analysis information.
    * @return True if error has been reported.
    */
@@ -399,24 +406,31 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
       return false;
     }
     String namespace = info.article.substring(0, colonIndex);
-    Namespace specialNamespace = info.wiki.getWikiConfiguration().getNamespace(Namespace.SPECIAL);
-    if ((specialNamespace == null)  || !specialNamespace.isPossibleName(namespace)) {
+    Namespace specialNamespace =
+        info.wiki.getWikiConfiguration().getNamespace(Namespace.SPECIAL);
+    if ((specialNamespace == null) ||
+        !specialNamespace.isPossibleName(namespace)) {
       return false;
     }
     String specialPageName = info.article.substring(colonIndex + 1);
-    SpecialPage specialPrefixIndex = info.wiki.getWikiConfiguration().getSpecialPageByName(SpecialPage.PREFIX_INDEX);
-    if ((specialPrefixIndex == null) || !specialPrefixIndex.isPossibleAlias(specialPageName)) {
+    SpecialPage specialPrefixIndex =
+        info.wiki.getWikiConfiguration().getSpecialPageByName(
+            SpecialPage.PREFIX_INDEX);
+    if ((specialPrefixIndex == null) ||
+        !specialPrefixIndex.isPossibleAlias(specialPageName)) {
       return false;
     }
 
     // Retrieve information
     String prefix = null;
     if (info.articleUrl.getAttributes() != null) {
-      for (Map.Entry<String, String> attribute : info.articleUrl.getAttributes().entrySet()) {
+      for (Map.Entry<String, String> attribute :
+           info.articleUrl.getAttributes().entrySet()) {
         String key = attribute.getKey();
         if ("prefix".equals(key)) {
           prefix = attribute.getValue();
-          while ((prefix.length() > 0) && (prefix.charAt(prefix.length() - 1) == '+')) {
+          while ((prefix.length() > 0) &&
+                 (prefix.charAt(prefix.length() - 1) == '+')) {
             prefix = prefix.substring(0, prefix.length() - 1);
           }
         } else if ("namespace".equals(key)) {
@@ -430,8 +444,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
       return false;
     }
 
-    CheckErrorResult errorResult = createCheckErrorResult(
-        info.analysis, info.beginIndex, info.endIndex);
+    CheckErrorResult errorResult =
+        createCheckErrorResult(info.analysis, info.beginIndex, info.endIndex);
     for (String[] prefixIndexTemplate : prefixIndexTemplates) {
       if ((prefixIndexTemplate != null) && (prefixIndexTemplate.length > 0)) {
         StringBuilder replacement = new StringBuilder();
@@ -440,7 +454,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
         replacement.append("|");
         String articleParam = null;
         if (prefixIndexTemplate.length > 1) {
-          if ((prefixIndexTemplate[1].length() > 0) && !"1".equals(prefixIndexTemplate[1])) {
+          if ((prefixIndexTemplate[1].length() > 0) &&
+              !"1".equals(prefixIndexTemplate[1])) {
             articleParam = prefixIndexTemplate[1];
           }
         }
@@ -452,7 +467,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
         replacement.append("|");
         String textParam = null;
         if (prefixIndexTemplate.length > 2) {
-          if ((prefixIndexTemplate[2].length() > 0) && !"2".equals(prefixIndexTemplate[2])) {
+          if ((prefixIndexTemplate[2].length() > 0) &&
+              !"2".equals(prefixIndexTemplate[2])) {
             textParam = prefixIndexTemplate[2];
           }
         }
@@ -476,7 +492,7 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze cases of links with oldid=xxx.
-   * 
+   *
    * @param info Analysis information.
    * @return True if error has been reported.
    */
@@ -490,7 +506,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
     // Check if it is an old id link
     String oldid = null;
     if (info.articleUrl.getAttributes() != null) {
-      for (Map.Entry<String, String> attribute : info.articleUrl.getAttributes().entrySet()) {
+      for (Map.Entry<String, String> attribute :
+           info.articleUrl.getAttributes().entrySet()) {
         String key = attribute.getKey();
         if ("oldid".equals(key)) {
           oldid = attribute.getValue();
@@ -503,8 +520,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
       return false;
     }
 
-    CheckErrorResult errorResult = createCheckErrorResult(
-        info.analysis, info.beginIndex, info.endIndex);
+    CheckErrorResult errorResult =
+        createCheckErrorResult(info.analysis, info.beginIndex, info.endIndex);
     for (String[] oldidTemplate : oldidTemplates) {
       if ((oldidTemplate != null) && (oldidTemplate.length > 0)) {
         StringBuilder replacement = new StringBuilder();
@@ -513,7 +530,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
         replacement.append("|");
         String articleParam = null;
         if (oldidTemplate.length > 1) {
-          if ((oldidTemplate[1].length() > 0) && !"1".equals(oldidTemplate[1])) {
+          if ((oldidTemplate[1].length() > 0) &&
+              !"1".equals(oldidTemplate[1])) {
             articleParam = oldidTemplate[1];
           }
         }
@@ -525,7 +543,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
         replacement.append("|");
         String oldidParam = null;
         if (oldidTemplate.length > 2) {
-          if ((oldidTemplate[2].length() > 0) && !"2".equals(oldidTemplate[2])) {
+          if ((oldidTemplate[2].length() > 0) &&
+              !"2".equals(oldidTemplate[2])) {
             oldidParam = oldidTemplate[2];
           }
         }
@@ -537,7 +556,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
         replacement.append("|");
         String textParam = null;
         if (oldidTemplate.length > 3) {
-          if ((oldidTemplate[3].length() > 0) && !"3".equals(oldidTemplate[3])) {
+          if ((oldidTemplate[3].length() > 0) &&
+              !"3".equals(oldidTemplate[3])) {
             textParam = oldidTemplate[3];
           }
         }
@@ -561,7 +581,7 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze cases of links with action=history.
-   * 
+   *
    * @param info Analysis information.
    * @return True if error has been reported.
    */
@@ -575,7 +595,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
     // Check if it is an history link
     boolean isHistory = false;
     if (info.articleUrl.getAttributes() != null) {
-      for (Map.Entry<String, String> attribute : info.articleUrl.getAttributes().entrySet()) {
+      for (Map.Entry<String, String> attribute :
+           info.articleUrl.getAttributes().entrySet()) {
         String key = attribute.getKey();
         if ("action".equals(key)) {
           if (!"history".equals(attribute.getValue())) {
@@ -591,8 +612,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
       return false;
     }
 
-    CheckErrorResult errorResult = createCheckErrorResult(
-        info.analysis, info.beginIndex, info.endIndex);
+    CheckErrorResult errorResult =
+        createCheckErrorResult(info.analysis, info.beginIndex, info.endIndex);
     for (String[] historyTemplate : historyTemplates) {
       if ((historyTemplate != null) && (historyTemplate.length > 0)) {
         StringBuilder replacement = new StringBuilder();
@@ -601,7 +622,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
         replacement.append("|");
         String articleParam = null;
         if (historyTemplate.length > 1) {
-          if ((historyTemplate[1].length() > 0) && !"1".equals(historyTemplate[1])) {
+          if ((historyTemplate[1].length() > 0) &&
+              !"1".equals(historyTemplate[1])) {
             articleParam = historyTemplate[1];
           }
         }
@@ -613,7 +635,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
         replacement.append("|");
         String textParam = null;
         if (historyTemplate.length > 2) {
-          if ((historyTemplate[2].length() > 0) && !"2".equals(historyTemplate[2])) {
+          if ((historyTemplate[2].length() > 0) &&
+              !"2".equals(historyTemplate[2])) {
             textParam = historyTemplate[2];
           }
         }
@@ -637,7 +660,7 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
   /**
    * Basic reporting for a link with text.
-   * 
+   *
    * @param info Analysis information.
    * @return True if error has been reported.
    */
@@ -646,8 +669,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
       return false;
     }
 
-    CheckErrorResult errorResult = createCheckErrorResult(
-        info.analysis, info.beginIndex, info.endIndex);
+    CheckErrorResult errorResult =
+        createCheckErrorResult(info.analysis, info.beginIndex, info.endIndex);
     addBasicReplacement(info, errorResult);
     info.errors.add(errorResult);
     return true;
@@ -655,7 +678,7 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
   /**
    * Basic reporting for a link without text.
-   * 
+   *
    * @param info Analysis information.
    * @return True if error has been reported.
    */
@@ -666,18 +689,20 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
     // Link without text but previous text
     int tmpIndex = info.beginIndex;
-    while ((tmpIndex > 0) &&
-           (info.contents.charAt(tmpIndex - 1) == ' ')) {
+    while ((tmpIndex > 0) && (info.contents.charAt(tmpIndex - 1) == ' ')) {
       tmpIndex--;
     }
     if (tmpIndex > info.article.length()) {
-      String textBefore = info.contents.substring(tmpIndex - info.article.length(), tmpIndex);
+      String textBefore =
+          info.contents.substring(tmpIndex - info.article.length(), tmpIndex);
       if (Page.areSameTitle(info.article, textBefore)) {
         CheckErrorResult errorResult = createCheckErrorResult(
             info.analysis, tmpIndex - info.article.length(), info.endIndex);
         errorResult.addReplacement(
             PageElementInternalLink.createInternalLink(
-                (info.needColon ? ":" : "") + info.articleUrl.getTitleAndFragment(), textBefore),
+                (info.needColon ? ":" : "") +
+                    info.articleUrl.getTitleAndFragment(),
+                textBefore),
             info.automatic);
         info.errors.add(errorResult);
         return true;
@@ -685,30 +710,30 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
     }
 
     // Link without text
-    CheckErrorResult errorResult = createCheckErrorResult(
-        info.analysis, info.beginIndex, info.endIndex);
+    CheckErrorResult errorResult =
+        createCheckErrorResult(info.analysis, info.beginIndex, info.endIndex);
     String question = GT._T("What text should be displayed by the link?");
     AddInternalLinkActionProvider action = new AddInternalLinkActionProvider(
-        info.article, info.articleUrl.getFragment(), null, null, null,
-        question, info.articleUrl.getTitleAndFragment().replaceAll("\\_", " "), checker);
-    errorResult.addPossibleAction(
-        GT._T("Convert into an internal link"),
-        action);
+        info.article, info.articleUrl.getFragment(), null, null, null, question,
+        info.articleUrl.getTitleAndFragment().replaceAll("\\_", " "), checker);
+    errorResult.addPossibleAction(GT._T("Convert into an internal link"),
+                                  action);
     info.errors.add(errorResult);
     return true;
   }
 
   /**
    * Add a basic replacement proposal.
-   * 
+   *
    * @param info Analysis information.
    * @param errorResult Error result.
    */
-  private void addBasicReplacement(
-      AnalysisInformation info, CheckErrorResult errorResult) {
+  private void addBasicReplacement(AnalysisInformation info,
+                                   CheckErrorResult errorResult) {
     errorResult.addReplacement(
         PageElementInternalLink.createInternalLink(
-            (info.needColon ? ":" : "") + info.articleUrl.getTitleAndFragment(), info.text),
+            (info.needColon ? ":" : "") + info.articleUrl.getTitleAndFragment(),
+            info.text),
         info.automatic);
     if (info.text != null) {
       errorResult.addReplacement(info.text);
@@ -717,15 +742,16 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze internal links.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
-  private boolean analyzeInternalLinks(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  private boolean analyzeInternalLinks(PageAnalysis analysis,
+                                       Collection<CheckErrorResult> errors,
+                                       boolean onlyAutomatic) {
     boolean result = false;
     List<PageElementInternalLink> links = analysis.getInternalLinks();
     if (links == null) {
@@ -751,7 +777,7 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -765,7 +791,7 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
   /**
    * Bot fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -821,12 +847,10 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
     /** True if link is defined by a template */
     public Boolean isInTemplate;
 
-    public AnalysisInformation(
-        PageAnalysis analysis,
-        PageElementExternalLink link,
-        ArticleUrl articleUrl,
-        EnumWikipedia wiki,
-        Collection<CheckErrorResult> errors) {
+    public AnalysisInformation(PageAnalysis analysis,
+                               PageElementExternalLink link,
+                               ArticleUrl articleUrl, EnumWikipedia wiki,
+                               Collection<CheckErrorResult> errors) {
       this.analysis = analysis;
       this.contents = analysis.getContents();
       this.link = link;
@@ -848,23 +872,21 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
     public void computeLinkInformation() {
       if (link.hasSquare()) {
         if ((beginIndex > 0) && (contents.charAt(beginIndex - 1) == '[') &&
-            (endIndex < contents.length()) && (contents.charAt(endIndex) == ']')) {
+            (endIndex < contents.length()) &&
+            (contents.charAt(endIndex) == ']')) {
           beginIndex--;
           endIndex++;
         }
       }
-      Page articlePage = DataManager.getPage(
-          analysis.getWikipedia(), article, null, null, null);
+      Page articlePage = DataManager.getPage(analysis.getWikipedia(), article,
+                                             null, null, null);
       needColon = Boolean.FALSE;
       if (articlePage.getNamespace() != null) {
         int ns = articlePage.getNamespace().intValue();
         if (ns % 2 == 0) {
-          if ((ns != Namespace.MAIN) &&
-              (ns != Namespace.USER) &&
-              (ns != Namespace.HELP) &&
-              (ns != Namespace.MEDIAWIKI) &&
-              (ns != Namespace.TEMPLATE) &&
-              (ns != Namespace.WIKIPEDIA)) {
+          if ((ns != Namespace.MAIN) && (ns != Namespace.USER) &&
+              (ns != Namespace.HELP) && (ns != Namespace.MEDIAWIKI) &&
+              (ns != Namespace.TEMPLATE) && (ns != Namespace.WIKIPEDIA)) {
             needColon = Boolean.TRUE;
           }
         }
@@ -873,11 +895,11 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
     /**
      * Compute if link is defined by a template.
-     * 
+     *
      * @param linkTemplates List of link templates.
      */
     public void computeIsInTemplate(List<String> linkTemplates) {
-      
+
       isInTemplate = Boolean.FALSE;
       if (linkTemplates != null) {
         PageElementTemplate template = analysis.isInTemplate(beginIndex);
@@ -886,7 +908,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
             String[] elements = linkTemplate.split("\\|");
             if ((elements.length > 2) &&
                 Page.areSameTitle(elements[0], template.getTemplateName()) &&
-                link.getLink().trim().equals(template.getParameterValue(elements[1]))) {
+                link.getLink().trim().equals(
+                    template.getParameterValue(elements[1]))) {
               text = template.getParameterValue(elements[2]);
               beginIndex = template.getBeginIndex();
               endIndex = template.getEndIndex();
@@ -905,7 +928,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
         automatic = false;
       }
       if (articleUrl.getAttributes() != null) {
-        for (Map.Entry<String, String> attribute : articleUrl.getAttributes().entrySet()) {
+        for (Map.Entry<String, String> attribute :
+             articleUrl.getAttributes().entrySet()) {
           String key = attribute.getKey();
           if ("venotify".equals(key)) {
             if (!"created".equals(attribute.getValue())) {
@@ -937,19 +961,23 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
   private static final String PARAMETER_OLDID_TEMPLATES = "oldid_templates";
 
   /** Templates for using instead of Special:PrefixIndex */
-  private static final String PARAMETER_PREFIX_INDEX_TEMPLATES = "prefix_index_templates";
+  private static final String PARAMETER_PREFIX_INDEX_TEMPLATES =
+      "prefix_index_templates";
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
-    String tmp = getSpecificProperty(PARAMETER_HISTORY_TEMPLATES, true, true, false);
+    String tmp =
+        getSpecificProperty(PARAMETER_HISTORY_TEMPLATES, true, true, false);
     historyTemplates.clear();
     if (tmp != null) {
-      List<String[]> tmpList = WPCConfiguration.convertPropertyToStringArrayList(tmp);
+      List<String[]> tmpList =
+          WPCConfiguration.convertPropertyToStringArrayList(tmp);
       if (tmpList != null) {
         historyTemplates.addAll(tmpList);
       }
@@ -967,16 +995,19 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
     tmp = getSpecificProperty(PARAMETER_OLDID_TEMPLATES, true, true, false);
     oldidTemplates.clear();
     if (tmp != null) {
-      List<String[]> tmpList = WPCConfiguration.convertPropertyToStringArrayList(tmp);
+      List<String[]> tmpList =
+          WPCConfiguration.convertPropertyToStringArrayList(tmp);
       if (tmpList != null) {
         oldidTemplates.addAll(tmpList);
       }
     }
 
-    tmp = getSpecificProperty(PARAMETER_PREFIX_INDEX_TEMPLATES, true, true, false);
+    tmp = getSpecificProperty(PARAMETER_PREFIX_INDEX_TEMPLATES, true, true,
+                              false);
     prefixIndexTemplates.clear();
     if (tmp != null) {
-      List<String[]> tmpList = WPCConfiguration.convertPropertyToStringArrayList(tmp);
+      List<String[]> tmpList =
+          WPCConfiguration.convertPropertyToStringArrayList(tmp);
       if (tmpList != null) {
         prefixIndexTemplates.addAll(tmpList);
       }
@@ -997,7 +1028,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
@@ -1005,9 +1037,8 @@ public class CheckErrorAlgorithm090 extends CheckErrorAlgorithmBase {
     parameters.put(
         PARAMETER_HISTORY_TEMPLATES,
         GT._T("Templates to be used for linking to the history of an article"));
-    parameters.put(
-        PARAMETER_LINK_TEMPLATES,
-        GT._T("Templates using external links"));
+    parameters.put(PARAMETER_LINK_TEMPLATES,
+                   GT._T("Templates using external links"));
     parameters.put(
         PARAMETER_OLDID_TEMPLATES,
         GT._T("Templates to be used for linking to an old version of an article"));

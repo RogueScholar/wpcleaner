@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.CheckErrorResult.ErrorLevel;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
@@ -22,29 +21,27 @@ import org.wikipediacleaner.api.data.PageElementTag;
 import org.wikipediacleaner.api.data.PageElementTag.Parameter;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 525 of check wikipedia project.
  * Error 525: Useless span tag
  */
 public class CheckErrorAlgorithm525 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm525() {
-    super("Useless span tag");
-  }
+  public CheckErrorAlgorithm525() { super("Useless span tag"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if ((analysis == null) || (analysis.getPage() == null)) {
       return false;
     }
@@ -53,7 +50,8 @@ public class CheckErrorAlgorithm525 extends CheckErrorAlgorithmBase {
     }
 
     // Analyze each tag
-    List<PageElementTag> tags = analysis.getCompleteTags(PageElementTag.TAG_HTML_SPAN);
+    List<PageElementTag> tags =
+        analysis.getCompleteTags(PageElementTag.TAG_HTML_SPAN);
     if ((tags == null) || tags.isEmpty()) {
       return false;
     }
@@ -72,17 +70,22 @@ public class CheckErrorAlgorithm525 extends CheckErrorAlgorithmBase {
         String value = param.getTrimmedValue();
         if ((value != null) && (!value.isEmpty())) {
           String lang = analysis.getWikipedia().getSettings().getLanguage();
-          if ("lang".equals(param.getName()) && (lang != null) && lang.equalsIgnoreCase(value)) {
+          if ("lang".equals(param.getName()) && (lang != null) &&
+              lang.equalsIgnoreCase(value)) {
             // useful
           } else if ("dir".equals(param.getName())) {
-            ComponentOrientation dir = analysis.getWikipedia().getSettings().getComponentOrientation();
-            if (("ltr".equalsIgnoreCase(value) && (dir == ComponentOrientation.LEFT_TO_RIGHT)) ||
-                ("rtl".equalsIgnoreCase(value) && (dir == ComponentOrientation.RIGHT_TO_LEFT))) {
+            ComponentOrientation dir =
+                analysis.getWikipedia().getSettings().getComponentOrientation();
+            if (("ltr".equalsIgnoreCase(value) &&
+                 (dir == ComponentOrientation.LEFT_TO_RIGHT)) ||
+                ("rtl".equalsIgnoreCase(value) &&
+                 (dir == ComponentOrientation.RIGHT_TO_LEFT))) {
               // useful
             } else {
               isUseless = false;
             }
-          } else if ("class".equals(param.getName()) && "cx-segment".equals(param.getValue())) {
+          } else if ("class".equals(param.getName()) &&
+                     "cx-segment".equals(param.getValue())) {
             // useless: Content Translation tool garbage
             isParameterUseless = true;
           } else if ("data-segmentid".equals(param.getName())) {
@@ -116,14 +119,15 @@ public class CheckErrorAlgorithm525 extends CheckErrorAlgorithmBase {
         lastIndex = tag.getCompleteEndIndex();
 
         // Create error
-        CheckErrorResult errorResult = createCheckErrorResult(
-            analysis, tag.getCompleteBeginIndex(), tag.getCompleteEndIndex(), level);
+        CheckErrorResult errorResult =
+            createCheckErrorResult(analysis, tag.getCompleteBeginIndex(),
+                                   tag.getCompleteEndIndex(), level);
         if (tag.isFullTag() || !tag.isComplete()) {
           errorResult.addReplacement("");
         } else {
 
-          String internal = contents.substring(
-              tag.getValueBeginIndex(), tag.getValueEndIndex());
+          String internal = contents.substring(tag.getValueBeginIndex(),
+                                               tag.getValueEndIndex());
 
           // Suggestion for anchors
           if ((idParam != null) && !idParam.isEmpty()) {
@@ -131,12 +135,14 @@ public class CheckErrorAlgorithm525 extends CheckErrorAlgorithmBase {
               errorResult.addText(GT._T("Use an anchor template?"));
             }
             for (String[] anchorTemplate : anchorTemplates) {
-              if ((anchorTemplate.length > 0) && (anchorTemplate[0].length() > 0)) {
+              if ((anchorTemplate.length > 0) &&
+                  (anchorTemplate[0].length() > 0)) {
                 StringBuilder replacement = new StringBuilder();
                 replacement.append("{{");
                 replacement.append(anchorTemplate[0]);
                 replacement.append("|");
-                if ((anchorTemplate.length > 1) && !"1".equals(anchorTemplate[1])) {
+                if ((anchorTemplate.length > 1) &&
+                    !"1".equals(anchorTemplate[1])) {
                   replacement.append(anchorTemplate[1]);
                   replacement.append("=");
                 }
@@ -149,14 +155,13 @@ public class CheckErrorAlgorithm525 extends CheckErrorAlgorithmBase {
           }
 
           // Suggestion to remove the tag
-          PageElementTag refTag = analysis.isInTag(
-              tag.getCompleteEndIndex(), PageElementTag.TAG_WIKI_REF);
+          PageElementTag refTag = analysis.isInTag(tag.getCompleteEndIndex(),
+                                                   PageElementTag.TAG_WIKI_REF);
           if ((refTag != null) && (refTag.isEndTag())) {
             internal = internal.trim();
           }
           errorResult.addReplacement(
-              internal,
-              GT._T("Remove {0} tags", PageElementTag.TAG_HTML_SPAN),
+              internal, GT._T("Remove {0} tags", PageElementTag.TAG_HTML_SPAN),
               onlyUselessParameter);
         }
         errors.add(errorResult);
@@ -168,7 +173,7 @@ public class CheckErrorAlgorithm525 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of some errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -186,15 +191,18 @@ public class CheckErrorAlgorithm525 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
-    String tmp = getSpecificProperty(PARAMETER_ANCHOR_TEMPLATES, true, true, false);
+    String tmp =
+        getSpecificProperty(PARAMETER_ANCHOR_TEMPLATES, true, true, false);
     anchorTemplates.clear();
     if (tmp != null) {
-      List<String[]> tmpList = WPCConfiguration.convertPropertyToStringArrayList(tmp);
+      List<String[]> tmpList =
+          WPCConfiguration.convertPropertyToStringArrayList(tmp);
       if (tmpList != null) {
         anchorTemplates.addAll(tmpList);
       }
@@ -212,14 +220,14 @@ public class CheckErrorAlgorithm525 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_ANCHOR_TEMPLATES,
-        GT._T("A replacement for {0}", "&lt;span id=\"xxx\"/&gt;"));
+    parameters.put(PARAMETER_ANCHOR_TEMPLATES,
+                   GT._T("A replacement for {0}", "&lt;span id=\"xxx\"/&gt;"));
     return parameters;
   }
 }

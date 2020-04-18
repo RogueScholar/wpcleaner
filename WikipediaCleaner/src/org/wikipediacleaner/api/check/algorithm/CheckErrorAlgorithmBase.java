@@ -14,12 +14,10 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter.HighlightPainter;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.CheckErrorResult.ErrorLevel;
 import org.wikipediacleaner.api.check.SpecialCharacters;
@@ -33,7 +31,6 @@ import org.wikipediacleaner.api.data.Page;
 import org.wikipediacleaner.api.data.PageAnalysis;
 import org.wikipediacleaner.gui.swing.component.MWPane;
 import org.wikipediacleaner.i18n.GT;
-
 
 /**
  * Abstract base class for analyzing errors.
@@ -54,16 +51,12 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
   /**
    * @param name Name of the error.
    */
-  public CheckErrorAlgorithmBase(String name) {
-    this.name = name;
-  }
+  public CheckErrorAlgorithmBase(String name) { this.name = name; }
 
   /**
    * @return Name of the error.
    */
-  public String getName() {
-    return name;
-  }
+  public String getName() { return name; }
 
   /**
    * @return Textual representation of the object.
@@ -103,7 +96,7 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
   /**
    * Retrieve the list of pages in error.
-   * 
+   *
    * @param wiki Wiki.
    * @param limit Maximum number of pages to retrieve.
    * @return List of pages in error.
@@ -116,13 +109,17 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
   /**
    * @param cwConfiguration Configuration for Check Wiki.
    * @param wpcConfiguration Configuration for WPCleaner.
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithm#setConfiguration(org.wikipediacleaner.api.constants.CWConfiguration, org.wikipediacleaner.api.constants.WPCConfiguration)
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithm#setConfiguration(org.wikipediacleaner.api.constants.CWConfiguration,
+   *     org.wikipediacleaner.api.constants.WPCConfiguration)
    */
   @Override
-  public void setConfiguration(CWConfiguration cwConfiguration, WPCConfiguration wpcConfiguration) {
+  public void setConfiguration(CWConfiguration cwConfiguration,
+                               WPCConfiguration wpcConfiguration) {
     this.wpcConfiguration = wpcConfiguration;
     this.cwConfiguration = cwConfiguration;
-    this.errorConfiguration = cwConfiguration.getErrorConfiguration(getErrorNumber());
+    this.errorConfiguration =
+        cwConfiguration.getErrorConfiguration(getErrorNumber());
     initializeSettings();
   }
 
@@ -139,7 +136,9 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
    */
   @Override
   public String getShortDescription() {
-    return (errorConfiguration != null) ? errorConfiguration.getShortDescription() : null;
+    return (errorConfiguration != null)
+        ? errorConfiguration.getShortDescription()
+        : null;
   }
 
   /**
@@ -147,7 +146,9 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
    */
   @Override
   public String getShortDescriptionReplaced() {
-    return (errorConfiguration != null) ? errorConfiguration.getShortDescriptionReplaced() : null;
+    return (errorConfiguration != null)
+        ? errorConfiguration.getShortDescriptionReplaced()
+        : null;
   }
 
   /**
@@ -156,7 +157,9 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
    */
   @Override
   public String getLongDescription() {
-    return (errorConfiguration != null) ? errorConfiguration.getLongDescription() : null;
+    return (errorConfiguration != null)
+        ? errorConfiguration.getLongDescription()
+        : null;
   }
 
   /**
@@ -169,13 +172,15 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
   /**
    * Tell if a page is among the white list.
-   * 
+   *
    * @param title Page title.
    * @return Page among the white list ?
    */
   @Override
   public boolean isInWhiteList(String title) {
-    return (errorConfiguration != null) ? errorConfiguration.isInWhiteList(title) : false;
+    return (errorConfiguration != null)
+        ? errorConfiguration.isInWhiteList(title)
+        : false;
   }
 
   /**
@@ -183,65 +188,57 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
    */
   @Override
   public String getWhiteListPageName() {
-    return (errorConfiguration != null) ? errorConfiguration.getWhiteListPageName() : null;
+    return (errorConfiguration != null)
+        ? errorConfiguration.getWhiteListPageName()
+        : null;
   }
 
   /**
    * @return Configuration for WPCleaner.
    */
-  protected WPCConfiguration getWPCConfiguration() {
-    return wpcConfiguration;
-  }
+  protected WPCConfiguration getWPCConfiguration() { return wpcConfiguration; }
 
   /**
    * @return Configuration for Check Wiki.
    */
-  protected CWConfiguration getCWConfiguration() {
-    return cwConfiguration;
-  }
+  protected CWConfiguration getCWConfiguration() { return cwConfiguration; }
 
   /**
    * Create a CheckErrorResult object.
-   * 
+   *
    * @param analysis Page analysis
    * @param startPosition Start of the error.
    * @param endPosition End of the error.
    * @return new CheckErrorResult object.
    */
-  protected CheckErrorResult createCheckErrorResult(
-      PageAnalysis analysis,
-      int startPosition, int endPosition) {
-    return createCheckErrorResult(
-        analysis,
-        startPosition, endPosition,
-        ErrorLevel.ERROR);
+  protected CheckErrorResult createCheckErrorResult(PageAnalysis analysis,
+                                                    int startPosition,
+                                                    int endPosition) {
+    return createCheckErrorResult(analysis, startPosition, endPosition,
+                                  ErrorLevel.ERROR);
   }
-
 
   /**
    * Create a CheckErrorResult object.
-   * 
+   *
    * @param analysis Page analysis
    * @param startPosition Start of the error.
    * @param endPosition End of the error.
    * @param errorLevel Error level.
    * @return new CheckErrorResult object.
    */
-  protected CheckErrorResult createCheckErrorResult(
-      PageAnalysis analysis,
-      int startPosition, int endPosition,
-      ErrorLevel errorLevel) {
-    if ((!ErrorLevel.CORRECT.equals(errorLevel)) &&
-        (analysis != null) &&
+  protected CheckErrorResult createCheckErrorResult(PageAnalysis analysis,
+                                                    int startPosition,
+                                                    int endPosition,
+                                                    ErrorLevel errorLevel) {
+    if ((!ErrorLevel.CORRECT.equals(errorLevel)) && (analysis != null) &&
         (analysis.getPage() != null)) {
       if (isInWhiteList(analysis.getPage().getTitle())) {
         errorLevel = ErrorLevel.CORRECT;
       }
     }
-    return new CheckErrorResult(
-        this, analysis.getPage(),
-        startPosition, endPosition,
-        errorLevel);
+    return new CheckErrorResult(this, analysis.getPage(), startPosition,
+                                endPosition, errorLevel);
   }
 
   /**
@@ -249,7 +246,8 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
    */
   @Override
   public int getPriority() {
-    return (errorConfiguration != null) ? errorConfiguration.getPriority() : CWConfigurationError.PRIORITY_UNKOWN;
+    return (errorConfiguration != null) ? errorConfiguration.getPriority()
+                                        : CWConfigurationError.PRIORITY_UNKOWN;
   }
 
   /**
@@ -290,13 +288,13 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
    * @return Property value.
    */
   @Override
-  public String getSpecificProperty(
-      String property,
-      boolean useWiki, boolean useGeneral, boolean acceptEmpty) {
+  public String getSpecificProperty(String property, boolean useWiki,
+                                    boolean useGeneral, boolean acceptEmpty) {
     if (errorConfiguration == null) {
       return null;
     }
-    return errorConfiguration.getSpecificProperty(property, useWiki, useGeneral, useWiki, acceptEmpty);
+    return errorConfiguration.getSpecificProperty(property, useWiki, useGeneral,
+                                                  useWiki, acceptEmpty);
   }
 
   /**
@@ -308,37 +306,45 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
    * @return Property value.
    */
   @Override
-  public String getSpecificProperty(
-      int errorNumber, String property,
-      boolean useWiki, boolean useGeneral, boolean acceptEmpty) {
+  public String getSpecificProperty(int errorNumber, String property,
+                                    boolean useWiki, boolean useGeneral,
+                                    boolean acceptEmpty) {
     if (cwConfiguration == null) {
       return null;
     }
-    CWConfigurationError tmpConfig = cwConfiguration.getErrorConfiguration(errorNumber);
+    CWConfigurationError tmpConfig =
+        cwConfiguration.getErrorConfiguration(errorNumber);
     if (tmpConfig == null) {
       return null;
     }
-    return tmpConfig.getSpecificProperty(property, useWiki, useGeneral, useWiki, acceptEmpty);
+    return tmpConfig.getSpecificProperty(property, useWiki, useGeneral, useWiki,
+                                         acceptEmpty);
   }
 
   /**
    * Return the parameters used to configure the algorithm.
-   * 
+   *
    * @return Map of parameters (key=name, value=description).
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = new Hashtable<String, String>();
-    parameters.put("link", GT._T("Title of the article describing this type of error"));
-    parameters.put("noauto", GT._T("Set to true to prevent automatic modifications for this type of error"));
-    parameters.put("whitelist", GT._T("List of false positives for this type of error"));
-    parameters.put("whitelistpage", GT._T("Page containing the list of false positives for this type of error"));
+    parameters.put("link",
+                   GT._T("Title of the article describing this type of error"));
+    parameters.put(
+        "noauto",
+        GT._T("Set to true to prevent automatic modifications for this type of error"));
+    parameters.put("whitelist",
+                   GT._T("List of false positives for this type of error"));
+    parameters.put(
+        "whitelistpage",
+        GT._T("Page containing the list of false positives for this type of error"));
     return parameters;
   }
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -352,7 +358,7 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -362,7 +368,7 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
   /**
    * Bot fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -376,7 +382,7 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
   /**
    * Bot fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -394,7 +400,7 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
   /**
    * Fix all the errors in the page.
-   * 
+   *
    * @param fixName Fix name (extracted from getGlobalFixes()).
    * @param analysis Page analysis.
    * @param textPane Text pane.
@@ -407,12 +413,13 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
   /**
    * Fix all the errors in the page by using the first replacement proposed.
-   * 
+   *
    * @param fixName Fix name (extracted from getGlobalFixes()).
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
-  public String fixUsingFirstReplacement(String fixName, PageAnalysis analysis) {
+  public String fixUsingFirstReplacement(String fixName,
+                                         PageAnalysis analysis) {
     String result = analysis.getContents();
     List<CheckErrorResult> errors = new ArrayList<CheckErrorResult>();
     if (analyze(analysis, errors, false)) {
@@ -420,10 +427,8 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
         CheckErrorResult errorResult = errors.get(i - 1);
         String newText = errorResult.getFirstReplacement();
         if (newText != null) {
-          String tmp =
-            result.substring(0, errorResult.getStartPosition()) +
-            newText +
-            result.substring(errorResult.getEndPosition());
+          String tmp = result.substring(0, errorResult.getStartPosition()) +
+                       newText + result.substring(errorResult.getEndPosition());
           result = tmp;
         }
       }
@@ -433,7 +438,7 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
   /**
    * Fix all the errors in the page by using automatic replacement proposed.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -453,10 +458,9 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
         if (shouldTry) {
           String newText = errorResult.getAutomaticReplacement();
           if (newText != null) {
-            String tmp =
-              result.substring(0, errorResult.getStartPosition()) +
-              newText +
-              result.substring(errorResult.getEndPosition());
+            String tmp = result.substring(0, errorResult.getStartPosition()) +
+                         newText +
+                         result.substring(errorResult.getEndPosition());
             result = tmp;
           }
         }
@@ -467,7 +471,7 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
   /**
    * Fix all the errors in the page by using automatic bot replacement proposed.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -480,10 +484,8 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
         CheckErrorResult errorResult = errors.get(i - 1);
         String newText = errorResult.getAutomaticBotReplacement();
         if (newText != null) {
-          String tmp =
-            result.substring(0, errorResult.getStartPosition()) +
-            newText +
-            result.substring(errorResult.getEndPosition());
+          String tmp = result.substring(0, errorResult.getStartPosition()) +
+                       newText + result.substring(errorResult.getEndPosition());
           result = tmp;
         }
       }
@@ -493,7 +495,7 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
   /**
    * Fix all the errors in the page by removing.
-   * 
+   *
    * @param fixName Fix name (extracted from getGlobalFixes()).
    * @param analysis Page analysis.
    * @return Page contents after fix.
@@ -504,9 +506,8 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
     if (analyze(analysis, errors, false)) {
       for (int i = errors.size(); i > 0; i--) {
         CheckErrorResult errorResult = errors.get(i - 1);
-        String tmp =
-          result.substring(0, errorResult.getStartPosition()) +
-          result.substring(errorResult.getEndPosition());
+        String tmp = result.substring(0, errorResult.getStartPosition()) +
+                     result.substring(errorResult.getEndPosition());
         result = tmp;
       }
     }
@@ -517,9 +518,11 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
    * @param contents Contents.
    * @param startIndex Index for starting the search.
    * @param characters Authorized characters.
-   * @return First index after the start index that is not an authorized character.
+   * @return First index after the start index that is not an authorized
+   *     character.
    */
-  protected int getFirstIndexAfter(String contents, int startIndex, String characters) {
+  protected int getFirstIndexAfter(String contents, int startIndex,
+                                   String characters) {
     if ((contents == null) || (characters == null)) {
       return startIndex;
     }
@@ -540,7 +543,8 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
     return getFirstIndexAfter(contents, startIndex, " ");
   }
 
-  protected int getLastIndexBefore(String contents, int startIndex, String characters) {
+  protected int getLastIndexBefore(String contents, int startIndex,
+                                   String characters) {
     if ((contents == null) || (characters == null)) {
       return startIndex;
     }
@@ -563,13 +567,15 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
   /**
    * @param contents Contents.
    * @param startIndex Index for starting the search.
-   * @return Last index before the start index that is not a whitespace character.
+   * @return Last index before the start index that is not a whitespace
+   *     character.
    */
   protected int getLastIndexBeforeWhiteSpace(String contents, int startIndex) {
     if (contents == null) {
       return startIndex;
     }
-    while ((startIndex >= 0) && (Character.isWhitespace(contents.charAt(startIndex)))) {
+    while ((startIndex >= 0) &&
+           (Character.isWhitespace(contents.charAt(startIndex)))) {
       startIndex--;
     }
     return startIndex;
@@ -577,38 +583,38 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
   /**
    * Search for simple text in page.
-   * 
+   *
    * @param pageAnalysis Page analysis.
    * @param errors Errors found in the page.
    * @param search Text to be searched.
    * @return Flag indicating if the error was found.
    */
-  protected boolean simpleTextSearch(
-      PageAnalysis pageAnalysis,
-      Collection<CheckErrorResult> errors, String search) {
-    return simpleTextSearch(pageAnalysis, errors, search, (String[]) null);
+  protected boolean simpleTextSearch(PageAnalysis pageAnalysis,
+                                     Collection<CheckErrorResult> errors,
+                                     String search) {
+    return simpleTextSearch(pageAnalysis, errors, search, (String[])null);
   }
 
   /**
    * Search for simple text in page.
-   * 
+   *
    * @param pageAnalysis Page analysis.
    * @param errors Errors found in the page.
    * @param search Text to be searched.
    * @param replacement Text proposed as a replacement.
    * @return Flag indicating if the error was found.
    */
-  protected boolean simpleTextSearch(
-      PageAnalysis pageAnalysis, Collection<CheckErrorResult> errors,
-      String search, String replacement) {
-    return simpleTextSearch(
-        pageAnalysis, errors, search,
-        (replacement != null) ? new String[] { replacement } : null);
+  protected boolean simpleTextSearch(PageAnalysis pageAnalysis,
+                                     Collection<CheckErrorResult> errors,
+                                     String search, String replacement) {
+    return simpleTextSearch(pageAnalysis, errors, search,
+                            (replacement != null) ? new String[] {replacement}
+                                                  : null);
   }
 
   /**
    * Search for simple text in page.
-   * 
+   *
    * @param pageAnalysis Page analysis.
    * @param begin Index in text to begin search.
    * @param end Index in text to end search.
@@ -617,36 +623,35 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
    * @param replacement Text proposed as a replacement.
    * @return Flag indicating if the error was found.
    */
-  protected boolean simpleTextSearch(
-      PageAnalysis pageAnalysis, int begin, int end,
-      Collection<CheckErrorResult> errors,
-      String search, String replacement) {
-    return simpleTextSearch(
-        pageAnalysis, begin, end, errors, search,
-        (replacement != null) ? new String[] { replacement } : null);
+  protected boolean simpleTextSearch(PageAnalysis pageAnalysis, int begin,
+                                     int end,
+                                     Collection<CheckErrorResult> errors,
+                                     String search, String replacement) {
+    return simpleTextSearch(pageAnalysis, begin, end, errors, search,
+                            (replacement != null) ? new String[] {replacement}
+                                                  : null);
   }
 
   /**
    * Search for simple text in page.
-   * 
+   *
    * @param pageAnalysis Page analysis.
    * @param errors Errors found in the page.
    * @param search Text to be searched.
    * @param replacements Texts proposed as a replacement.
    * @return Flag indicating if the error was found.
    */
-  protected boolean simpleTextSearch(
-      PageAnalysis pageAnalysis, Collection<CheckErrorResult> errors,
-      String search, String[] replacements) {
+  protected boolean simpleTextSearch(PageAnalysis pageAnalysis,
+                                     Collection<CheckErrorResult> errors,
+                                     String search, String[] replacements) {
     String contents = pageAnalysis.getContents();
-    return simpleTextSearch(
-        pageAnalysis, 0, contents.length(),
-        errors, search, replacements);
+    return simpleTextSearch(pageAnalysis, 0, contents.length(), errors, search,
+                            replacements);
   }
 
   /**
    * Search for simple text in page.
-   * 
+   *
    * @param analysis Page analysis.
    * @param begin Index in text to begin search.
    * @param end Index in text to end search.
@@ -655,10 +660,9 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
    * @param replacements Texts proposed as a replacement.
    * @return Flag indicating if the error was found.
    */
-  protected boolean simpleTextSearch(
-      PageAnalysis analysis, int begin, int end,
-      Collection<CheckErrorResult> errors,
-      String search, String[] replacements) {
+  protected boolean simpleTextSearch(PageAnalysis analysis, int begin, int end,
+                                     Collection<CheckErrorResult> errors,
+                                     String search, String[] replacements) {
     int startIndex = begin;
     boolean result = false;
     String contents = analysis.getContents();
@@ -670,8 +674,8 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
         }
         result = true;
         int endIndex = startIndex + search.length();
-        CheckErrorResult errorResult = createCheckErrorResult(
-            analysis, startIndex, endIndex);
+        CheckErrorResult errorResult =
+            createCheckErrorResult(analysis, startIndex, endIndex);
         if (replacements != null) {
           for (int i = 0; i < replacements.length; i++) {
             if (replacements[i] != null) {
@@ -690,14 +694,13 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
   /**
    * Create a default DEFAULTSORT.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Default DEFAULTSORT.
    */
   protected String createDefaultSort(PageAnalysis analysis) {
     // Basic check
-    if ((analysis == null) ||
-        (analysis.getContents() == null)) {
+    if ((analysis == null) || (analysis.getContents() == null)) {
       return null;
     }
     String contents = analysis.getContents();
@@ -708,9 +711,11 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
     // Get DEFAULTSORT name
     String defaultSort = "DEFAULTSORT:";
-    MagicWord magicWord = analysis.getWikiConfiguration().getMagicWordByName(MagicWord.DEFAULT_SORT);
+    MagicWord magicWord = analysis.getWikiConfiguration().getMagicWordByName(
+        MagicWord.DEFAULT_SORT);
     if (magicWord != null) {
-      String value = analysis.getWPCConfiguration().getString(WPCConfigurationString.DEFAULTSORT);
+      String value = analysis.getWPCConfiguration().getString(
+          WPCConfigurationString.DEFAULTSORT);
       if ((value != null) && (value.trim().length() > 0)) {
         value = value.trim();
         if (magicWord.isPossibleAlias(value)) {
@@ -734,7 +739,8 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
           SpecialCharacters.isAuthorized(character, wiki)) {
         currentTitle.append(character);
       } else {
-        currentTitle.append(SpecialCharacters.proposeReplacement(character, wiki));
+        currentTitle.append(
+            SpecialCharacters.proposeReplacement(character, wiki));
       }
     }
 
@@ -776,18 +782,18 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
   /**
    * Add an highlight on the text pane.
-   * 
+   *
    * @param textPane Text pane.
    * @param beginIndex Beginning of the highlight area.
    * @param endIndex End of the highlight area.
    * @return Highlight tag.
    */
-  protected Object addHighlight(
-      JTextPane textPane, int beginIndex, int endIndex) {
+  protected Object addHighlight(JTextPane textPane, int beginIndex,
+                                int endIndex) {
     if (textPane != null) {
       try {
-        return textPane.getHighlighter().addHighlight(
-            beginIndex, endIndex, highlighter);
+        return textPane.getHighlighter().addHighlight(beginIndex, endIndex,
+                                                      highlighter);
       } catch (BadLocationException e) {
         //
       }
@@ -797,7 +803,7 @@ public abstract class CheckErrorAlgorithmBase implements CheckErrorAlgorithm {
 
   /**
    * Remove an highlight of the text pane.
-   * 
+   *
    * @param textPane Text pane.
    * @param highlight Highlight tag.
    */

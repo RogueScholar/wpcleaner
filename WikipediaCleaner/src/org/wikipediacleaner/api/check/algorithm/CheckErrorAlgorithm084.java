@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
 import org.wikipediacleaner.api.data.PageAnalysis;
@@ -19,29 +18,27 @@ import org.wikipediacleaner.api.data.PageElementTitle;
 import org.wikipediacleaner.api.data.contents.ContentsComment;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 84 of check wikipedia project.
  * Error 84: Section without content
  */
 public class CheckErrorAlgorithm084 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm084() {
-    super("Section without content");
-  }
+  public CheckErrorAlgorithm084() { super("Section without content"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -57,11 +54,12 @@ public class CheckErrorAlgorithm084 extends CheckErrorAlgorithmBase {
     String contents = analysis.getContents();
     for (int i = 0; i < titles.size(); i++) {
       PageElementTitle title = titles.get(i);
-      PageElementTitle nextTitle = (i + 1 < titles.size()) ? titles.get(i + 1) : null;
-      if ((nextTitle == null) ||
-          (nextTitle.getLevel() <= title.getLevel())) {
+      PageElementTitle nextTitle =
+          (i + 1 < titles.size()) ? titles.get(i + 1) : null;
+      if ((nextTitle == null) || (nextTitle.getLevel() <= title.getLevel())) {
         boolean textFound = false;
-        int lastPos = (nextTitle != null) ? nextTitle.getBeginIndex() : contents.length(); 
+        int lastPos =
+            (nextTitle != null) ? nextTitle.getBeginIndex() : contents.length();
         int pos = title.getEndIndex();
         ContentsComment commentFound = null;
         while (!textFound && (pos < lastPos)) {
@@ -90,18 +88,19 @@ public class CheckErrorAlgorithm084 extends CheckErrorAlgorithmBase {
           if (commentFound != null) {
             lastPos = commentFound.getBeginIndex();
           }
-          CheckErrorResult errorResult = createCheckErrorResult(
-              analysis, title.getBeginIndex(), lastPos);
+          CheckErrorResult errorResult =
+              createCheckErrorResult(analysis, title.getBeginIndex(), lastPos);
           if (texts != null) {
             for (String text : texts) {
-              String replacement =
-                  contents.substring(title.getBeginIndex(), title.getEndIndex()) + "\n" +
-                  text + "\n\n";
+              String replacement = contents.substring(title.getBeginIndex(),
+                                                      title.getEndIndex()) +
+                                   "\n" + text + "\n\n";
               errorResult.addReplacement(replacement, GT._T("Add {0}", text));
             }
           }
           errorResult.addReplacement("", GT._T("Delete section"));
-          if ((nextTitle != null) && (nextTitle.getLevel() == title.getLevel())) {
+          if ((nextTitle != null) &&
+              (nextTitle.getLevel() == title.getLevel())) {
             errorResult.addEditTocAction(title);
           }
           errors.add(errorResult);
@@ -123,8 +122,9 @@ public class CheckErrorAlgorithm084 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -156,7 +156,8 @@ public class CheckErrorAlgorithm084 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {

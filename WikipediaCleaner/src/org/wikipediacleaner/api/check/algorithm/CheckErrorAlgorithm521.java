@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
 import org.wikipediacleaner.api.data.Page;
@@ -21,29 +20,27 @@ import org.wikipediacleaner.api.data.PageElementTemplate;
 import org.wikipediacleaner.api.data.contents.ContentsComment;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 521 of check wikipedia project.
  * Error 521: Date format in templates
  */
 public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm521() {
-    super("Date format in templates");
-  }
+  public CheckErrorAlgorithm521() { super("Date format in templates"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if ((analysis == null) || (analysis.getPage() == null)) {
       return false;
     }
@@ -53,7 +50,8 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
     for (String check : checks) {
       String[] elements = check.split("\\|");
       if ((elements != null) && (elements.length > 2)) {
-        List<PageElementTemplate> templates = analysis.getTemplates(elements[0]);
+        List<PageElementTemplate> templates =
+            analysis.getTemplates(elements[0]);
         for (PageElementTemplate template : templates) {
           int paramIndex = template.getParameterIndex(elements[1]);
           if (paramIndex >= 0) {
@@ -65,18 +63,21 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
                     analysis, template.getParameterValueStartIndex(paramIndex),
                     value, elements[i]);
               }
-  
+
               // Report error
               if (!formatOK) {
                 if (errors == null) {
                   return true;
                 }
                 result = true;
-                int beginIndex = template.getParameterValueStartIndex(paramIndex);
-                int endIndex = (paramIndex + 1 < template.getParameterCount()) ?
-                    template.getParameterPipeIndex(paramIndex + 1) : template.getEndIndex() - 2;
-                CheckErrorResult errorResult = createCheckErrorResult(
-                    analysis, beginIndex, endIndex);
+                int beginIndex =
+                    template.getParameterValueStartIndex(paramIndex);
+                int endIndex =
+                    (paramIndex + 1 < template.getParameterCount())
+                        ? template.getParameterPipeIndex(paramIndex + 1)
+                        : template.getEndIndex() - 2;
+                CheckErrorResult errorResult =
+                    createCheckErrorResult(analysis, beginIndex, endIndex);
                 for (int i = 2; i < elements.length; i++) {
                   errorResult.addText(elements[i]);
                 }
@@ -93,16 +94,15 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
 
   /**
    * Check format.
-   * 
+   *
    * @param analysis Page analysis.
    * @param offset Offset of the value in the page.
    * @param value Parameter value.
    * @param format Expected format.
    * @return True if the value matches the format.
    */
-  private boolean checkFormat(
-      PageAnalysis analysis, int offset,
-      String value, String format) {
+  private boolean checkFormat(PageAnalysis analysis, int offset, String value,
+                              String format) {
     if ((value == null) || (format == null)) {
       return false;
     }
@@ -119,19 +119,22 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
         formatOk = true;
         valueIndex = comment.getEndIndex() - offset;
 
-      // If current value position is the beginning of a reference, skip it
+        // If current value position is the beginning of a reference, skip it
       } else if ((valueChar == '<') &&
-                 (analysis.isInTag(offset + valueIndex, PageElementTag.TAG_WIKI_REF) != null)) {
-        PageElementTag tag = analysis.isInTag(offset + valueIndex, PageElementTag.TAG_WIKI_REF);
+                 (analysis.isInTag(offset + valueIndex,
+                                   PageElementTag.TAG_WIKI_REF) != null)) {
+        PageElementTag tag =
+            analysis.isInTag(offset + valueIndex, PageElementTag.TAG_WIKI_REF);
         formatOk = true;
         valueIndex = tag.getCompleteEndIndex() - offset;
 
       } else if (formatIndex < format.length()) {
         char formatChar = format.charAt(formatIndex);
 
-        // If format string has a quote, it can be for quoted text or really a quote
+        // If format string has a quote, it can be for quoted text or really a
+        // quote
         if (formatChar == '\'') {
-  
+
           // Two quotes in format string means a single quote
           if ((formatIndex + 1 < format.length()) &&
               (format.charAt(formatIndex + 1) == '\'')) {
@@ -140,8 +143,8 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
               formatIndex += 2;
               valueIndex++;
             }
-  
-          // Quoted text
+
+            // Quoted text
           } else {
             int tmpIndex = formatIndex + 1;
             while ((tmpIndex < format.length()) &&
@@ -153,18 +156,18 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
             }
             int length = tmpIndex - formatIndex - 1;
             if ((valueIndex + length <= value.length()) &&
-                format.substring(formatIndex + 1, tmpIndex).equals(value.substring(valueIndex, valueIndex + length))) {
+                format.substring(formatIndex + 1, tmpIndex)
+                    .equals(value.substring(valueIndex, valueIndex + length))) {
               formatOk = true;
               valueIndex += length;
               formatIndex = tmpIndex + 1;
             }
           }
-  
-        // Templates
-        } else if ((formatChar == '{') &&
-                   (formatIndex + 1 < format.length()) &&
+
+          // Templates
+        } else if ((formatChar == '{') && (formatIndex + 1 < format.length()) &&
                    (format.charAt(formatIndex + 1) == '{')) {
-  
+
           // Find template name
           int tmpIndex = formatIndex + 2;
           while ((tmpIndex < format.length()) &&
@@ -175,10 +178,12 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
               !format.startsWith("}}", tmpIndex)) {
             return false;
           }
-          String templateName = format.substring(formatIndex + 2, tmpIndex).trim();
-  
+          String templateName =
+              format.substring(formatIndex + 2, tmpIndex).trim();
+
           // Analyze value
-          PageElementTemplate template = analysis.isInTemplate(offset + valueIndex);
+          PageElementTemplate template =
+              analysis.isInTemplate(offset + valueIndex);
           if ((template != null) &&
               (template.getBeginIndex() == offset + valueIndex) &&
               (Page.areSameTitle(templateName, template.getTemplateName()))) {
@@ -186,12 +191,11 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
             valueIndex = template.getEndIndex() - offset;
             formatIndex = tmpIndex + 2;
           }
-  
-        // Formatting characters
-        } else if ((formatChar == 'd') ||
-                   (formatChar == 'M') ||
+
+          // Formatting characters
+        } else if ((formatChar == 'd') || (formatChar == 'M') ||
                    (formatChar == 'y')) {
-  
+
           // Count the number of consecutive identical formatting characters
           int formatCount = 0;
           int nextFormatIndex = formatIndex;
@@ -200,7 +204,7 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
             formatCount++;
             nextFormatIndex++;
           }
-  
+
           // Count the number of consecutive digits
           int digitCount = 0;
           int nextValueIndex = valueIndex;
@@ -212,18 +216,20 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
           int intValue = 0;
           if (digitCount > 0) {
             try {
-              intValue = Integer.parseInt(value.substring(valueIndex, nextValueIndex));
+              intValue =
+                  Integer.parseInt(value.substring(valueIndex, nextValueIndex));
             } catch (NumberFormatException e) {
               // Nothing to do
             }
           }
-  
+
           // Depending on the formatting character
           switch (formatChar) {
           case 'd': // Day
             if (formatCount == 1) {
               // Format "d": day number without leading 0
-              if ((digitCount != 0) && (digitCount <= 2) && (valueChar != '0')) {
+              if ((digitCount != 0) && (digitCount <= 2) &&
+                  (valueChar != '0')) {
                 if ((intValue > 0) && (intValue <= 31)) {
                   formatOk = true;
                 }
@@ -237,11 +243,12 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
               }
             }
             break;
-  
+
           case 'M': // Month
             if (formatCount == 1) {
               // Format "M": month number without leading 0
-              if ((digitCount != 0) && (digitCount <= 2) && (valueChar != '0')) {
+              if ((digitCount != 0) && (digitCount <= 2) &&
+                  (valueChar != '0')) {
                 if ((intValue > 0) && (intValue <= 12)) {
                   formatOk = true;
                 }
@@ -269,7 +276,7 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
               }
             }
             break;
-  
+
           case 'y': // Year
             if (intValue <= 9999) {
               if ((formatCount == 1) || (formatCount == 2)) {
@@ -286,14 +293,14 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
             }
             break;
           }
-  
+
           // Move indexes if needed
           if (formatOk) {
             formatIndex = nextFormatIndex;
             valueIndex = nextValueIndex;
           }
-  
-        // Check for identical text
+
+          // Check for identical text
         } else {
           if (value.charAt(valueIndex) == format.charAt(formatIndex)) {
             formatOk = true;
@@ -302,7 +309,7 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
           }
         }
 
-      // Check for potential white space characters at the end
+        // Check for potential white space characters at the end
       } else if (Character.isWhitespace(valueChar)) {
         formatOk = true;
         valueIndex++;
@@ -315,12 +322,14 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
     }
 
     // Check for potential comments or whitespace characters
-    while ((valueIndex < value.length()) && Character.isWhitespace(value.charAt(valueIndex))) {
+    while ((valueIndex < value.length()) &&
+           Character.isWhitespace(value.charAt(valueIndex))) {
       valueIndex++;
     }
     if ((valueIndex < value.length()) && value.startsWith("<!--", valueIndex)) {
       valueIndex += 2;
-      while ((valueIndex < value.length() && !value.startsWith("-->", valueIndex))) {
+      while ((valueIndex < value.length() &&
+              !value.startsWith("-->", valueIndex))) {
         valueIndex++;
       }
       if (valueIndex < value.length()) {
@@ -348,8 +357,9 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -379,7 +389,8 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
@@ -387,9 +398,7 @@ public class CheckErrorAlgorithm521 extends CheckErrorAlgorithmBase {
     parameters.put(
         PARAMETER_TEMPLATES,
         GT._T("A list of templates and parameters in which format should be checked"));
-    parameters.put(
-        PARAMETER_MONTHS,
-        GT._T("A list of text values for months"));
+    parameters.put(PARAMETER_MONTHS, GT._T("A list of text values for months"));
     return parameters;
   }
 }

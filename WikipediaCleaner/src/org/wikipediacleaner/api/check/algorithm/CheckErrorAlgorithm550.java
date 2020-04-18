@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
 import org.wikipediacleaner.api.data.CharacterUtils;
@@ -21,29 +20,27 @@ import org.wikipediacleaner.api.data.PageElementInternalLink;
 import org.wikipediacleaner.api.data.PageElementTag;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 550 of check wikipedia project.
  * Error 550: Link without text.
  */
 public class CheckErrorAlgorithm550 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm550() {
-    super("Link without text");
-  }
+  public CheckErrorAlgorithm550() { super("Link without text"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -70,8 +67,8 @@ public class CheckErrorAlgorithm550 extends CheckErrorAlgorithmBase {
             char currentChar = text.charAt(index);
             if (currentChar == '<') {
               PageElementTag tag = PageElementTag.analyzeBlock(text, index);
-              if ((tag != null) &&
-                  PageElementTag.TAG_WIKI_NOWIKI.equals(tag.getNormalizedName())) {
+              if ((tag != null) && PageElementTag.TAG_WIKI_NOWIKI.equals(
+                                       tag.getNormalizedName())) {
                 index = tag.getEndIndex();
               } else {
                 shouldReport = false;
@@ -105,13 +102,15 @@ public class CheckErrorAlgorithm550 extends CheckErrorAlgorithmBase {
         if (automatic) {
           String contents = analysis.getContents();
           if ((beginIndex > 0) && (contents.charAt(beginIndex - 1) == '\'') &&
-              (endIndex < contents.length()) && (contents.charAt(endIndex) == '\'')) {
+              (endIndex < contents.length()) &&
+              (contents.charAt(endIndex) == '\'')) {
             automatic = false;
           }
         }
 
         // Report error
-        CheckErrorResult errorResult = createCheckErrorResult(analysis, beginIndex, endIndex);
+        CheckErrorResult errorResult =
+            createCheckErrorResult(analysis, beginIndex, endIndex);
         errorResult.addReplacement("", automatic);
         if (hasSpace) {
           String contents = analysis.getContents();
@@ -137,7 +136,7 @@ public class CheckErrorAlgorithm550 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -159,8 +158,9 @@ public class CheckErrorAlgorithm550 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -179,7 +179,8 @@ public class CheckErrorAlgorithm550 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {

@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.API;
 import org.wikipediacleaner.api.APIException;
 import org.wikipediacleaner.api.APIFactory;
@@ -22,11 +21,10 @@ import org.wikipediacleaner.api.constants.WPCConfigurationStringList;
 import org.wikipediacleaner.api.data.DataManager;
 import org.wikipediacleaner.api.data.Namespace;
 import org.wikipediacleaner.api.data.Page;
+import org.wikipediacleaner.api.data.Page.RelatedPages;
 import org.wikipediacleaner.api.data.PageAnalysis;
 import org.wikipediacleaner.api.data.PageElementISBN;
-import org.wikipediacleaner.api.data.Page.RelatedPages;
 import org.wikipediacleaner.i18n.GT;
-
 
 /**
  * Algorithm for analyzing error 529 of check wikipedia project.
@@ -34,20 +32,18 @@ import org.wikipediacleaner.i18n.GT;
  */
 public class CheckErrorAlgorithm529 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm529() {
-    super("ISBN magical link");
-  }
+  public CheckErrorAlgorithm529() { super("ISBN magical link"); }
 
   /** List of string that could be before an ISBN. */
   private final static String[] EXTEND_BEFORE_ISBN = {
-    "<small>",
-    "(",
+      "<small>",
+      "(",
   };
 
   /** List of string that could be after an ISBN. */
   private final static String[] EXTEND_AFTER_ISBN = {
-    "</small>",
-    ")",
+      "</small>",
+      ")",
   };
 
   /** Tracking category. */
@@ -55,16 +51,17 @@ public class CheckErrorAlgorithm529 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if ((analysis == null) || (analysis.getPage() == null)) {
       return false;
     }
@@ -99,23 +96,22 @@ public class CheckErrorAlgorithm529 extends CheckErrorAlgorithmBase {
         if (!automaticReplacements.isEmpty() && !isbnTemplates.isEmpty()) {
           for (String[] automaticReplacement : automaticReplacements) {
             if ((automaticReplacement != null) &&
-                (automaticReplacement.length > 2) &&
-                !reported) {
+                (automaticReplacement.length > 2) && !reported) {
               String template = automaticReplacement[0];
               String prefix = automaticReplacement[1];
               String suffix = automaticReplacement[2];
               if ((isbnBeginIndex >= prefix.length()) &&
-                  (contents.startsWith(prefix, isbnBeginIndex - prefix.length())) &&
+                  (contents.startsWith(prefix,
+                                       isbnBeginIndex - prefix.length())) &&
                   (contents.startsWith(suffix, isbnEndIndex))) {
                 CheckErrorResult errorResult = createCheckErrorResult(
-                    analysis,
-                    isbnBeginIndex - prefix.length(),
+                    analysis, isbnBeginIndex - prefix.length(),
                     isbnEndIndex + suffix.length());
                 for (String[] isbnTemplate : isbnTemplates) {
-                  if ((isbnTemplate != null) &&
-                      (isbnTemplate.length > 0) &&
+                  if ((isbnTemplate != null) && (isbnTemplate.length > 0) &&
                       (template.equals(isbnTemplate[0]))) {
-                    addTemplateReplacement(errorResult, isbnTemplate, isbn, null, null, true);
+                    addTemplateReplacement(errorResult, isbnTemplate, isbn,
+                                           null, null, true);
                   }
                 }
                 errors.add(errorResult);
@@ -152,17 +148,18 @@ public class CheckErrorAlgorithm529 extends CheckErrorAlgorithmBase {
           } while (extensionFound);
           String prefix = contents.substring(beginIndex, isbnBeginIndex);
           String suffix = contents.substring(isbnEndIndex, endIndex);
-  
-          CheckErrorResult errorResult = createCheckErrorResult(
-              analysis, beginIndex, endIndex);
-  
+
+          CheckErrorResult errorResult =
+              createCheckErrorResult(analysis, beginIndex, endIndex);
+
           // Suggest replacement with templates
           if (isbnTemplates != null) {
             for (String[] isbnTemplate : isbnTemplates) {
-              addTemplateReplacement(errorResult, isbnTemplate, isbn, prefix, suffix, false);
+              addTemplateReplacement(errorResult, isbnTemplate, isbn, prefix,
+                                     suffix, false);
             }
           }
-  
+
           // Suggest replacement with interwikis
           for (String[] isbnInterwiki : isbnInterwikis) {
             if (isbnInterwiki.length > 0) {
@@ -180,7 +177,7 @@ public class CheckErrorAlgorithm529 extends CheckErrorAlgorithmBase {
               errorResult.addReplacement(replacement.toString());
             }
           }
-  
+
           errors.add(errorResult);
         }
       }
@@ -191,7 +188,7 @@ public class CheckErrorAlgorithm529 extends CheckErrorAlgorithmBase {
 
   /**
    * Add a suggestion for replacement with a template.
-   * 
+   *
    * @param errorResult Error result.
    * @param isbnTemplate Definition of the template.
    * @param isbn ISBN.
@@ -199,10 +196,10 @@ public class CheckErrorAlgorithm529 extends CheckErrorAlgorithmBase {
    * @param suffix Optional suffix.
    * @param automatic True if automatic replacement can be performed.
    */
-  private void addTemplateReplacement(
-      CheckErrorResult errorResult, String[] isbnTemplate,
-      PageElementISBN isbn, String prefix, String suffix,
-      boolean automatic) {
+  private void addTemplateReplacement(CheckErrorResult errorResult,
+                                      String[] isbnTemplate,
+                                      PageElementISBN isbn, String prefix,
+                                      String suffix, boolean automatic) {
     if ((isbnTemplate == null) || (isbnTemplate.length <= 2)) {
       return;
     }
@@ -223,8 +220,9 @@ public class CheckErrorAlgorithm529 extends CheckErrorAlgorithmBase {
       errorResult.addReplacement(replacement.toString(), automatic);
       if (((prefix != null) && !prefix.isEmpty()) ||
           ((suffix != null) && !suffix.isEmpty())) {
-        errorResult.addReplacement(
-            (prefix != null ? prefix : "") + replacement.toString() + (suffix != null ? suffix : ""));
+        errorResult.addReplacement((prefix != null ? prefix : "") +
+                                   replacement.toString() +
+                                   (suffix != null ? suffix : ""));
       }
     }
   }
@@ -251,8 +249,7 @@ public class CheckErrorAlgorithm529 extends CheckErrorAlgorithmBase {
     if (categoryName != null) {
       return categoryName;
     }
-    if ((trackingCategory != null) &&
-        (trackingCategory.trim().length() > 0)) {
+    if ((trackingCategory != null) && (trackingCategory.trim().length() > 0)) {
       return trackingCategory;
     }
     return null;
@@ -260,7 +257,7 @@ public class CheckErrorAlgorithm529 extends CheckErrorAlgorithmBase {
 
   /**
    * Retrieve the list of pages in error.
-   * 
+   *
    * @param wiki Wiki.
    * @param limit Maximum number of pages to retrieve.
    * @return List of pages in error.
@@ -271,7 +268,8 @@ public class CheckErrorAlgorithm529 extends CheckErrorAlgorithmBase {
     String category = getTrackingCategory();
     if (category != null) {
       API api = APIFactory.getAPI();
-      String title = wiki.getWikiConfiguration().getPageTitle(Namespace.CATEGORY, category);
+      String title = wiki.getWikiConfiguration().getPageTitle(
+          Namespace.CATEGORY, category);
       Page categoryPage = DataManager.getPage(wiki, title, null, null, null);
       try {
         api.retrieveCategoryMembers(wiki, categoryPage, 0, false, limit);
@@ -285,7 +283,7 @@ public class CheckErrorAlgorithm529 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of some errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -306,22 +304,23 @@ public class CheckErrorAlgorithm529 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
     String tmp = getSpecificProperty(PARAMETER_CATEGORY, true, true, false);
     categoryName = null;
-    if ((tmp != null) &&
-        (tmp.trim().length() > 0)) {
+    if ((tmp != null) && (tmp.trim().length() > 0)) {
       categoryName = tmp.trim();
     }
 
     tmp = getSpecificProperty(PARAMETER_AUTOMATIC, true, true, true);
     automaticReplacements.clear();
     if (tmp != null) {
-      List<String[]> tmpList = WPCConfiguration.convertPropertyToStringArrayList(tmp);
+      List<String[]> tmpList =
+          WPCConfiguration.convertPropertyToStringArrayList(tmp);
       if (tmpList != null) {
         for (String[] tmpItem : tmpList) {
           if (tmpItem.length > 2) {
@@ -368,17 +367,16 @@ public class CheckErrorAlgorithm529 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_AUTOMATIC,
-        GT._T("Automatic replacements of ISBN"));
-    parameters.put(
-        PARAMETER_CATEGORY,
-        GT._T("A category containing the list of pages in error"));
+    parameters.put(PARAMETER_AUTOMATIC,
+                   GT._T("Automatic replacements of ISBN"));
+    parameters.put(PARAMETER_CATEGORY,
+                   GT._T("A category containing the list of pages in error"));
     return parameters;
   }
 }

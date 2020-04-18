@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.API;
 import org.wikipediacleaner.api.APIException;
 import org.wikipediacleaner.api.APIFactory;
@@ -22,12 +21,11 @@ import org.wikipediacleaner.api.constants.EnumWikipedia;
 import org.wikipediacleaner.api.data.DataManager;
 import org.wikipediacleaner.api.data.Namespace;
 import org.wikipediacleaner.api.data.Page;
+import org.wikipediacleaner.api.data.Page.RelatedPages;
 import org.wikipediacleaner.api.data.PageAnalysis;
 import org.wikipediacleaner.api.data.PageElementTag;
-import org.wikipediacleaner.api.data.Page.RelatedPages;
 import org.wikipediacleaner.api.data.PageElementTag.Parameter;
 import org.wikipediacleaner.i18n.GT;
-
 
 /**
  * Algorithm for analyzing error 527 of check wikipedia project.
@@ -44,22 +42,24 @@ public class CheckErrorAlgorithm527 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if ((analysis == null) || (analysis.getPage() == null)) {
       return false;
     }
 
     // Group all references by name
-    List<PageElementTag> refTags = analysis.getCompleteTags(PageElementTag.TAG_WIKI_REF);
+    List<PageElementTag> refTags =
+        analysis.getCompleteTags(PageElementTag.TAG_WIKI_REF);
     if ((refTags == null) || (refTags.isEmpty())) {
       return false;
     }
@@ -68,10 +68,9 @@ public class CheckErrorAlgorithm527 extends CheckErrorAlgorithmBase {
     for (PageElementTag refTag : refTags) {
       if (refTag.isComplete() && !refTag.isFullTag()) {
         String tagId = getTagIdentifier(refTag);
-        String value = content.substring(refTag.getValueBeginIndex(), refTag.getValueEndIndex());
-        if ((tagId != null) &&
-            (value != null) &&
-            (value.length() > 0)) {
+        String value = content.substring(refTag.getValueBeginIndex(),
+                                         refTag.getValueEndIndex());
+        if ((tagId != null) && (value != null) && (value.length() > 0)) {
           List<PageElementTag> namedTags = namedRefTags.get(tagId);
           if (namedTags == null) {
             namedTags = new ArrayList<>();
@@ -91,11 +90,12 @@ public class CheckErrorAlgorithm527 extends CheckErrorAlgorithmBase {
         boolean hardError = false;
         boolean softError = false;
         PageElementTag firstNamedRef = namedRefs.get(0);
-        String firstValue = content.substring(
-            firstNamedRef.getValueBeginIndex(),
-            firstNamedRef.getValueEndIndex());
+        String firstValue =
+            content.substring(firstNamedRef.getValueBeginIndex(),
+                              firstNamedRef.getValueEndIndex());
         for (PageElementTag namedRef : namedRefs) {
-          String value = content.substring(namedRef.getValueBeginIndex(), namedRef.getValueEndIndex());
+          String value = content.substring(namedRef.getValueBeginIndex(),
+                                           namedRef.getValueEndIndex());
           if (!firstValue.trim().equals(value.trim())) {
             hardError = true;
           } else if (!firstValue.equals(value)) {
@@ -114,25 +114,26 @@ public class CheckErrorAlgorithm527 extends CheckErrorAlgorithmBase {
           boolean first = true;
           for (PageElementTag namedRef : namedRefs) {
             CheckErrorResult errorResult = createCheckErrorResult(
-                analysis,
-                namedRef.getCompleteBeginIndex(),
+                analysis, namedRef.getCompleteBeginIndex(),
                 namedRef.getCompleteEndIndex(),
                 first ? ErrorLevel.CORRECT : ErrorLevel.ERROR);
-            String value = content.substring(namedRef.getValueBeginIndex(), namedRef.getValueEndIndex());
+            String value = content.substring(namedRef.getValueBeginIndex(),
+                                             namedRef.getValueEndIndex());
             if (!hardError && !value.equals(value.trim())) {
               String replacement =
-                  content.substring(namedRef.getCompleteBeginIndex(), namedRef.getValueBeginIndex()) +
+                  content.substring(namedRef.getCompleteBeginIndex(),
+                                    namedRef.getValueBeginIndex()) +
                   value.trim() +
-                  content.substring(namedRef.getValueEndIndex(), namedRef.getCompleteEndIndex());
+                  content.substring(namedRef.getValueEndIndex(),
+                                    namedRef.getCompleteEndIndex());
               errorResult.addReplacement(replacement, GT._T("Trim text"), true);
             } else {
               errorResult.addText(value);
               List<String> others = new ArrayList<>();
               others.add(value);
               for (PageElementTag tmpNamedRef : namedRefs) {
-                value = content.substring(
-                    tmpNamedRef.getValueBeginIndex(),
-                    tmpNamedRef.getValueEndIndex());
+                value = content.substring(tmpNamedRef.getValueBeginIndex(),
+                                          tmpNamedRef.getValueEndIndex());
                 if (!others.contains(value)) {
                   errorResult.addText(value);
                   others.add(value);
@@ -193,8 +194,7 @@ public class CheckErrorAlgorithm527 extends CheckErrorAlgorithmBase {
     if (categoryName != null) {
       return categoryName;
     }
-    if ((trackingCategory != null) &&
-        (trackingCategory.trim().length() > 0)) {
+    if ((trackingCategory != null) && (trackingCategory.trim().length() > 0)) {
       return trackingCategory;
     }
     return null;
@@ -202,7 +202,7 @@ public class CheckErrorAlgorithm527 extends CheckErrorAlgorithmBase {
 
   /**
    * Retrieve the list of pages in error.
-   * 
+   *
    * @param wiki Wiki.
    * @param limit Maximum number of pages to retrieve.
    * @return List of pages in error.
@@ -213,7 +213,8 @@ public class CheckErrorAlgorithm527 extends CheckErrorAlgorithmBase {
     String category = getTrackingCategory();
     if (category != null) {
       API api = APIFactory.getAPI();
-      String title = wiki.getWikiConfiguration().getPageTitle(Namespace.CATEGORY, category);
+      String title = wiki.getWikiConfiguration().getPageTitle(
+          Namespace.CATEGORY, category);
       Page categoryPage = DataManager.getPage(wiki, title, null, null, null);
       try {
         api.retrieveCategoryMembers(wiki, categoryPage, 0, false, limit);
@@ -227,7 +228,7 @@ public class CheckErrorAlgorithm527 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of some errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -245,15 +246,15 @@ public class CheckErrorAlgorithm527 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
     String tmp = getSpecificProperty(PARAMETER_CATEGORY, true, true, false);
     categoryName = null;
-    if ((tmp != null) &&
-        (tmp.trim().length() > 0)) {
+    if ((tmp != null) && (tmp.trim().length() > 0)) {
       categoryName = tmp.trim();
     }
   }
@@ -263,14 +264,14 @@ public class CheckErrorAlgorithm527 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_CATEGORY,
-        GT._T("A category containing the list of pages in error"));
+    parameters.put(PARAMETER_CATEGORY,
+                   GT._T("A category containing the list of pages in error"));
     return parameters;
   }
 }

@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.API;
 import org.wikipediacleaner.api.APIException;
 import org.wikipediacleaner.api.APIFactory;
@@ -32,7 +31,6 @@ import org.wikipediacleaner.i18n.GT;
 import org.wikipediacleaner.utils.StringChecker;
 import org.wikipediacleaner.utils.StringCheckerUnauthorizedCharacters;
 
-
 /**
  * Algorithm for analyzing error 68 of check wikipedia project.
  * Error 68: Link to other language
@@ -48,7 +46,7 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
    * Possible global fixes.
    */
   private final static String[] globalFixes = new String[] {
-    GT._T("Check all links to other language"),
+      GT._T("Check all links to other language"),
   };
 
   public CheckErrorAlgorithm068() {
@@ -61,9 +59,9 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
    * @param wiki Current wiki.
    * @return True if the interwiki link is a link to an other language.
    */
-  private Interwiki isLanguageLink(PageElementInterwikiLink link, EnumWikipedia wiki) {
-    if ((link != null) &&
-        (link.getInterwiki() != null)) {
+  private Interwiki isLanguageLink(PageElementInterwikiLink link,
+                                   EnumWikipedia wiki) {
+    if ((link != null) && (link.getInterwiki() != null)) {
       if (link.getInterwiki().getLanguage() != null) {
         if (!link.getInterwikiText().equals(wiki.getSettings().getCode())) {
           return link.getInterwiki();
@@ -83,17 +81,17 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors,
-      boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if ((analysis == null) || (analysis.getPage() == null)) {
       return false;
     }
@@ -115,32 +113,34 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
             analysis, link.getBeginIndex(), link.getEndIndex());
         String lgCode = iw.getPrefix();
         EnumWikipedia fromWiki = EnumWikipedia.getWikipedia(lgCode);
-        if ((fromWiki != null) && (fromWiki.getSettings().getCode().equals(lgCode))) {
+        if ((fromWiki != null) &&
+            (fromWiki.getSettings().getCode().equals(lgCode))) {
           String pageTitle = link.getLink();
           errorResult.addPossibleAction(
               GT._T("Check language links"),
-              new CheckLanguageLinkActionProvider(
-                  fromWiki, toWiki,
-                  pageTitle, link.getText()));
+              new CheckLanguageLinkActionProvider(fromWiki, toWiki, pageTitle,
+                                                  link.getText()));
           for (String[] templateArgs : templatesArgs) {
             StringBuilder prefix = new StringBuilder();
             StringBuilder suffix = new StringBuilder();
             buildReplacementTemplate(templateArgs, link, prefix, suffix);
-            String question = GT._T("What is the title of the page on this wiki ?");
+            String question =
+                GT._T("What is the title of the page on this wiki ?");
             AddTextActionProvider action = null;
-            if ((link.getText() != null) && (!link.getText().equals(pageTitle))) {
-              String[] possibleValues = { null, pageTitle, link.getText() };
+            if ((link.getText() != null) &&
+                (!link.getText().equals(pageTitle))) {
+              String[] possibleValues = {null, pageTitle, link.getText()};
               action = new AddTextActionProvider(
                   prefix.toString(), suffix.toString(), null, question,
                   possibleValues, false, null, checker);
             } else {
-              action = new AddTextActionProvider(
-                  prefix.toString(), suffix.toString(), null, question,
-                  pageTitle, checker);
+              action = new AddTextActionProvider(prefix.toString(),
+                                                 suffix.toString(), null,
+                                                 question, pageTitle, checker);
             }
-            errorResult.addPossibleAction(
-                GT._T("Replace using template {0}", "{{" + templateArgs[0] + "}}"),
-                action);
+            errorResult.addPossibleAction(GT._T("Replace using template {0}",
+                                                "{{" + templateArgs[0] + "}}"),
+                                          action);
           }
           errorResult.addPossibleAction(
               GT._T("External Viewer"),
@@ -156,15 +156,16 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
 
   /**
    * Build a replacement text with a template.
-   * 
+   *
    * @param templateArgs Configuration for the template.
    * @param link Link to the other wiki.
    * @param prefix Prefix for the replacement text (output).
    * @param suffix Suffix for the replacement text (output).
    */
-  private void buildReplacementTemplate(
-      String[] templateArgs, PageElementInterwikiLink link,
-      StringBuilder prefix, StringBuilder suffix) {
+  private void buildReplacementTemplate(String[] templateArgs,
+                                        PageElementInterwikiLink link,
+                                        StringBuilder prefix,
+                                        StringBuilder suffix) {
 
     // Parameters
     String templateName = templateArgs[0];
@@ -219,7 +220,7 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
             append = false;
           } else {
             value = lgCode;
-          } 
+          }
         } else if (param.equals(paramDistantTitle)) {
           value = link.getLink();
         } else if (param.equals(paramText)) {
@@ -249,7 +250,7 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
 
   /**
    * Fix all the errors in the page.
-   * 
+   *
    * @param fixName Fix name (extracted from getGlobalFixes()).
    * @param analysis Page analysis.
    * @param textPane Text pane.
@@ -264,7 +265,8 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
     int currentIndex = 0;
 
     // Manage templates that can be used to replace a link to an other language
-    String[] templateArgs = templatesArgs.isEmpty() ? null : templatesArgs.get(0);
+    String[] templateArgs =
+        templatesArgs.isEmpty() ? null : templatesArgs.get(0);
 
     // Check all internal links
     Object highlight = null;
@@ -276,7 +278,8 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
         if (iw != null) {
           String lgCode = iw.getPrefix();
           EnumWikipedia fromWiki = EnumWikipedia.getWikipedia(lgCode);
-          if ((fromWiki != null) && (fromWiki.getSettings().getCode().equals(lgCode))) {
+          if ((fromWiki != null) &&
+              (fromWiki.getSettings().getCode().equals(lgCode))) {
             String pageTitle = link.getLink();
             int beginIndex = link.getBeginIndex();
             int endIndex = link.getEndIndex();
@@ -293,15 +296,18 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
               // List possible replacements
               List<String> possibleValues = new ArrayList<String>();
               String possible = null;
-              possible = PageElementInternalLink.createInternalLink(toTitle, link.getText());
+              possible = PageElementInternalLink.createInternalLink(
+                  toTitle, link.getText());
               if (!possibleValues.contains(possible)) {
                 possibleValues.add(possible);
               }
-              possible = PageElementInternalLink.createInternalLink(toTitle, link.getFullLink());
+              possible = PageElementInternalLink.createInternalLink(
+                  toTitle, link.getFullLink());
               if (!possibleValues.contains(possible)) {
                 possibleValues.add(possible);
               }
-              possible = PageElementInternalLink.createInternalLink(toTitle, null);
+              possible =
+                  PageElementInternalLink.createInternalLink(toTitle, null);
               if (!possibleValues.contains(possible)) {
                 possibleValues.add(possible);
               }
@@ -310,12 +316,11 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
 
               // Ask user what replacement to use
               String message = GT._T(
-                  "The page \"{0}\" in \"{1}\" has a language link to \"{2}\": {3}.\n" +
-                  "With what text do you want to replace the link ?",
-                  new Object[] { pageTitle, fromWiki, toWiki, toTitle } );
+                  "The page \"{0}\" in \"{1}\" has a language link to \"{2}\": {3}.\n"
+                      + "With what text do you want to replace the link ?",
+                  new Object[] {pageTitle, fromWiki, toWiki, toTitle});
               int answer = Utilities.displayQuestion(
-                  textPane.getParent(), message,
-                  possibleValues.toArray());
+                  textPane.getParent(), message, possibleValues.toArray());
               if ((answer < 0) || (answer >= possibleValues.size() - 1)) {
                 break;
               } else if (answer < possibleValues.size() - 2) {
@@ -323,17 +328,20 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
               }
             } else if (templateArgs != null) {
               String message =
-                  GT._T("The page \"{0}\" in \"{1}\" doesn''t have a language link to \"{2}\".",
-                       new Object[] { pageTitle, fromWiki, toWiki }) +"\n" +
+                  GT._T(
+                      "The page \"{0}\" in \"{1}\" doesn''t have a language link to \"{2}\".",
+                      new Object[] {pageTitle, fromWiki, toWiki}) +
+                  "\n" +
                   GT._T("You can replace the link using template {0}.",
-                       "{{" + templateArgs[0] + "}}") + "\n" +
-                  GT._T("What is the title of the page on this wiki ?");
-              if ((link.getText() != null) && (!link.getText().equals(pageTitle))) {
-                toTitle = Utilities.askForValue(
-                    textPane.getParent(), message, link.getText(), checker);
+                        "{{" + templateArgs[0] + "}}") +
+                  "\n" + GT._T("What is the title of the page on this wiki ?");
+              if ((link.getText() != null) &&
+                  (!link.getText().equals(pageTitle))) {
+                toTitle = Utilities.askForValue(textPane.getParent(), message,
+                                                link.getText(), checker);
               } else {
-                toTitle = Utilities.askForValue(
-                    textPane.getParent(), message, pageTitle, checker);
+                toTitle = Utilities.askForValue(textPane.getParent(), message,
+                                                pageTitle, checker);
               }
               if (toTitle != null) {
                 StringBuilder prefix = new StringBuilder();
@@ -346,7 +354,8 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
             // Do the replacement
             if (replacement != null) {
               if (currentIndex < link.getBeginIndex()) {
-                tmpContents.append(contents.substring(currentIndex, link.getBeginIndex()));
+                tmpContents.append(
+                    contents.substring(currentIndex, link.getBeginIndex()));
               }
               tmpContents.append(replacement);
               currentIndex = link.getEndIndex();
@@ -381,15 +390,17 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
     String tmp = getSpecificProperty(PARAMETER_TEMPLATE, true, false, false);
     templatesArgs.clear();
     if (tmp != null) {
-      List<String[]> tmpList = WPCConfiguration.convertPropertyToStringArrayList(tmp);
+      List<String[]> tmpList =
+          WPCConfiguration.convertPropertyToStringArrayList(tmp);
       if (tmpList != null) {
         for (String[] tmpItem : tmpList) {
           if (tmpItem.length >= 5) {
@@ -405,21 +416,25 @@ public class CheckErrorAlgorithm068 extends CheckErrorAlgorithmBase {
 
   /**
    * Return the parameters used to configure the algorithm.
-   * 
+   *
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(PARAMETER_TEMPLATE, GT._T(
-        "A template that can be used instead of the link to an other language. " +
-        "It must be specified as: " +
-          "<template name>|" +
-          "<param name for local page name>|" +
-          "<param name for code of other language>|" +
-          "<param name for page name in other language>|" +
-          "<param name for displayed text>").replaceAll("\\<", "&lt;").replaceAll("\\>", "&gt;"));
+    parameters.put(
+        PARAMETER_TEMPLATE,
+        GT._T("A template that can be used instead of the link to an other language. "
+              + "It must be specified as: "
+              + "<template name>|"
+              + "<param name for local page name>|"
+              + "<param name for code of other language>|"
+              + "<param name for page name in other language>|"
+              + "<param name for displayed text>")
+            .replaceAll("\\<", "&lt;")
+            .replaceAll("\\>", "&gt;"));
     return parameters;
   }
 }

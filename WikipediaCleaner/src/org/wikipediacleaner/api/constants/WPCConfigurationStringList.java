@@ -10,7 +10,6 @@ package org.wikipediacleaner.api.constants;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * Configuration for String list attributes.
  */
@@ -19,11 +18,11 @@ public enum WPCConfigurationStringList {
   // Possible replacements for abbreviations
   ABBREVIATIONS("general_abbreviations", true, true, true),
   // Templates for anchor
-  ANCHOR_TEMPLATES("general_anchor_templates", true, true, true, null ),
+  ANCHOR_TEMPLATES("general_anchor_templates", true, true, true, null),
   // Templates for columns
-  COLUMNS_TEMPLATES("general_columns_templates", true, true, true, null ),
+  COLUMNS_TEMPLATES("general_columns_templates", true, true, true, null),
   // Templates for columns
-  COLUMNS2_TEMPLATES("general_columns2_templates", true, true, true, null ),
+  COLUMNS2_TEMPLATES("general_columns2_templates", true, true, true, null),
   // Comment used for a normal link to a disambiguation page
   COMMENTS_FOR_DAB_LINK("dab_link_comments", false, true, true),
   // Common languages
@@ -39,26 +38,32 @@ public enum WPCConfigurationStringList {
   // Lists for ISBN errors
   ISBN_ERRORS_LISTS("isbn_errors_lists", true, true, true),
   // Templates to ask for help about ISBN
-  ISBN_HELP_NEEDED_TEMPLATES("general_isbn_help_needed_templates", true, true, true),
+  ISBN_HELP_NEEDED_TEMPLATES("general_isbn_help_needed_templates", true, true,
+                             true),
   // Templates to ignore for ISBN
   ISBN_IGNORE_TEMPLATES("isbn_ignore_templates", true, true, true),
   // Templates to ignore invalid ISBN
-  ISBN_IGNORE_INCORRECT_TEMPLATES("isbn_ignore_incorrect_templates", true, true, true),
+  ISBN_IGNORE_INCORRECT_TEMPLATES("isbn_ignore_incorrect_templates", true, true,
+                                  true),
   // Interwikis for ISBN
-  ISBN_INTERWIKIS("general_isbn_interwikis", true, true, true, null ),
+  ISBN_INTERWIKIS("general_isbn_interwikis", true, true, true, null),
   // ISBN search engines
-  ISBN_SEARCH_ENGINES("general_isbn_search_engines", true, true, true, new String[] { 
-      "WorldCat|http://worldcat.org/isbn/{0}",
-      "ISBNdb|http://isbndb.com/search/all?query={0}",
-      "OttoBib|http://www.ottobib.com/isbn/{0}",
-      "Copyright Clearance Center|http://www.copyright.com/openurl.do?isbn={0}&servicename=all&WT.mc_id=wikipedia",
-  } ),
+  ISBN_SEARCH_ENGINES(
+      "general_isbn_search_engines", true, true, true,
+      new String[] {
+          "WorldCat|http://worldcat.org/isbn/{0}",
+          "ISBNdb|http://isbndb.com/search/all?query={0}",
+          "OttoBib|http://www.ottobib.com/isbn/{0}",
+          "Copyright Clearance Center|http://www.copyright.com/openurl.do?isbn={0}&servicename=all&WT.mc_id=wikipedia",
+      }),
   // ISBN search engines
-  ISBN_SEARCH_ENGINES_TEMPLATES("general_isbn_search_engines_templates", true, true, true),
+  ISBN_SEARCH_ENGINES_TEMPLATES("general_isbn_search_engines_templates", true,
+                                true, true),
   // ISBN special values
   ISBN_SPECIAL_VALUES("isbn_special_values", true, true, true),
   // Templates for ISBN
-  ISBN_TEMPLATES("general_isbn_templates", true, true, true, new String[] { "ISBN|1" } ),
+  ISBN_TEMPLATES("general_isbn_templates", true, true, true,
+                 new String[] {"ISBN|1"}),
   // Templates that automatically add the dash to the ISSN if required
   ISSN_AUTO_DASH_TEMPLATES("issn_auto_dash_templates", true, true, true),
   // Templates that automatically format the ISSN if required
@@ -68,36 +73,42 @@ public enum WPCConfigurationStringList {
   // Lists for ISSN errors
   ISSN_ERRORS_LISTS("issn_errors_lists", true, true, true),
   // Templates to ask for help about ISSN
-  ISSN_HELP_NEEDED_TEMPLATES("general_issn_help_needed_templates", true, true, true),
+  ISSN_HELP_NEEDED_TEMPLATES("general_issn_help_needed_templates", true, true,
+                             true),
   // Templates to ignore for ISSN
   ISSN_IGNORE_TEMPLATES("issn_ignore_templates", true, true, true),
   // Templates to ignore invalid ISSN
-  ISSN_IGNORE_INCORRECT_TEMPLATES("issn_ignore_incorrect_templates", true, true, true),
+  ISSN_IGNORE_INCORRECT_TEMPLATES("issn_ignore_incorrect_templates", true, true,
+                                  true),
   // Interwikis for ISSN
-  ISSN_INTERWIKIS("general_issn_interwikis", true, true, true, null ),
+  ISSN_INTERWIKIS("general_issn_interwikis", true, true, true, null),
   // ISSN search engines
-  ISSN_SEARCH_ENGINES("general_issn_search_engines", true, true, true, new String[] { 
-      "WorldCat|http://worldcat.org/issn/{0}",
-      "MIAR|http://miar.ub.edu/issn/{0}",
-  } ),
+  ISSN_SEARCH_ENGINES("general_issn_search_engines", true, true, true,
+                      new String[] {
+                          "WorldCat|http://worldcat.org/issn/{0}",
+                          "MIAR|http://miar.ub.edu/issn/{0}",
+                      }),
   // ISSN search engines
-  ISSN_SEARCH_ENGINES_TEMPLATES("general_issn_search_engines_templates", true, true, true),
+  ISSN_SEARCH_ENGINES_TEMPLATES("general_issn_search_engines_templates", true,
+                                true, true),
   // ISSN special values
   ISSN_SPECIAL_VALUES("issn_special_values", true, true, true),
   // Templates for ISSN
-  ISSN_TEMPLATES("general_issn_templates", true, true, true, new String[] { "ISSN|1" } ),
+  ISSN_TEMPLATES("general_issn_templates", true, true, true,
+                 new String[] {"ISSN|1"}),
   // Pages containing the list of pages with many disambiguation links
   MOST_DAB_LINKS("most_dab_links", false, true, false),
   // List of templates for preventing bot editions
   NOBOT_TEMPLATES("general_nobot_templates", true, true, true),
   // Templates to ask for help about PMID
-  PMID_HELP_NEEDED_TEMPLATES("general_pmid_help_needed_templates", true, true, true),
+  PMID_HELP_NEEDED_TEMPLATES("general_pmid_help_needed_templates", true, true,
+                             true),
   // Templates to ignore for PMID
   PMID_IGNORE_TEMPLATES("pmid_ignore_templates", true, true, true),
   // Interwikis for PMID
-  PMID_INTERWIKIS("general_pmid_interwikis", true, true, true, null ),
+  PMID_INTERWIKIS("general_pmid_interwikis", true, true, true, null),
   // Templates for PMID
-  PMID_TEMPLATES("general_pmid_templates", true, true, true, null ),
+  PMID_TEMPLATES("general_pmid_templates", true, true, true, null),
   // Categories that can be applied to redirect page
   REDIRECT_CATEGORIES("redirect_categories", true, true, true),
   // Templates that can be applied to redirect page
@@ -105,15 +116,17 @@ public enum WPCConfigurationStringList {
   // Templates that can be used instead of <references/>
   REFERENCES_TEMPLATES("general_references_templates", true, true, true),
   // Templates to ask for help about RFC
-  RFC_HELP_NEEDED_TEMPLATES("general_rfc_help_needed_templates", true, true, true),
+  RFC_HELP_NEEDED_TEMPLATES("general_rfc_help_needed_templates", true, true,
+                            true),
   // Templates to ignore for RFC
   RFC_IGNORE_TEMPLATES("rfc_ignore_templates", true, true, true),
   // Interwikis for RFC
-  RFC_INTERWIKIS("general_rfc_interwikis", true, true, true, null ),
+  RFC_INTERWIKIS("general_rfc_interwikis", true, true, true, null),
   // Templates for RFC
-  RFC_TEMPLATES("general_rfc_templates", true, true, true, null ),
+  RFC_TEMPLATES("general_rfc_templates", true, true, true, null),
   // Search engines
-  SEARCH_ENGINES_TEMPLATES("general_search_engines_templates", true, true, true),
+  SEARCH_ENGINES_TEMPLATES("general_search_engines_templates", true, true,
+                           true),
   // Chapters to be ignored for suggestions
   SUGGESTION_IGNORE("general_suggestions_ignore", true, true, true),
   // Pages containing spelling suggestions
@@ -121,7 +134,8 @@ public enum WPCConfigurationStringList {
   // Pages containing spelling suggestions in AWB format
   SUGGESTION_TYPO_PAGES("general_suggestions_typo", true, true, true),
   // Templates used after a disambiguation link asking for help
-  TEMPLATES_AFTER_HELP_ASKED("dab_help_asked_templates_after", false, true, false),
+  TEMPLATES_AFTER_HELP_ASKED("dab_help_asked_templates_after", false, true,
+                             false),
   // Templates used for a normal link to a disambiguation page
   TEMPLATES_FOR_DAB_LINK("dab_link_templates", false, true, false),
   // Templates used for finding pages where help is requested
@@ -166,27 +180,27 @@ public enum WPCConfigurationStringList {
 
   /**
    * @param attributeName Attribute name.
-   * @param canCombine True if general attribute and user attribute can be combined.
+   * @param canCombine True if general attribute and user attribute can be
+   *     combined.
    * @param generalAttribute True if it can be set as a general attribute.
    * @param userAttribute True if it can be set as a user attribute.
    */
-  WPCConfigurationStringList(
-      String attributeName, boolean canCombine,
-      boolean generalAttribute, boolean userAttribute) {
+  WPCConfigurationStringList(String attributeName, boolean canCombine,
+                             boolean generalAttribute, boolean userAttribute) {
     this(attributeName, canCombine, generalAttribute, userAttribute, null);
   }
 
   /**
    * @param attributeName Attribute name.
-   * @param canCombine True if general attribute and user attribute can be combined.
+   * @param canCombine True if general attribute and user attribute can be
+   *     combined.
    * @param generalAttribute True if it can be set as a general attribute.
    * @param userAttribute True if it can be set as a user attribute.
    * @param defaultValue Default value.
    */
-  WPCConfigurationStringList(
-      String attributeName, boolean canCombine,
-      boolean generalAttribute, boolean userAttribute,
-      String[] defaultValue) {
+  WPCConfigurationStringList(String attributeName, boolean canCombine,
+                             boolean generalAttribute, boolean userAttribute,
+                             String[] defaultValue) {
     this.attributeName = attributeName;
     this.canCombine = canCombine;
     this.generalAttribute = generalAttribute;
@@ -203,7 +217,7 @@ public enum WPCConfigurationStringList {
 
   /**
    * Find attribute by its name.
-   * 
+   *
    * @param attributeName Attribute name.
    * @return Attribute for the given name.
    */
@@ -223,35 +237,25 @@ public enum WPCConfigurationStringList {
   /**
    * @return Attribute name.
    */
-  public String getAttributeName() {
-    return attributeName;
-  }
+  public String getAttributeName() { return attributeName; }
 
   /**
    * @return True if general attribute and user attribute can be combined.
    */
-  public boolean canCombine() {
-    return canCombine;
-  }
+  public boolean canCombine() { return canCombine; }
 
   /**
    * @return True if it can be set as a general attribute.
    */
-  public boolean isGeneralAttribute() {
-    return generalAttribute;
-  }
+  public boolean isGeneralAttribute() { return generalAttribute; }
 
   /**
    * @return True if it can be set as a user attribute.
    */
-  public boolean isUserAttribute() {
-    return userAttribute;
-  }
+  public boolean isUserAttribute() { return userAttribute; }
 
   /**
    * @return Default value.
    */
-  public List<String> getDefaultValue() {
-    return defaultValue;
-  }
+  public List<String> getDefaultValue() { return defaultValue; }
 }

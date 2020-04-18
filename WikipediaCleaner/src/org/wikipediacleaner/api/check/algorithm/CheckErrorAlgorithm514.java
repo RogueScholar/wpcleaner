@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
 import org.wikipediacleaner.api.data.PageAnalysis;
@@ -21,43 +20,43 @@ import org.wikipediacleaner.api.data.PageElementTag;
 import org.wikipediacleaner.api.data.PageElementTemplate;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 511 of check wikipedia project.
  * Error 514: Missing named reference
  */
 public class CheckErrorAlgorithm514 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm514() {
-    super("Missing named reference");
-  }
+  public CheckErrorAlgorithm514() { super("Missing named reference"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if ((analysis == null) || (analysis.getInternalLinks() == null)) {
       return false;
     }
 
-    // List named references with actual content 
+    // List named references with actual content
     boolean result = false;
-    List<PageElementTag> tags = analysis.getCompleteTags(PageElementTag.TAG_WIKI_REF);
+    List<PageElementTag> tags =
+        analysis.getCompleteTags(PageElementTag.TAG_WIKI_REF);
     if (tags == null) {
       return result;
     }
     Map<String, Set<String>> names = new HashMap<String, Set<String>>();
     for (PageElementTag tag : tags) {
       if (!tag.isFullTag() && !tag.isEndTag() && tag.isComplete()) {
-        String value = analysis.getContents().substring(tag.getValueBeginIndex(), tag.getValueEndIndex());
+        String value = analysis.getContents().substring(
+            tag.getValueBeginIndex(), tag.getValueEndIndex());
         if ((value != null) && (value.trim().length() > 0)) {
           PageElementTag.Parameter nameParam = tag.getParameter("name");
           if (nameParam != null) {
@@ -80,7 +79,8 @@ public class CheckErrorAlgorithm514 extends CheckErrorAlgorithmBase {
       if (tag.isFullTag()) {
         withoutContent = true;
       } else if (tag.isComplete()) {
-        String content = analysis.getContents().substring(tag.getValueBeginIndex(), tag.getValueEndIndex());
+        String content = analysis.getContents().substring(
+            tag.getValueBeginIndex(), tag.getValueEndIndex());
         withoutContent = ((content == null) || (content.trim().length() == 0));
       }
       if (withoutContent) {
@@ -88,7 +88,8 @@ public class CheckErrorAlgorithm514 extends CheckErrorAlgorithmBase {
         if (nameParam != null) {
           String nameValue = nameParam.getTrimmedValue();
           PageElementTag.Parameter groupParam = tag.getParameter("group");
-          String groupValue = (groupParam != null) ? groupParam.getValue() : null;
+          String groupValue =
+              (groupParam != null) ? groupParam.getValue() : null;
           if ((groupValue != null) && (groupValue.length() == 0)) {
             groupValue = null;
           }
@@ -98,13 +99,16 @@ public class CheckErrorAlgorithm514 extends CheckErrorAlgorithmBase {
             found = set.contains(nameValue);
           }
           if (!found && (groupValue == null) && (refByTemplate != null)) {
-            List<String> refByTemplateList = WPCConfiguration.convertPropertyToStringList(refByTemplate);
+            List<String> refByTemplateList =
+                WPCConfiguration.convertPropertyToStringList(refByTemplate);
             if (refByTemplateList != null) {
               for (String refByTemplateElement : refByTemplateList) {
                 String[] elements = refByTemplateElement.split("\\|");
-                for (int numElement = 1; numElement < elements.length; numElement++) {
+                for (int numElement = 1; numElement < elements.length;
+                     numElement++) {
                   if (elements[numElement].equals(nameValue)) {
-                    List<PageElementTemplate> templates = analysis.getTemplates(elements[0]);
+                    List<PageElementTemplate> templates =
+                        analysis.getTemplates(elements[0]);
                     if ((templates != null) && !templates.isEmpty()) {
                       found = true;
                     }
@@ -118,8 +122,9 @@ public class CheckErrorAlgorithm514 extends CheckErrorAlgorithmBase {
               return false;
             }
             result = true;
-            CheckErrorResult errorResult = createCheckErrorResult(
-                analysis, tag.getCompleteBeginIndex(), tag.getCompleteEndIndex());
+            CheckErrorResult errorResult =
+                createCheckErrorResult(analysis, tag.getCompleteBeginIndex(),
+                                       tag.getCompleteEndIndex());
             errors.add(errorResult);
           }
         }
@@ -137,12 +142,14 @@ public class CheckErrorAlgorithm514 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
-    refByTemplate = getSpecificProperty(PARAMETER_REF_BY_TEMPLATE, true, true, false);
+    refByTemplate =
+        getSpecificProperty(PARAMETER_REF_BY_TEMPLATE, true, true, false);
   }
 
   /** Template defining references */
@@ -150,16 +157,16 @@ public class CheckErrorAlgorithm514 extends CheckErrorAlgorithmBase {
 
   /**
    * Return the parameters used to configure the algorithm.
-   * 
+   *
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_REF_BY_TEMPLATE,
-        GT._T("References defined by templates."));
+    parameters.put(PARAMETER_REF_BY_TEMPLATE,
+                   GT._T("References defined by templates."));
     return parameters;
   }
 }

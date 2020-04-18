@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wikipediacleaner.api.check.CheckErrorResult;
@@ -29,7 +28,6 @@ import org.wikipediacleaner.api.data.PageElementTemplate;
 import org.wikipediacleaner.api.data.contents.IntervalComparator;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 78 of check wikipedia project.
  * Error 78: Reference double
@@ -37,24 +35,24 @@ import org.wikipediacleaner.i18n.GT;
 public class CheckErrorAlgorithm078 extends CheckErrorAlgorithmBase {
 
   /** Logs */
-  private final Logger log = LoggerFactory.getLogger(CheckErrorAlgorithm078.class);
+  private final Logger log =
+      LoggerFactory.getLogger(CheckErrorAlgorithm078.class);
 
-  public CheckErrorAlgorithm078() {
-    super("Reference double");
-  }
+  public CheckErrorAlgorithm078() { super("Reference double"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -66,13 +64,14 @@ public class CheckErrorAlgorithm078 extends CheckErrorAlgorithmBase {
     Map<String, List<PageElement>> referencesByGroup = new HashMap<>();
 
     // Manage <references> tags
-    List<PageElementTag> referencesTags = analysis.getTags(PageElementTag.TAG_WIKI_REFERENCES);
+    List<PageElementTag> referencesTags =
+        analysis.getTags(PageElementTag.TAG_WIKI_REFERENCES);
     if ((referencesTags != null) && !referencesTags.isEmpty()) {
       for (PageElementTag referencesTag : referencesTags) {
-        
+
         // Use only beginning tags
         if (referencesTag.isFullTag() || !referencesTag.isEndTag()) {
-          
+
           // Retrieve "group"
           PageElementTag.Parameter group = referencesTag.getParameter("group");
           String groupName = "";
@@ -81,7 +80,8 @@ public class CheckErrorAlgorithm078 extends CheckErrorAlgorithmBase {
           }
 
           // Store <references> tag
-          List<PageElement> existingReferences = referencesByGroup.get(groupName);
+          List<PageElement> existingReferences =
+              referencesByGroup.get(groupName);
           if (existingReferences == null) {
             existingReferences = new ArrayList<>();
             referencesByGroup.put(groupName, existingReferences);
@@ -100,7 +100,8 @@ public class CheckErrorAlgorithm078 extends CheckErrorAlgorithmBase {
         PageElementTemplate template = analysis.isInTemplate(beginIndex);
         if (template != null) {
           String groupName = "";
-          List<PageElement> existingReferences = referencesByGroup.get(groupName);
+          List<PageElement> existingReferences =
+              referencesByGroup.get(groupName);
           if (existingReferences == null) {
             existingReferences = new ArrayList<>();
             referencesByGroup.put(groupName, existingReferences);
@@ -121,20 +122,22 @@ public class CheckErrorAlgorithm078 extends CheckErrorAlgorithmBase {
 
         // Find first suggested references for the group
         Collections.sort(referencesForGroup, new IntervalComparator());
-        PageElement suggestedReferences = referencesForGroup.get(referencesForGroup.size() - 1);
+        PageElement suggestedReferences =
+            referencesForGroup.get(referencesForGroup.size() - 1);
 
         // Report errors
         for (PageElement referencesElement : referencesForGroup) {
           int beginIndex = referencesElement.getBeginIndex();
           int endIndex = referencesElement.getEndIndex();
           if (referencesElement instanceof PageElementTag) {
-            PageElementTag tag = (PageElementTag) referencesElement;
+            PageElementTag tag = (PageElementTag)referencesElement;
             beginIndex = tag.getCompleteBeginIndex();
             endIndex = tag.getCompleteEndIndex();
           }
           CheckErrorResult errorResult = createCheckErrorResult(
               analysis, beginIndex, endIndex,
-              (referencesElement == suggestedReferences) ? ErrorLevel.WARNING : ErrorLevel.ERROR);
+              (referencesElement == suggestedReferences) ? ErrorLevel.WARNING
+                                                         : ErrorLevel.ERROR);
           errorResult.addReplacement("");
           errors.add(errorResult);
         }
@@ -153,8 +156,9 @@ public class CheckErrorAlgorithm078 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -168,10 +172,11 @@ public class CheckErrorAlgorithm078 extends CheckErrorAlgorithmBase {
           try {
             if (templateRegexp.length() > 0) {
               char firstLetter = templateRegexp.charAt(0);
-              if (Character.isUpperCase(firstLetter) || Character.isLowerCase(firstLetter)) {
-                templateRegexp =
-                    "[" + Character.toUpperCase(firstLetter) + Character.toLowerCase(firstLetter) + "]" +
-                    templateRegexp.substring(1);
+              if (Character.isUpperCase(firstLetter) ||
+                  Character.isLowerCase(firstLetter)) {
+                templateRegexp = "[" + Character.toUpperCase(firstLetter) +
+                                 Character.toLowerCase(firstLetter) + "]" +
+                                 templateRegexp.substring(1);
               }
             }
             patternText = "\\{\\{" + templateRegexp;
@@ -189,7 +194,8 @@ public class CheckErrorAlgorithm078 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {

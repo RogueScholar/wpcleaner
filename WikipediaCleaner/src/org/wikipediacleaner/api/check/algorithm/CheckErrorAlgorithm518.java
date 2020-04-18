@@ -10,7 +10,6 @@ package org.wikipediacleaner.api.check.algorithm;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.API;
 import org.wikipediacleaner.api.APIException;
 import org.wikipediacleaner.api.APIFactory;
@@ -26,29 +25,27 @@ import org.wikipediacleaner.i18n.GT;
 import org.wikipediacleaner.utils.Configuration;
 import org.wikipediacleaner.utils.ConfigurationValueInteger;
 
-
 /**
  * Algorithm for analyzing error 518 of check wikipedia project.
  * Error 518: nowiki tags in main namespace
  */
 public class CheckErrorAlgorithm518 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm518() {
-    super("<nowiki> tags");
-  }
+  public CheckErrorAlgorithm518() { super("<nowiki> tags"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if ((analysis == null) || (analysis.getPage() == null)) {
       return false;
     }
@@ -58,7 +55,8 @@ public class CheckErrorAlgorithm518 extends CheckErrorAlgorithmBase {
     }
 
     // Check each tag
-    List<PageElementTag> tags = analysis.getCompleteTags(PageElementTag.TAG_WIKI_NOWIKI);
+    List<PageElementTag> tags =
+        analysis.getCompleteTags(PageElementTag.TAG_WIKI_NOWIKI);
     if ((tags == null) || (tags.isEmpty())) {
       return false;
     }
@@ -75,7 +73,8 @@ public class CheckErrorAlgorithm518 extends CheckErrorAlgorithmBase {
         int endIndex = tag.getEndIndex();
 
         // Check for <nowiki/> just after an internal link
-        PageElementInternalLink link = analysis.isInInternalLink(beginIndex - 1);
+        PageElementInternalLink link =
+            analysis.isInInternalLink(beginIndex - 1);
         if ((link != null) && (link.getEndIndex() == beginIndex)) {
           beginIndex = link.getBeginIndex();
           while ((endIndex < contents.length()) &&
@@ -106,18 +105,21 @@ public class CheckErrorAlgorithm518 extends CheckErrorAlgorithmBase {
           }
         }
         if (errorResult == null) {
-          String textBefore = contents.substring(beginIndex, tag.getBeginIndex());
+          String textBefore =
+              contents.substring(beginIndex, tag.getBeginIndex());
           String textAfter = contents.substring(tag.getEndIndex(), endIndex);
-          errorResult = createCheckErrorResult(
-              analysis, beginIndex, endIndex);
+          errorResult = createCheckErrorResult(analysis, beginIndex, endIndex);
           if (link != null) {
             String displayed = link.getDisplayedTextNotTrimmed();
             if (displayed.endsWith(" ")) {
-              errorResult.addReplacement(PageElementInternalLink.createInternalLink(
-                  link.getFullLink(), displayed.trim()) + " " + textAfter);
+              errorResult.addReplacement(
+                  PageElementInternalLink.createInternalLink(link.getFullLink(),
+                                                             displayed.trim()) +
+                  " " + textAfter);
             }
-            errorResult.addReplacement(PageElementInternalLink.createInternalLink(
-                link.getFullLink(), displayed + textAfter));
+            errorResult.addReplacement(
+                PageElementInternalLink.createInternalLink(
+                    link.getFullLink(), displayed + textAfter));
           }
           errorResult.addReplacement(textBefore + " " + textAfter);
           errorResult.addReplacement(textBefore + textAfter);
@@ -126,21 +128,25 @@ public class CheckErrorAlgorithm518 extends CheckErrorAlgorithmBase {
         // Complete tag <nowiki> ... </nowiki>
         errorResult = createCheckErrorResult(
             analysis, tag.getCompleteBeginIndex(), tag.getCompleteEndIndex());
-        String internalText = contents.substring(
-            tag.getValueBeginIndex(), tag.getValueEndIndex());
+        String internalText = contents.substring(tag.getValueBeginIndex(),
+                                                 tag.getValueEndIndex());
 
         // Check for specific characters
         StringBuilder replacement = new StringBuilder();
         for (int i = 0; i < internalText.length(); i++) {
           char currentChar = internalText.charAt(i);
           if ((apostropheTemplate != null) && (currentChar == '\'')) {
-            replacement.append(PageElementTemplate.createTemplate(apostropheTemplate));
+            replacement.append(
+                PageElementTemplate.createTemplate(apostropheTemplate));
           } else if ((asteriskTemplate != null) && (currentChar == '*')) {
-            replacement.append(PageElementTemplate.createTemplate(asteriskTemplate));
+            replacement.append(
+                PageElementTemplate.createTemplate(asteriskTemplate));
           } else if ((openSBTemplate != null) && (currentChar == '[')) {
-              replacement.append(PageElementTemplate.createTemplate(openSBTemplate));
+            replacement.append(
+                PageElementTemplate.createTemplate(openSBTemplate));
           } else if ((closeSBTemplate != null) && (currentChar == ']')) {
-            replacement.append(PageElementTemplate.createTemplate(closeSBTemplate));
+            replacement.append(
+                PageElementTemplate.createTemplate(closeSBTemplate));
           } else {
             replacement.append(currentChar);
           }
@@ -159,7 +165,9 @@ public class CheckErrorAlgorithm518 extends CheckErrorAlgorithmBase {
             }
           }
           if (!otherFound) {
-            errorResult.addReplacement("&lt;" + internalText.substring(1, internalText.length() - 1) + "&gt;");
+            errorResult.addReplacement(
+                "&lt;" + internalText.substring(1, internalText.length() - 1) +
+                "&gt;");
           }
         }
 
@@ -167,7 +175,8 @@ public class CheckErrorAlgorithm518 extends CheckErrorAlgorithmBase {
         int begin = tag.getBeginIndex();
         if ((begin > 0) && (contents.charAt(begin - 1) == '\n')) {
           int index = 0;
-          while ((index < internalText.length()) && (internalText.charAt(index) == ' ')) {
+          while ((index < internalText.length()) &&
+                 (internalText.charAt(index) == ' ')) {
             index++;
           }
           if (index > 0) {
@@ -196,7 +205,7 @@ public class CheckErrorAlgorithm518 extends CheckErrorAlgorithmBase {
 
   /**
    * Retrieve the list of pages in error.
-   * 
+   *
    * @param wiki Wiki.
    * @param limit Maximum number of pages to retrieve.
    * @return List of pages in error.
@@ -208,7 +217,8 @@ public class CheckErrorAlgorithm518 extends CheckErrorAlgorithmBase {
     }
     API api = APIFactory.getAPI();
     Configuration config = Configuration.getConfiguration();
-    int maxDays = config.getInt(wiki, ConfigurationValueInteger.MAX_DAYS_ABUSE_LOG);
+    int maxDays =
+        config.getInt(wiki, ConfigurationValueInteger.MAX_DAYS_ABUSE_LOG);
     try {
       return api.retrieveAbuseLog(wiki, abuseFilter, maxDays);
     } catch (APIException e) {
@@ -222,7 +232,8 @@ public class CheckErrorAlgorithm518 extends CheckErrorAlgorithmBase {
   /* ====================================================================== */
 
   /** Template replacing an apostrophe */
-  private static final String PARAMETER_APOSTROPHE_TEMPLATE = "apostrophe_template";
+  private static final String PARAMETER_APOSTROPHE_TEMPLATE =
+      "apostrophe_template";
 
   /** Template replacing an asterisk */
   private static final String PARAMETER_ASTERISK_TEMPLATE = "asterisk_template";
@@ -238,15 +249,20 @@ public class CheckErrorAlgorithm518 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
-    apostropheTemplate = getSpecificProperty(PARAMETER_APOSTROPHE_TEMPLATE, true, false, false);
-    asteriskTemplate = getSpecificProperty(PARAMETER_ASTERISK_TEMPLATE, true, false, false);
-    openSBTemplate = getSpecificProperty(PARAMETER_OPEN_SB_TEMPLATE, true, false, false);
-    closeSBTemplate = getSpecificProperty(PARAMETER_CLOSE_SB_TEMPLATE, true, false, false);
+    apostropheTemplate =
+        getSpecificProperty(PARAMETER_APOSTROPHE_TEMPLATE, true, false, false);
+    asteriskTemplate =
+        getSpecificProperty(PARAMETER_ASTERISK_TEMPLATE, true, false, false);
+    openSBTemplate =
+        getSpecificProperty(PARAMETER_OPEN_SB_TEMPLATE, true, false, false);
+    closeSBTemplate =
+        getSpecificProperty(PARAMETER_CLOSE_SB_TEMPLATE, true, false, false);
 
     String tmp = getSpecificProperty(PARAMETER_ABUSE_FILTER, true, true, false);
     abuseFilter = null;
@@ -276,18 +292,18 @@ public class CheckErrorAlgorithm518 extends CheckErrorAlgorithmBase {
 
   /**
    * Return the parameters used to configure the algorithm.
-   * 
+   *
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
     parameters.put(
         PARAMETER_ABUSE_FILTER,
-        GT._T(
-            "An identifier of an abuse filter that is triggered by {0} tags.",
-            PageElementTag.TAG_WIKI_NOWIKI));
+        GT._T("An identifier of an abuse filter that is triggered by {0} tags.",
+              PageElementTag.TAG_WIKI_NOWIKI));
     parameters.put(
         PARAMETER_APOSTROPHE_TEMPLATE,
         GT._T("A template that can be used instead of an apostrophe."));

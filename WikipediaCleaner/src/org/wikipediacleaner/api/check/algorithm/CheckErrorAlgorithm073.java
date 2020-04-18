@@ -12,18 +12,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.SimpleAction;
 import org.wikipediacleaner.api.data.ISBNRange;
+import org.wikipediacleaner.api.data.ISBNRange.ISBNInformation;
 import org.wikipediacleaner.api.data.PageAnalysis;
 import org.wikipediacleaner.api.data.PageElementISBN;
 import org.wikipediacleaner.api.data.PageElementISSN;
 import org.wikipediacleaner.api.data.PageElementTemplate;
-import org.wikipediacleaner.api.data.ISBNRange.ISBNInformation;
 import org.wikipediacleaner.gui.swing.action.ActionExternalViewer;
 import org.wikipediacleaner.i18n.GT;
-
 
 /**
  * Algorithm for analyzing error 73 of check wikipedia project.
@@ -31,22 +29,21 @@ import org.wikipediacleaner.i18n.GT;
  */
 public class CheckErrorAlgorithm073 extends CheckErrorAlgorithmISBN {
 
-  public CheckErrorAlgorithm073() {
-    super("ISBN wrong checksum in ISBN-13");
-  }
+  public CheckErrorAlgorithm073() { super("ISBN wrong checksum in ISBN-13"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -58,14 +55,13 @@ public class CheckErrorAlgorithm073 extends CheckErrorAlgorithmISBN {
       String number = isbn.getISBN();
       if ((number != null) && (number.length() == 13) && isbn.isValid()) {
         char check = Character.toUpperCase(number.charAt(12));
-        char computedCheck = Character.toUpperCase(
-            PageElementISBN.computeChecksum(number));
+        char computedCheck =
+            Character.toUpperCase(PageElementISBN.computeChecksum(number));
 
         String message = null;
         if ((check != computedCheck) && Character.isDigit(computedCheck)) {
-          message = GT._T(
-              "The checksum is {0} instead of {1}",
-              new Object[] { check, computedCheck } );
+          message = GT._T("The checksum is {0} instead of {1}",
+                          new Object[] {check, computedCheck});
         } else {
           ISBNInformation isbnInfo = ISBNRange.getInformation(number);
           if (isbnInfo != null) {
@@ -82,7 +78,8 @@ public class CheckErrorAlgorithm073 extends CheckErrorAlgorithmISBN {
             return true;
           }
           result = true;
-          CheckErrorResult errorResult = createCheckErrorResult(analysis, isbn, true);
+          CheckErrorResult errorResult =
+              createCheckErrorResult(analysis, isbn, true);
           errorResult.addText(message);
           addHelpNeededTemplates(analysis, errorResult, isbn);
           addHelpNeededComment(analysis, errorResult, isbn);
@@ -92,17 +89,22 @@ public class CheckErrorAlgorithm073 extends CheckErrorAlgorithmISBN {
 
           // Add search engines using other parameters of the template
           if (isbn.isTemplateParameter()) {
-            PageElementTemplate template = analysis.isInTemplate(isbn.getBeginIndex());
+            PageElementTemplate template =
+                analysis.isInTemplate(isbn.getBeginIndex());
             addSearchEngines(analysis, errorResult, template);
           }
 
           // Add search for other identifiers
-          errorResult.addPossibleAction(new SimpleAction(GT._T(
+          errorResult.addPossibleAction(
+              new SimpleAction(GT._T(
               "Search as OCLC"),
-              new ActionExternalViewer(MessageFormat.format("http://worldcat.org/oclc/{0}", number))));
-          errorResult.addPossibleAction(new SimpleAction(GT._T(
+                               new ActionExternalViewer(MessageFormat.format(
+                                   "http://worldcat.org/oclc/{0}", number))));
+          errorResult.addPossibleAction(
+              new SimpleAction(GT._T(
               "Search as LCCN"),
-              new ActionExternalViewer(MessageFormat.format("http://lccn.loc.gov/{0}", number))));
+                               new ActionExternalViewer(MessageFormat.format(
+                                   "http://lccn.loc.gov/{0}", number))));
 
           // Add ISSN if number starts with 977=Prefix for ISSN
           if (number.startsWith("977")) { // Prefix for ISSN
@@ -116,7 +118,8 @@ public class CheckErrorAlgorithm073 extends CheckErrorAlgorithmISBN {
           // Add ISBN with modified checksum
           List<String> searchISBN = new ArrayList<>();
           if (computedCheck != check) {
-            String value = number.substring(0, number.length() - 1) + computedCheck;
+            String value =
+                number.substring(0, number.length() - 1) + computedCheck;
             addSearchISBN(searchISBN, value, false);
           }
 
@@ -128,7 +131,8 @@ public class CheckErrorAlgorithm073 extends CheckErrorAlgorithmISBN {
             count += (number.charAt(2) == '8') ? 1 : 0;
             count += (number.charAt(2) == '9') ? 1 : 0;
             if (count == 2) {
-              String value = ((number.charAt(2) == '9') ? "979" : "978") + number.substring(3);
+              String value = ((number.charAt(2) == '9') ? "979" : "978") +
+                             number.substring(3);
               addSearchISBN(searchISBN, value, false);
             }
           }
@@ -142,7 +146,8 @@ public class CheckErrorAlgorithm073 extends CheckErrorAlgorithmISBN {
           // Add ISBN with characters inversion
           if (number.length() == 13) {
             int previousChar = -1;
-            for (int currentChar = 0; currentChar < number.length(); currentChar++) {
+            for (int currentChar = 0; currentChar < number.length();
+                 currentChar++) {
               if (Character.isDigit(number.charAt(currentChar))) {
                 if (previousChar >= 0) {
                   String value =
@@ -160,13 +165,12 @@ public class CheckErrorAlgorithm073 extends CheckErrorAlgorithmISBN {
 
           // Add ISBN with one modified digit
           if (number.length() == 13) {
-            for (int currentChar = 0; currentChar < number.length(); currentChar++) {
+            for (int currentChar = 0; currentChar < number.length();
+                 currentChar++) {
               if (Character.isDigit(number.charAt(currentChar))) {
                 for (char newChar = '0'; newChar <= '9'; newChar++) {
-                  String value =
-                      number.substring(0, currentChar) +
-                      newChar +
-                      number.substring(currentChar + 1);
+                  String value = number.substring(0, currentChar) + newChar +
+                                 number.substring(currentChar + 1);
                   addSearchISBN(searchISBN, value, false);
                 }
               }
@@ -174,9 +178,8 @@ public class CheckErrorAlgorithm073 extends CheckErrorAlgorithmISBN {
           }
 
           // Add direct search engines
-          addSearchEngines(
-              analysis, errorResult, searchISBN,
-              GT._T("Similar ISBN"));
+          addSearchEngines(analysis, errorResult, searchISBN,
+                           GT._T("Similar ISBN"));
 
           errors.add(errorResult);
         }
@@ -191,17 +194,19 @@ public class CheckErrorAlgorithm073 extends CheckErrorAlgorithmISBN {
    * @param isbn ISBN to be added.
    * @param force True if ISBN should be added even if incorrect.
    */
-  private void addSearchISBN(List<String> searchISBN, String isbn, boolean force) {
+  private void addSearchISBN(List<String> searchISBN, String isbn,
+                             boolean force) {
     if (!searchISBN.contains(isbn)) {
-      if (force ||
-          (PageElementISBN.computeChecksum(isbn) == isbn.charAt(isbn.length() - 1))) {
+      if (force || (PageElementISBN.computeChecksum(isbn) ==
+                    isbn.charAt(isbn.length() - 1))) {
         searchISBN.add(isbn);
       }
     }
     if ((isbn.length() == 13) && isbn.startsWith("978")) {
       isbn = isbn.substring(3);
       if (!searchISBN.contains(isbn)) {
-        if (PageElementISBN.computeChecksum(isbn) == isbn.charAt(isbn.length() - 1)) {
+        if (PageElementISBN.computeChecksum(isbn) ==
+            isbn.charAt(isbn.length() - 1)) {
           searchISBN.add(isbn);
         }
       }
@@ -222,7 +227,8 @@ public class CheckErrorAlgorithm073 extends CheckErrorAlgorithmISBN {
       return null;
     }
     char check = Character.toUpperCase(number.charAt(12));
-    char computedCheck = Character.toUpperCase(PageElementISBN.computeChecksum(number));
+    char computedCheck =
+        Character.toUpperCase(PageElementISBN.computeChecksum(number));
 
     // Invalid checksum
     if ((check != computedCheck) && Character.isDigit(computedCheck)) {
@@ -265,17 +271,21 @@ public class CheckErrorAlgorithm073 extends CheckErrorAlgorithmISBN {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
-    reasonChecksum = getSpecificProperty(PARAMETER_REASON_CHECKSUM, true, true, false);
+    reasonChecksum =
+        getSpecificProperty(PARAMETER_REASON_CHECKSUM, true, true, false);
     if (reasonChecksum == null) {
       reasonChecksum = getSpecificProperty(PARAMETER_REASON, true, true, false);
     }
-    reasonNoRange = getSpecificProperty(PARAMETER_REASON_NO_RANGE, true, true, false);
-    reasonReserved = getSpecificProperty(PARAMETER_REASON_RESERVED, true, true, false);
+    reasonNoRange =
+        getSpecificProperty(PARAMETER_REASON_NO_RANGE, true, true, false);
+    reasonReserved =
+        getSpecificProperty(PARAMETER_REASON_RESERVED, true, true, false);
   }
 
   /** Reason of the error: checksum */
@@ -289,16 +299,16 @@ public class CheckErrorAlgorithm073 extends CheckErrorAlgorithmISBN {
 
   /**
    * Return the parameters used to configure the algorithm.
-   * 
+   *
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_REASON_CHECKSUM,
-        GT._T("An explanation of the problem (incorrect checksum)"));
+    parameters.put(PARAMETER_REASON_CHECKSUM,
+                   GT._T("An explanation of the problem (incorrect checksum)"));
     parameters.put(
         PARAMETER_REASON_NO_RANGE,
         GT._T("An explanation of the problem (non-existing range of ISBN numbers)"));

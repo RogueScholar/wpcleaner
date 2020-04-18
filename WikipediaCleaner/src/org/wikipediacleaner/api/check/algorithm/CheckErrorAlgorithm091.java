@@ -13,12 +13,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.AddTextActionProvider;
 import org.wikipediacleaner.api.check.BasicActionProvider;
 import org.wikipediacleaner.api.check.CheckErrorResult;
-import org.wikipediacleaner.api.check.CheckLanguageLinkActionProvider;
 import org.wikipediacleaner.api.check.CheckErrorResult.ErrorLevel;
+import org.wikipediacleaner.api.check.CheckLanguageLinkActionProvider;
 import org.wikipediacleaner.api.constants.EnumWikipedia;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
 import org.wikipediacleaner.api.data.Interwiki;
@@ -31,7 +30,6 @@ import org.wikipediacleaner.gui.swing.component.MWPane;
 import org.wikipediacleaner.i18n.GT;
 import org.wikipediacleaner.utils.StringChecker;
 import org.wikipediacleaner.utils.StringCheckerUnauthorizedCharacters;
-
 
 /**
  * Algorithm for analyzing error 091 of check wikipedia project.
@@ -48,7 +46,7 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
    * Possible global fixes.
    */
   private final static String[] globalFixes = new String[] {
-    GT._T("Convert them to internal links"),
+      GT._T("Convert them to internal links"),
   };
 
   public CheckErrorAlgorithm091() {
@@ -57,22 +55,23 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
   }
 
   /**
-   * Possible separation characters at the end of the internal link. 
+   * Possible separation characters at the end of the internal link.
    */
   private final static String SEPARATION_CHARACTERS = ",.";
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if ((analysis == null) || (analysis.getInternalLinks() == null)) {
       return false;
     }
@@ -144,7 +143,8 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
           }
         }
         boolean isError = true;
-        if (isError && (article.length() == 0) && (!local || link.getText() == null)) {
+        if (isError && (article.length() == 0) &&
+            (!local || link.getText() == null)) {
           isError = false;
         }
         if (fromWiki == wiki) {
@@ -159,7 +159,7 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
         if (onlyLocal && !local) {
           isError = false;
         }
-  
+
         // Mark error
         if (isError) {
           if (errors == null) {
@@ -169,14 +169,15 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
           int beginIndex = link.getBeginIndex();
           int endIndex = link.getEndIndex();
           if ((beginIndex > 0) && (contents.charAt(beginIndex - 1) == '[') &&
-              (endIndex < contents.length()) && (contents.charAt(endIndex) == ']')) {
+              (endIndex < contents.length()) &&
+              (contents.charAt(endIndex) == ']')) {
             beginIndex--;
             endIndex++;
           }
-  
+
           // Compute informations
           String text = link.getText();
-  
+
           // Check if link is in template
           if (linkTemplates != null) {
             PageElementTemplate template = analysis.isInTemplate(beginIndex);
@@ -184,8 +185,10 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
               for (String linkTemplate : linkTemplates) {
                 String[] elements = linkTemplate.split("\\|");
                 if ((elements.length > 2) &&
-                    Page.areSameTitle(elements[0], template.getTemplateName()) &&
-                    link.getLink().trim().equals(template.getParameterValue(elements[1]))) {
+                    Page.areSameTitle(elements[0],
+                                      template.getTemplateName()) &&
+                    link.getLink().trim().equals(
+                        template.getParameterValue(elements[1]))) {
                   text = template.getParameterValue(elements[2]);
                   beginIndex = template.getBeginIndex();
                   endIndex = template.getEndIndex();
@@ -193,24 +196,21 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
               }
             }
           }
-  
+
           // Check language link
           CheckErrorResult errorResult = createCheckErrorResult(
               analysis, beginIndex, endIndex,
               fullLink ? ErrorLevel.ERROR : ErrorLevel.WARNING);
-          if ((fromWiki != null) && (articleName.length() >0)) {
+          if ((fromWiki != null) && (articleName.length() > 0)) {
             errorResult.addPossibleAction(
                 GT._T("Check language links"),
                 new CheckLanguageLinkActionProvider(
-                    fromWiki, analysis.getWikipedia(),
-                    articleName, text));
+                    fromWiki, analysis.getWikipedia(), articleName, text));
           }
-  
+
           // Use templates
-          if ((templatesList != null) &&
-              (templatesList.size() > 0) &&
-              (articleName.length() > 0) &&
-              (language != null)) {
+          if ((templatesList != null) && (templatesList.size() > 0) &&
+              (articleName.length() > 0) && (language != null)) {
             for (String template : templatesList) {
               String[] templateArgs = template.split("\\|");
               if (templateArgs.length >= 5) {
@@ -226,7 +226,7 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
                 String paramOriginalTitle = templateArgs[3];
                 String paramText = templateArgs[4];
                 String textPrefix =
-                  "{{" + templateName + "|" + paramLocalTitle + "=";
+                    "{{" + templateName + "|" + paramLocalTitle + "=";
                 StringBuilder textSuffix = new StringBuilder();
                 if ((prefix != null) && !prefix.equals(paramLangDefaultValue)) {
                   textSuffix.append('|');
@@ -243,10 +243,11 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
                 textSuffix.append('=');
                 textSuffix.append((text != null) ? text : article);
                 textSuffix.append("}}");
-                String question = GT._T("What is the title of the page on this wiki ?");
+                String question =
+                    GT._T("What is the title of the page on this wiki ?");
                 AddTextActionProvider action = null;
                 if ((text != null) && (!text.equals(article))) {
-                  String[] possibleValues = { null, article, text };
+                  String[] possibleValues = {null, article, text};
                   action = new AddTextActionProvider(
                       textPrefix, textSuffix.toString(), null, question,
                       possibleValues, false, null, checker);
@@ -256,32 +257,38 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
                       articleName, checker);
                 }
                 errorResult.addPossibleAction(
-                    GT._T("Replace using template {0}", "{{" + templateArgs[0] + "}}"),
+                    GT._T("Replace using template {0}",
+                          "{{" + templateArgs[0] + "}}"),
                     action);
               }
             }
           }
-  
+
           // Create internal link
           if (articleName.length() > 0) {
             if (!link.hasSquare() || link.hasSecondSquare()) {
               int lastSure = article.length();
               while ((lastSure > 0) &&
-                     (SEPARATION_CHARACTERS.indexOf(article.charAt(lastSure - 1)) >= 0)) {
+                     (SEPARATION_CHARACTERS.indexOf(
+                          article.charAt(lastSure - 1)) >= 0)) {
                 lastSure--;
               }
               if ((text == null) && (lastSure < article.length())) {
                 while (lastSure <= article.length()) {
                   String actualArticle = article.substring(0, lastSure);
                   errorResult.addReplacement(
-                      "[[:" + prefix + ":" + actualArticle + "|" + actualArticle + "]]" + article.substring(lastSure));
+                      "[[:" + prefix + ":" + actualArticle + "|" +
+                      actualArticle + "]]" + article.substring(lastSure));
                   lastSure++;
                 }
               } else {
-                boolean first = (errorResult.getPossibleActions() == null) || (errorResult.getPossibleActions().isEmpty());
+                boolean first = (errorResult.getPossibleActions() == null) ||
+                                (errorResult.getPossibleActions().isEmpty());
                 errorResult.addReplacement(
-                    "[[:" + prefix + ":" + article + "|" + (text != null ? text : article) + "]]",
-                    first && fullLink && link.hasSquare() && link.hasSecondSquare() && (text != null));
+                    "[[:" + prefix + ":" + article + "|" +
+                        (text != null ? text : article) + "]]",
+                    first && fullLink && link.hasSquare() &&
+                        link.hasSecondSquare() && (text != null));
               }
             }
           }
@@ -323,7 +330,7 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
 
   /**
    * Bot fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -334,7 +341,7 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -353,7 +360,7 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
 
   /**
    * Fix all the errors in the page.
-   * 
+   *
    * @param fixName Fix name (extracted from getGlobalFixes()).
    * @param analysis Page analysis.
    * @param textPane Text pane.
@@ -379,18 +386,20 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
-    String tmp = getSpecificProperty(PARAMETER_ONLY_LANGUAGE, true, true, false);
+    String tmp =
+        getSpecificProperty(PARAMETER_ONLY_LANGUAGE, true, true, false);
     onlyLanguage = (tmp != null) ? Boolean.valueOf(tmp) : true;
 
     tmp = getSpecificProperty(PARAMETER_ONLY_LOCAL, true, false, false);
     onlyLocal = (tmp != null) ? Boolean.valueOf(tmp) : true;
 
-    tmp = getSpecificProperty(PARAMETER_LINK_TEMPLATES, true,  true,  false);
+    tmp = getSpecificProperty(PARAMETER_LINK_TEMPLATES, true, true, false);
     linkTemplates.clear();
     if (tmp != null) {
       List<String> tmpList = WPCConfiguration.convertPropertyToStringList(tmp);
@@ -399,7 +408,8 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
       }
     }
 
-    tmp = getSpecificProperty(68, CheckErrorAlgorithm068.PARAMETER_TEMPLATE, true, false, false);
+    tmp = getSpecificProperty(68, CheckErrorAlgorithm068.PARAMETER_TEMPLATE,
+                              true, false, false);
     templatesList.clear();
     if (tmp != null) {
       List<String> tmpList = WPCConfiguration.convertPropertyToStringList(tmp);
@@ -423,20 +433,18 @@ public class CheckErrorAlgorithm091 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_LINK_TEMPLATES,
-        GT._T("Templates using external links"));
-    parameters.put(
-        PARAMETER_ONLY_LANGUAGE,
-        GT._T("To report only links to other languages"));
-    parameters.put(
-        PARAMETER_ONLY_LOCAL,
-        GT._T("To report only links to local wikis"));
+    parameters.put(PARAMETER_LINK_TEMPLATES,
+                   GT._T("Templates using external links"));
+    parameters.put(PARAMETER_ONLY_LANGUAGE,
+                   GT._T("To report only links to other languages"));
+    parameters.put(PARAMETER_ONLY_LOCAL,
+                   GT._T("To report only links to local wikis"));
     return parameters;
   }
 }

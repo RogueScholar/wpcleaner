@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.API;
 import org.wikipediacleaner.api.APIException;
 import org.wikipediacleaner.api.APIFactory;
@@ -23,13 +22,12 @@ import org.wikipediacleaner.api.constants.WPCConfiguration;
 import org.wikipediacleaner.api.data.DataManager;
 import org.wikipediacleaner.api.data.Namespace;
 import org.wikipediacleaner.api.data.Page;
+import org.wikipediacleaner.api.data.Page.RelatedPages;
 import org.wikipediacleaner.api.data.PageAnalysis;
 import org.wikipediacleaner.api.data.PageElementTag;
 import org.wikipediacleaner.api.data.PageElementTemplate;
-import org.wikipediacleaner.api.data.Page.RelatedPages;
 import org.wikipediacleaner.api.data.PageElementTemplate.Parameter;
 import org.wikipediacleaner.i18n.GT;
-
 
 /**
  * Algorithm for analyzing error 524 of check wikipedia project.
@@ -37,9 +35,7 @@ import org.wikipediacleaner.i18n.GT;
  */
 public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm524() {
-    super("Duplicate template argument");
-  }
+  public CheckErrorAlgorithm524() { super("Duplicate template argument"); }
 
   /**
    * Tracking category.
@@ -48,16 +44,17 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if ((analysis == null) || (analysis.getPage() == null)) {
       return false;
     }
@@ -78,7 +75,8 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
         shouldCheck = false;
       }
       if (shouldCheck) {
-        if (analysis.isInTag(template.getBeginIndex(), PageElementTag.TAG_WIKI_PRE) != null) {
+        if (analysis.isInTag(template.getBeginIndex(),
+                             PageElementTag.TAG_WIKI_PRE) != null) {
           shouldCheck = false;
         }
       }
@@ -103,7 +101,8 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
             // Compute actual area
             int pipeBefore = existingParam.param.getPipeIndex();
             int paramBegin = pipeBefore;
-            Parameter nextParam = template.getParameter(existingParam.numParam + 1);
+            Parameter nextParam =
+                template.getParameter(existingParam.numParam + 1);
             int paramEnd = nextParam.getPipeIndex();
             boolean existingStartNewLine = false;
             int tmpIndex = getLastIndexBeforeSpace(contents, paramBegin - 1);
@@ -120,8 +119,8 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
             }
 
             // Create error
-            CheckErrorResult errorResult = createCheckErrorResult(
-                analysis, paramBegin, paramEnd);
+            CheckErrorResult errorResult =
+                createCheckErrorResult(analysis, paramBegin, paramEnd);
             String existingValue = existingParam.param.getValue();
             String value = param.getValue();
 
@@ -139,15 +138,18 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
               }
             }
             if (automatic) {
-              // Detect special cases: first parameter unnamed, second one explicitly named
+              // Detect special cases: first parameter unnamed, second one
+              // explicitly named
               boolean special = false;
               String existingName = existingParam.param.getName();
-              if (((existingName == null) || (existingName.trim().length() == 0)) &&
+              if (((existingName == null) ||
+                   (existingName.trim().length() == 0)) &&
                   (param.getName() != null) &&
                   (param.getName().trim().length() > 0)) {
                 special = true;
                 // Avoid unnamed parameter in between
-                for (int numParam2 = existingParam.numParam + 1; numParam2 < numParam; numParam2++) {
+                for (int numParam2 = existingParam.numParam + 1;
+                     numParam2 < numParam; numParam2++) {
                   String name2 = template.getParameter(numParam2).getName();
                   if ((name2 == null) || (name2.trim().length() == 0)) {
                     special = false;
@@ -155,7 +157,8 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
                 }
               }
 
-              // If the argument name contains digits, don't do automatic replacement
+              // If the argument name contains digits, don't do automatic
+              // replacement
               if (!special) {
                 for (int pos = 0; pos < paramName.length(); pos++) {
                   char currentChar = paramName.charAt(pos);
@@ -171,7 +174,8 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
               // Manage some parameters safe to replace
               for (String[] ignoreElement : ignore) {
                 if ((ignoreElement.length > 1) &&
-                    Page.areSameTitle(template.getTemplateName(), ignoreElement[0]) &&
+                    Page.areSameTitle(template.getTemplateName(),
+                                      ignoreElement[0]) &&
                     ignoreElement[1].equals(paramName)) {
                   if (ignoreElement.length > 2) {
                     for (int pos = 2; pos < ignoreElement.length; pos++) {
@@ -186,14 +190,16 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
 
             if (automatic) {
               // If there's a table start, don't do automatic replacement
-              int indexTable = contents.indexOf("{|", template.getBeginIndex() + 2);
+              int indexTable =
+                  contents.indexOf("{|", template.getBeginIndex() + 2);
               if ((indexTable >= 0) && (indexTable < paramBegin)) {
                 automatic = false;
               }
             }
             if (automatic) {
               // If there's a table new line, don't do automatic replacement
-              int indexTable = contents.indexOf("|-", template.getBeginIndex() + 2);
+              int indexTable =
+                  contents.indexOf("|-", template.getBeginIndex() + 2);
               if ((indexTable >= 0) && (indexTable < paramBegin)) {
                 automatic = false;
               }
@@ -219,7 +225,8 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
               if (!numericName) {
                 StringBuilder replacement = new StringBuilder();
                 if (paramBegin < pipeBefore) {
-                  replacement.append(contents.substring(paramBegin, pipeBefore));
+                  replacement.append(
+                      contents.substring(paramBegin, pipeBefore));
                 }
                 replacement.append("<!--");
                 tmpIndex = paramEnd;
@@ -232,7 +239,8 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
                 if (paramEnd > tmpIndex) {
                   replacement.append(contents.substring(tmpIndex, paramEnd));
                 }
-                errorResult.addReplacement(replacement.toString(), GT._T("Comment"));
+                errorResult.addReplacement(replacement.toString(),
+                                           GT._T("Comment"));
               }
             }
 
@@ -244,13 +252,13 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
         for (ParameterInfo paramInfo : duplicates) {
           int endIndex = template.getEndIndex() - 2;
           if (paramInfo.numParam + 1 < template.getParameterCount()) {
-            endIndex = template.getParameter(paramInfo.numParam + 1).getPipeIndex();
+            endIndex =
+                template.getParameter(paramInfo.numParam + 1).getPipeIndex();
           }
           String value = paramInfo.param.getValue();
           boolean empty = (value == null) || value.isEmpty();
           CheckErrorResult errorResult = createCheckErrorResult(
-              analysis,
-              paramInfo.param.getPipeIndex(), endIndex,
+              analysis, paramInfo.param.getPipeIndex(), endIndex,
               empty ? ErrorLevel.WARNING : ErrorLevel.CORRECT);
           if (empty) {
             errorResult.addReplacement("");
@@ -285,8 +293,7 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
     if (categoryName != null) {
       return categoryName;
     }
-    if ((trackingCategory != null) &&
-        (trackingCategory.trim().length() > 0)) {
+    if ((trackingCategory != null) && (trackingCategory.trim().length() > 0)) {
       return trackingCategory;
     }
     return null;
@@ -294,7 +301,7 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
 
   /**
    * Retrieve the list of pages in error.
-   * 
+   *
    * @param wiki Wiki.
    * @param limit Maximum number of pages to retrieve.
    * @return List of pages in error.
@@ -305,7 +312,8 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
     String category = getTrackingCategory();
     if (category != null) {
       API api = APIFactory.getAPI();
-      String title = wiki.getWikiConfiguration().getPageTitle(Namespace.CATEGORY, category);
+      String title = wiki.getWikiConfiguration().getPageTitle(
+          Namespace.CATEGORY, category);
       Page categoryPage = DataManager.getPage(wiki, title, null, null, null);
       try {
         api.retrieveCategoryMembers(wiki, categoryPage, 0, false, limit);
@@ -319,7 +327,7 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of some errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -352,23 +360,24 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
     String tmp = getSpecificProperty(PARAMETER_IGNORE, true, true, false);
     ignore.clear();
     if (tmp != null) {
-      List<String[]> tmpList = WPCConfiguration.convertPropertyToStringArrayList(tmp);
+      List<String[]> tmpList =
+          WPCConfiguration.convertPropertyToStringArrayList(tmp);
       if (tmpList != null) {
         ignore.addAll(tmpList);
       }
     }
     tmp = getSpecificProperty(PARAMETER_CATEGORY, true, true, false);
     categoryName = null;
-    if ((tmp != null) &&
-        (tmp.trim().length() > 0)) {
+    if ((tmp != null) && (tmp.trim().length() > 0)) {
       categoryName = tmp.trim();
     }
   }
@@ -381,14 +390,14 @@ public class CheckErrorAlgorithm524 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_CATEGORY,
-        GT._T("A category containing the list of pages in error"));
+    parameters.put(PARAMETER_CATEGORY,
+                   GT._T("A category containing the list of pages in error"));
     parameters.put(
         PARAMETER_IGNORE,
         GT._T("Values that can be safely ignored for a given template and argument"));

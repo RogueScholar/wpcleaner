@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.constants.WPCConfigurationStringList;
 import org.wikipediacleaner.api.data.PageAnalysis;
@@ -27,9 +26,7 @@ import org.wikipediacleaner.i18n.GT;
  */
 public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm112() {
-    super("Bad or deprecated CSS attributes");
-  }
+  public CheckErrorAlgorithm112() { super("Bad or deprecated CSS attributes"); }
 
   /** List of attributes for each kind of tag */
   private final static Map<String, String[]> TAG_ATTRIBUTES = new HashMap<>();
@@ -39,79 +36,79 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
 
   /** List of attributes for tables */
   private final static String[] TABLE_ATTRIBUTES = new String[] {
-    "contenteditable",
-    "data-cx-draft",
-    "data-cx-state",
-    "data-cx-weight",
-    "data-source",
-    "id",
-    "-moz-border-radius-bottomleft",
-    "-moz-border-radius-bottomright",
-    "-moz-border-radius-topleft",
-    "-moz-border-radius-topright",
-    "-moz-border-radius",
+      "contenteditable",
+      "data-cx-draft",
+      "data-cx-state",
+      "data-cx-weight",
+      "data-source",
+      "id",
+      "-moz-border-radius-bottomleft",
+      "-moz-border-radius-bottomright",
+      "-moz-border-radius-topleft",
+      "-moz-border-radius-topright",
+      "-moz-border-radius",
   };
 
   // Initialization of lists of attributes/styles/...
   static {
     TAG_ATTRIBUTES.put(null, new String[] {
-        "contenteditable",
-        "data-cx-draft",
-        "data-cx-state",
-        "data-cx-weight",
-        "data-source",
-    });
+                                 "contenteditable",
+                                 "data-cx-draft",
+                                 "data-cx-state",
+                                 "data-cx-weight",
+                                 "data-source",
+                             });
     TAG_STYLES.put(null, new String[] {
-        "-moz-border-radius-bottomleft",
-        "-moz-border-radius-bottomright",
-        "-moz-border-radius-topleft",
-        "-moz-border-radius-topright",
-        "-moz-border-radius",
-        "-moz-box-shadow",
-        "-moz-linear-gradient",
-        "-webkit-border-radius",
-    });
+                             "-moz-border-radius-bottomleft",
+                             "-moz-border-radius-bottomright",
+                             "-moz-border-radius-topleft",
+                             "-moz-border-radius-topright",
+                             "-moz-border-radius",
+                             "-moz-box-shadow",
+                             "-moz-linear-gradient",
+                             "-webkit-border-radius",
+                         });
 
     TAG_ATTRIBUTES.put(PageElementTag.TAG_HTML_CENTER, new String[] {
-        "id",
-    });
+                                                           "id",
+                                                       });
     TAG_ATTRIBUTES.put(PageElementTag.TAG_HTML_DIV, new String[] {
-        "id",
-    });
+                                                        "id",
+                                                    });
     TAG_ATTRIBUTES.put(PageElementTag.TAG_HTML_SMALL, new String[] {
-        "id",
-    });
+                                                          "id",
+                                                      });
 
     TAG_STYLES.put(PageElementTag.TAG_HTML_DIV, new String[] {
-        "-moz-column-count",
-        "-moz-column-gap",
-        "-moz-column-width",
-        "-webkit-column-count",
-        "-webkit-column-width",
-    });
+                                                    "-moz-column-count",
+                                                    "-moz-column-gap",
+                                                    "-moz-column-width",
+                                                    "-webkit-column-count",
+                                                    "-webkit-column-width",
+                                                });
   }
 
   /**
    * Characters used for "mw" identifiers.
    */
-  private final static String CHARS_MW_ID =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-      "abcdefghijklmnopqrstuvwxyz" +
-      "0123456789" +
-      "-_";
+  private final static String CHARS_MW_ID = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                            + "abcdefghijklmnopqrstuvwxyz"
+                                            + "0123456789"
+                                            + "-_";
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -119,13 +116,15 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
     // Analyze each kind of tags
     boolean result = false;
     for (Entry<String, String[]> tag : TAG_ATTRIBUTES.entrySet()) {
-      result |= analyzeTagAttributes(analysis, errors, tag.getKey(), tag.getValue());
+      result |=
+          analyzeTagAttributes(analysis, errors, tag.getKey(), tag.getValue());
       if (result && (errors == null)) {
         return result;
       }
     }
     for (Entry<String, String[]> tag : TAG_STYLES.entrySet()) {
-      result |= analyzeTagStyles(analysis, errors, tag.getKey(), tag.getValue());
+      result |=
+          analyzeTagStyles(analysis, errors, tag.getKey(), tag.getValue());
       if (result && (errors == null)) {
         return result;
       }
@@ -137,16 +136,16 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze tables to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
-  private boolean analyzeTables(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors,
-      String[] attributeNames) {
+  private boolean analyzeTables(PageAnalysis analysis,
+                                Collection<CheckErrorResult> errors,
+                                String[] attributeNames) {
 
     // Check each table
     boolean result = false;
@@ -181,15 +180,19 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
             }
             if (endIndex < line.length()) {
               int tmpIndex = endIndex;
-              if ((tmpIndex < line.length()) && (line.charAt(tmpIndex) == '=')) {
+              if ((tmpIndex < line.length()) &&
+                  (line.charAt(tmpIndex) == '=')) {
                 tmpIndex++;
-                if ((tmpIndex < line.length()) && (line.charAt(tmpIndex) == '"')) {
+                if ((tmpIndex < line.length()) &&
+                    (line.charAt(tmpIndex) == '"')) {
                   tmpIndex++;
                   int valueIndex = tmpIndex;
-                  while ((tmpIndex < line.length()) && (line.charAt(tmpIndex) != '"')) {
+                  while ((tmpIndex < line.length()) &&
+                         (line.charAt(tmpIndex) != '"')) {
                     tmpIndex++;
                   }
-                  if ((tmpIndex < line.length()) && (line.charAt(tmpIndex) == '"')) {
+                  if ((tmpIndex < line.length()) &&
+                      (line.charAt(tmpIndex) == '"')) {
                     attributeValue = line.substring(valueIndex, tmpIndex);
                     tmpIndex++;
                     endIndex = tmpIndex;
@@ -200,14 +203,18 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
             }
           }
           if (shouldReport && "id".equals(attributeName)) {
-            if ((attributeValue == null) || (attributeValue.trim().length() == 0)) {
+            if ((attributeValue == null) ||
+                (attributeValue.trim().length() == 0)) {
               shouldReport = false;
-            } else if (attributeValue.startsWith("mw") || attributeValue.startsWith("cx")) {
+            } else if (attributeValue.startsWith("mw") ||
+                       attributeValue.startsWith("cx")) {
               shouldReport = true;
             } else {
-              for (int tmpIndex = 0; tmpIndex < attributeValue.length(); tmpIndex++) {
+              for (int tmpIndex = 0; tmpIndex < attributeValue.length();
+                   tmpIndex++) {
                 char tmpChar = attributeValue.charAt(tmpIndex);
-                if (!Character.isDigit(tmpChar) && !Character.isWhitespace(tmpChar)) {
+                if (!Character.isDigit(tmpChar) &&
+                    !Character.isWhitespace(tmpChar)) {
                   shouldReport = false;
                 }
               }
@@ -241,8 +248,7 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
             tableEndFound = true;
           } else {
             int prefix = 0;
-            while ((prefix < line.length()) &&
-                   (line.charAt(prefix) == ' ')) {
+            while ((prefix < line.length()) && (line.charAt(prefix) == ' ')) {
               prefix++;
             }
             if (line.startsWith("|-", prefix)) {
@@ -254,8 +260,7 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
                   Character.isLetterOrDigit(line.charAt(attributeIndex - 1))) {
                 shouldReport = false;
               }
-              if (shouldReport &&
-                  (attributeIndex + 2 >= line.length()) ||
+              if (shouldReport && (attributeIndex + 2 >= line.length()) ||
                   Character.isLetterOrDigit(line.charAt(attributeIndex + 2))) {
                 shouldReport = false;
               }
@@ -263,29 +268,35 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
               int endIndex = beginIndex + 2;
               boolean delete = false;
               if (shouldReport) {
-                while ((beginIndex > 0) && (line.charAt(beginIndex - 1) == ' ')) {
+                while ((beginIndex > 0) &&
+                       (line.charAt(beginIndex - 1) == ' ')) {
                   beginIndex--;
                 }
                 if (endIndex < line.length()) {
                   int tmpIndex = endIndex;
-                  if ((tmpIndex < line.length()) && (line.charAt(tmpIndex) == '=')) {
+                  if ((tmpIndex < line.length()) &&
+                      (line.charAt(tmpIndex) == '=')) {
                     tmpIndex++;
-                    if ((tmpIndex < line.length()) && (line.charAt(tmpIndex) == '"')) {
+                    if ((tmpIndex < line.length()) &&
+                        (line.charAt(tmpIndex) == '"')) {
                       tmpIndex++;
                       if (tmpIndex < line.length()) {
                         if (Character.isDigit(line.charAt(tmpIndex))) {
-                          while ((tmpIndex < line.length()) && Character.isDigit(line.charAt(tmpIndex))) {
+                          while ((tmpIndex < line.length()) &&
+                                 Character.isDigit(line.charAt(tmpIndex))) {
                             tmpIndex++;
                           }
                         } else if (line.startsWith("mw", tmpIndex)) {
                           tmpIndex += 2;
                           while ((tmpIndex < line.length()) &&
-                                 (CHARS_MW_ID.indexOf(line.charAt(tmpIndex)) >= 0)) {
+                                 (CHARS_MW_ID.indexOf(line.charAt(tmpIndex)) >=
+                                  0)) {
                             tmpIndex++;
                           }
                         }
                       }
-                      if ((tmpIndex < line.length()) && (line.charAt(tmpIndex) == '"')) {
+                      if ((tmpIndex < line.length()) &&
+                          (line.charAt(tmpIndex) == '"')) {
                         tmpIndex++;
                         endIndex = tmpIndex;
                         delete = true;
@@ -311,70 +322,80 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
                 }
                 errors.add(errorResult);
               }
-            } else if (line.startsWith("!", prefix) || line.startsWith("|", prefix)) {
+            } else if (line.startsWith("!", prefix) ||
+                       line.startsWith("|", prefix)) {
 
               // Analyze table lines
               char separator = line.charAt(prefix);
               int attributeIndex = line.indexOf("id");
               while (attributeIndex > 0) {
                 boolean shouldReport = true;
-                if (shouldReport &&
-                    Character.isLetterOrDigit(line.charAt(attributeIndex - 1))) {
+                if (shouldReport && Character.isLetterOrDigit(
+                                        line.charAt(attributeIndex - 1))) {
                   shouldReport = false;
                 }
-                if (shouldReport &&
-                    ((attributeIndex + 2 >= line.length()) ||
-                     Character.isLetterOrDigit(line.charAt(attributeIndex + 2)))) {
+                if (shouldReport && ((attributeIndex + 2 >= line.length()) ||
+                                     Character.isLetterOrDigit(
+                                         line.charAt(attributeIndex + 2)))) {
                   shouldReport = false;
                 }
-                if (shouldReport &&
-                    (analysis.isInExternalLink(lineBegin + attributeIndex) != null)) {
+                if (shouldReport && (analysis.isInExternalLink(
+                                         lineBegin + attributeIndex) != null)) {
                   shouldReport = false;
                 }
-                if (shouldReport &&
-                    (analysis.isInTemplate(lineBegin + attributeIndex) != null)) {
+                if (shouldReport && (analysis.isInTemplate(
+                                         lineBegin + attributeIndex) != null)) {
                   shouldReport = false;
                 }
                 int beginIndex = attributeIndex;
                 int endIndex = beginIndex + 2;
                 String replacement = null;
                 if (shouldReport) {
-                  while ((beginIndex > 0) && (line.charAt(beginIndex - 1) == ' ')) {
+                  while ((beginIndex > 0) &&
+                         (line.charAt(beginIndex - 1) == ' ')) {
                     beginIndex--;
                   }
                   if (endIndex < line.length()) {
                     int tmpIndex = endIndex;
-                    if ((tmpIndex < line.length()) && (line.charAt(tmpIndex) == '=')) {
+                    if ((tmpIndex < line.length()) &&
+                        (line.charAt(tmpIndex) == '=')) {
                       tmpIndex++;
-                      if ((tmpIndex < line.length()) && (line.charAt(tmpIndex) == '"')) {
+                      if ((tmpIndex < line.length()) &&
+                          (line.charAt(tmpIndex) == '"')) {
                         tmpIndex++;
                         if (tmpIndex < line.length()) {
                           if (Character.isDigit(line.charAt(tmpIndex))) {
-                            while ((tmpIndex < line.length()) && Character.isDigit(line.charAt(tmpIndex))) {
+                            while ((tmpIndex < line.length()) &&
+                                   Character.isDigit(line.charAt(tmpIndex))) {
                               tmpIndex++;
                             }
                           } else if (line.startsWith("mw", tmpIndex)) {
                             tmpIndex += 2;
                             while ((tmpIndex < line.length()) &&
-                                (CHARS_MW_ID.indexOf(line.charAt(tmpIndex)) >= 0)) {
+                                   (CHARS_MW_ID.indexOf(
+                                        line.charAt(tmpIndex)) >= 0)) {
                               tmpIndex++;
                             }
                           }
                         }
-                        if ((tmpIndex < line.length()) && (line.charAt(tmpIndex) == '"')) {
+                        if ((tmpIndex < line.length()) &&
+                            (line.charAt(tmpIndex) == '"')) {
                           tmpIndex++;
                           endIndex = tmpIndex;
                           replacement = "";
                           if ((beginIndex > 0) &&
-                              ((line.charAt(beginIndex - 1) == separator)||
+                              ((line.charAt(beginIndex - 1) == separator) ||
                                (line.charAt(beginIndex - 1) == '|'))) {
-                            while ((tmpIndex < line.length()) && (line.charAt(tmpIndex) == ' ')) {
+                            while ((tmpIndex < line.length()) &&
+                                   (line.charAt(tmpIndex) == ' ')) {
                               tmpIndex++;
                             }
-                            if ((tmpIndex < line.length()) && (line.charAt(tmpIndex) == '|')) {
+                            if ((tmpIndex < line.length()) &&
+                                (line.charAt(tmpIndex) == '|')) {
                               tmpIndex++;
                               endIndex = tmpIndex;
-                              if ((tmpIndex < line.length()) && (line.charAt(tmpIndex) != ' ')) {
+                              if ((tmpIndex < line.length()) &&
+                                  (line.charAt(tmpIndex) != ' ')) {
                                 if (line.charAt(beginIndex) == ' ') {
                                   beginIndex++;
                                 } else {
@@ -421,26 +442,27 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present in tag attributes.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
    * @param tagName Tag name.
    * @param attributeName Tag attribute names.
    * @return Flag indicating if the error was found.
    */
-  private boolean analyzeTagAttributes(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors,
-      String tagName,
-      String[] attributeNames) {
+  private boolean analyzeTagAttributes(PageAnalysis analysis,
+                                       Collection<CheckErrorResult> errors,
+                                       String tagName,
+                                       String[] attributeNames) {
 
     // Check each tag
     boolean result = false;
     String contents = analysis.getContents();
-    List<PageElementTag> tags = (tagName != null) ? analysis.getTags(tagName) : analysis.getTags();
+    List<PageElementTag> tags =
+        (tagName != null) ? analysis.getTags(tagName) : analysis.getTags();
     for (PageElementTag tag : tags) {
       if ((tag != null) && (!tag.isEndTag())) {
-        for (int paramNum = 0; paramNum < tag.getParametersCount(); paramNum++) {
+        for (int paramNum = 0; paramNum < tag.getParametersCount();
+             paramNum++) {
           Parameter param = tag.getParameter(paramNum);
           boolean shouldReport = false;
           for (String attributeName : attributeNames) {
@@ -448,14 +470,18 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
               shouldReport = true;
               if (shouldReport && "id".equals(attributeName)) {
                 String attributeValue = param.getValue();
-                if ((attributeValue == null) || (attributeValue.trim().length() == 0)) {
+                if ((attributeValue == null) ||
+                    (attributeValue.trim().length() == 0)) {
                   shouldReport = false;
-                } else if (attributeValue.startsWith("mw") || attributeValue.startsWith("cx")) {
+                } else if (attributeValue.startsWith("mw") ||
+                           attributeValue.startsWith("cx")) {
                   shouldReport = true;
                 } else {
-                  for (int tmpIndex = 0; tmpIndex < attributeValue.length(); tmpIndex++) {
+                  for (int tmpIndex = 0; tmpIndex < attributeValue.length();
+                       tmpIndex++) {
                     char tmpChar = attributeValue.charAt(tmpIndex);
-                    if (!Character.isDigit(tmpChar) && !Character.isWhitespace(tmpChar)) {
+                    if (!Character.isDigit(tmpChar) &&
+                        !Character.isWhitespace(tmpChar)) {
                       shouldReport = false;
                     }
                   }
@@ -469,7 +495,8 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
             }
             result = true;
             int beginIndex = tag.getBeginIndex() + param.getOffsetBegin();
-            while ((beginIndex > 0) && (contents.charAt(beginIndex - 1) == ' ')) {
+            while ((beginIndex > 0) &&
+                   (contents.charAt(beginIndex - 1) == ' ')) {
               beginIndex--;
             }
             int endIndex = tag.getBeginIndex() + param.getOffsetEnd();
@@ -479,8 +506,8 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
                 (contents.charAt(beginIndex) == ' ')) {
               beginIndex++;
             }
-            CheckErrorResult errorResult = createCheckErrorResult(
-                analysis, beginIndex, endIndex);
+            CheckErrorResult errorResult =
+                createCheckErrorResult(analysis, beginIndex, endIndex);
             errorResult.addReplacement("");
             errors.add(errorResult);
           }
@@ -492,23 +519,22 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present in tag styles.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
    * @param tagName Tag name.
    * @param styleNames Tag style names.
    * @return Flag indicating if the error was found.
    */
-  private boolean analyzeTagStyles(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors,
-      String tagName,
-      String[] styleNames) {
+  private boolean analyzeTagStyles(PageAnalysis analysis,
+                                   Collection<CheckErrorResult> errors,
+                                   String tagName, String[] styleNames) {
 
     // Check each tag
     boolean result = false;
     String contents = analysis.getContents();
-    List<PageElementTag> tags = (tagName != null) ? analysis.getTags(tagName) : analysis.getTags();
+    List<PageElementTag> tags =
+        (tagName != null) ? analysis.getTags(tagName) : analysis.getTags();
     for (PageElementTag tag : tags) {
       if ((tag != null) && (!tag.isEndTag())) {
         Parameter styleParam = tag.getParameter("style");
@@ -541,13 +567,15 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
                   int currentIndex = 0;
                   boolean onlyColumnCount = true;
                   int columnCount = -1;
-                  while (onlyColumnCount && (currentIndex < styleValue.length())) {
+                  while (onlyColumnCount &&
+                         (currentIndex < styleValue.length())) {
                     int tmpIndex = currentIndex;
                     while ((tmpIndex < styleValue.length()) &&
                            (" :".indexOf(styleValue.charAt(tmpIndex)) < 0)) {
                       tmpIndex++;
                     }
-                    String tmpStyleName = styleValue.substring(currentIndex, tmpIndex);
+                    String tmpStyleName =
+                        styleValue.substring(currentIndex, tmpIndex);
                     while ((tmpIndex < styleValue.length()) &&
                            (styleValue.charAt(tmpIndex) == ' ')) {
                       tmpIndex++;
@@ -566,15 +594,18 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
                         tmpIndex++;
                       }
                       if (tmpIndex > currentIndex) {
-                        String tmpStyleValue = styleValue.substring(currentIndex, tmpIndex);
+                        String tmpStyleValue =
+                            styleValue.substring(currentIndex, tmpIndex);
                         if ("column-count".equals(tmpStyleName) ||
                             "-moz-column-count".equals(tmpStyleName) ||
                             "-webkit-column-count".equals(tmpStyleName)) {
                           try {
-                            int tmpColumnCount = Integer.parseInt(tmpStyleValue);
+                            int tmpColumnCount =
+                                Integer.parseInt(tmpStyleValue);
                             if (tmpColumnCount <= 0) {
                               onlyColumnCount = false;
-                            } else if ((columnCount < 0) || (columnCount == tmpColumnCount)) {
+                            } else if ((columnCount < 0) ||
+                                       (columnCount == tmpColumnCount)) {
                               columnCount = tmpColumnCount;
                             } else {
                               onlyColumnCount = false;
@@ -584,7 +615,8 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
                           }
                         } else if ("-moz-column-gap".equals(tmpStyleName) ||
                                    "-moz-column-width".equals(tmpStyleName) ||
-                                   "-webkit-column-width".equals(tmpStyleName)) {
+                                   "-webkit-column-width".equals(
+                                       tmpStyleName)) {
                           // Nothing to do
                         } else {
                           onlyColumnCount = false;
@@ -601,16 +633,22 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
                   }
 
                   if (onlyColumnCount && (columnCount > 0)) {
-                    List<String[]> columnsTemplates = analysis.getWPCConfiguration().getStringArrayList(
-                        WPCConfigurationStringList.COLUMNS_TEMPLATES);
-                    List<String[]> columns2Templates = analysis.getWPCConfiguration().getStringArrayList(
-                        WPCConfigurationStringList.COLUMNS2_TEMPLATES);
+                    List<String[]> columnsTemplates =
+                        analysis.getWPCConfiguration().getStringArrayList(
+                            WPCConfigurationStringList.COLUMNS_TEMPLATES);
+                    List<String[]> columns2Templates =
+                        analysis.getWPCConfiguration().getStringArrayList(
+                            WPCConfigurationStringList.COLUMNS2_TEMPLATES);
 
-                    if (((columnsTemplates != null) && (!columnsTemplates.isEmpty())) ||
-                        ((columns2Templates != null) && (!columns2Templates.isEmpty()))) {
+                    if (((columnsTemplates != null) &&
+                         (!columnsTemplates.isEmpty())) ||
+                        ((columns2Templates != null) &&
+                         (!columns2Templates.isEmpty()))) {
                       CheckErrorResult errorResult = createCheckErrorResult(
-                          analysis, tag.getCompleteBeginIndex(), tag.getCompleteEndIndex());
-                      String inside = contents.substring(tag.getValueBeginIndex(), tag.getValueEndIndex());
+                          analysis, tag.getCompleteBeginIndex(),
+                          tag.getCompleteEndIndex());
+                      String inside = contents.substring(
+                          tag.getValueBeginIndex(), tag.getValueEndIndex());
                       StringBuilder replacement = new StringBuilder();
                       if (columns2Templates != null) {
                         for (String[] columns2Template : columns2Templates) {
@@ -624,12 +662,17 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
                             replacement.append(columnCount);
                             replacement.append("}}");
                             replacement.append(inside);
-                            replacement.append(PageElementTemplate.createTemplate(columns2Template[1]));
+                            replacement.append(
+                                PageElementTemplate.createTemplate(
+                                    columns2Template[1]));
                             errorResult.addReplacement(
                                 replacement.toString(),
-                                GT._T("Use {0} and {1}", new Object[] {
-                                    PageElementTemplate.createTemplate(columns2Template[0]),
-                                    PageElementTemplate.createTemplate(columns2Template[1]) }));
+                                GT._T("Use {0} and {1}",
+                                      new Object[] {
+                                          PageElementTemplate.createTemplate(
+                                              columns2Template[0]),
+                                          PageElementTemplate.createTemplate(
+                                              columns2Template[1])}));
                           }
                         }
                       }
@@ -650,7 +693,9 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
                             replacement.append("}}");
                             errorResult.addReplacement(
                                 replacement.toString(),
-                                GT._T("Use {0}", PageElementTemplate.createTemplate(columnsTemplate[0])));
+                                GT._T("Use {0}",
+                                      PageElementTemplate.createTemplate(
+                                          columnsTemplate[0])));
                           }
                         }
                       }
@@ -662,13 +707,15 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
 
                 // General case
                 if (!reported) {
-                  int beginIndex = tag.getBeginIndex() + styleParam.getOffsetValue() + offset;
+                  int beginIndex = tag.getBeginIndex() +
+                                   styleParam.getOffsetValue() + offset;
                   int endIndex = beginIndex + styleName.length();
-                  while ((beginIndex > 0) && (contents.charAt(beginIndex - 1) == ' ')) {
+                  while ((beginIndex > 0) &&
+                         (contents.charAt(beginIndex - 1) == ' ')) {
                     beginIndex--;
                   }
-                  CheckErrorResult errorResult = createCheckErrorResult(
-                      analysis, beginIndex, endIndex);
+                  CheckErrorResult errorResult =
+                      createCheckErrorResult(analysis, beginIndex, endIndex);
                   errorResult.addReplacement("");
                   errors.add(errorResult);
                   reported = true;
@@ -684,7 +731,7 @@ public class CheckErrorAlgorithm112 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */

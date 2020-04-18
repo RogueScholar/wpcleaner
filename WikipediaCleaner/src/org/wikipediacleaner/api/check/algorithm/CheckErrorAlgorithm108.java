@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.SimpleAction;
 import org.wikipediacleaner.api.data.PageAnalysis;
@@ -21,29 +20,27 @@ import org.wikipediacleaner.api.data.PageElementTemplate;
 import org.wikipediacleaner.gui.swing.action.ActionExternalViewer;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 108 of check wikipedia project.
  * Error 108: ISSN wrong checksum
  */
 public class CheckErrorAlgorithm108 extends CheckErrorAlgorithmISSN {
 
-  public CheckErrorAlgorithm108() {
-    super("ISSN wrong checksum");
-  }
+  public CheckErrorAlgorithm108() { super("ISSN wrong checksum"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -55,15 +52,14 @@ public class CheckErrorAlgorithm108 extends CheckErrorAlgorithmISSN {
       String number = issn.getISSN();
       if ((number != null) && (number.length() == 8)) {
         char check = Character.toUpperCase(number.charAt(7));
-        char computedCheck = Character.toUpperCase(
-            PageElementISSN.computeChecksum(number));
+        char computedCheck =
+            Character.toUpperCase(PageElementISSN.computeChecksum(number));
 
         String message = null;
         if ((check != computedCheck) &&
             (Character.isDigit(computedCheck) || (computedCheck == 'X'))) {
-          message = GT._T(
-              "The checksum is {0} instead of {1}",
-              new Object[] { check, computedCheck } );
+          message = GT._T("The checksum is {0} instead of {1}",
+                          new Object[] {check, computedCheck});
         }
 
         if (message != null) {
@@ -71,7 +67,8 @@ public class CheckErrorAlgorithm108 extends CheckErrorAlgorithmISSN {
             return true;
           }
           result = true;
-          CheckErrorResult errorResult = createCheckErrorResult(analysis, issn, true);
+          CheckErrorResult errorResult =
+              createCheckErrorResult(analysis, issn, true);
           errorResult.addText(message);
           addHelpNeededTemplates(analysis, errorResult, issn);
           addHelpNeededComment(analysis, errorResult, issn);
@@ -82,29 +79,37 @@ public class CheckErrorAlgorithm108 extends CheckErrorAlgorithmISSN {
 
           // Add search engines using other parameters of the template
           if (issn.isTemplateParameter()) {
-            PageElementTemplate template = analysis.isInTemplate(issn.getBeginIndex());
+            PageElementTemplate template =
+                analysis.isInTemplate(issn.getBeginIndex());
             addSearchEngines(analysis, errorResult, template);
           }
 
           // Add search for other identifiers
-          errorResult.addPossibleAction(new SimpleAction(GT._T(
+          errorResult.addPossibleAction(new SimpleAction(
+              GT._T(
               "Search as OCLC"),
-              new ActionExternalViewer(MessageFormat.format("http://worldcat.org/oclc/{0}", originalValue))));
-          errorResult.addPossibleAction(new SimpleAction(GT._T(
+              new ActionExternalViewer(MessageFormat.format(
+                  "http://worldcat.org/oclc/{0}", originalValue))));
+          errorResult.addPossibleAction(
+              new SimpleAction(GT._T(
               "Search as LCCN"),
-              new ActionExternalViewer(MessageFormat.format("http://lccn.loc.gov/{0}", originalValue))));
+                               new ActionExternalViewer(MessageFormat.format(
+                                   "http://lccn.loc.gov/{0}", originalValue))));
 
           // Add ISSN with modified checksum
           List<String> searchISSN = new ArrayList<>();
           if (computedCheck != check) {
-            String value = originalValue.substring(0, originalValue.length() - 1) + computedCheck;
+            String value =
+                originalValue.substring(0, originalValue.length() - 1) +
+                computedCheck;
             addSearchISSN(searchISSN, value, false);
           }
 
           // Add ISSN with characters inversion
           if (originalValue.length() == 8) {
             int previousChar = -1;
-            for (int currentChar = 0; currentChar < originalValue.length(); currentChar++) {
+            for (int currentChar = 0; currentChar < originalValue.length();
+                 currentChar++) {
               if (Character.isDigit(originalValue.charAt(currentChar))) {
                 if (previousChar >= 0) {
                   String value =
@@ -122,13 +127,13 @@ public class CheckErrorAlgorithm108 extends CheckErrorAlgorithmISSN {
 
           // Add ISSN with one modified digit
           if (originalValue.length() == 8) {
-            for (int currentChar = 0; currentChar < originalValue.length(); currentChar++) {
+            for (int currentChar = 0; currentChar < originalValue.length();
+                 currentChar++) {
               if (Character.isDigit(originalValue.charAt(currentChar))) {
                 for (char newChar = '0'; newChar <= '9'; newChar++) {
-                  String value =
-                      originalValue.substring(0, currentChar) +
-                      newChar +
-                      originalValue.substring(currentChar + 1);
+                  String value = originalValue.substring(0, currentChar) +
+                                 newChar +
+                                 originalValue.substring(currentChar + 1);
                   addSearchISSN(searchISSN, value, false);
                 }
               }
@@ -136,9 +141,8 @@ public class CheckErrorAlgorithm108 extends CheckErrorAlgorithmISSN {
           }
 
           // Add direct search engines
-          addSearchEngines(
-              analysis, errorResult, searchISSN,
-              GT._T("Similar ISSN"));
+          addSearchEngines(analysis, errorResult, searchISSN,
+                           GT._T("Similar ISSN"));
 
           errors.add(errorResult);
         }
@@ -153,10 +157,11 @@ public class CheckErrorAlgorithm108 extends CheckErrorAlgorithmISSN {
    * @param issn ISSN to be added.
    * @param force True if ISSN should be added even if incorrect.
    */
-  private void addSearchISSN(List<String> searchISSN, String issn, boolean force) {
+  private void addSearchISSN(List<String> searchISSN, String issn,
+                             boolean force) {
     if (!searchISSN.contains(issn)) {
-      if (force ||
-          (PageElementISSN.computeChecksum(issn) == issn.charAt(issn.length() - 1))) {
+      if (force || (PageElementISSN.computeChecksum(issn) ==
+                    issn.charAt(issn.length() - 1))) {
         searchISSN.add(issn);
       }
     }
@@ -176,7 +181,8 @@ public class CheckErrorAlgorithm108 extends CheckErrorAlgorithmISSN {
       return null;
     }
     char check = Character.toUpperCase(number.charAt(7));
-    char computedCheck = Character.toUpperCase(PageElementISSN.computeChecksum(number));
+    char computedCheck =
+        Character.toUpperCase(PageElementISSN.computeChecksum(number));
     if (check != computedCheck) {
       if (reasonTemplate == null) {
         return null;
@@ -199,12 +205,14 @@ public class CheckErrorAlgorithm108 extends CheckErrorAlgorithmISSN {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
-    reasonTemplate = getSpecificProperty(PARAMETER_REASON_CHECKSUM, true, true, false);
+    reasonTemplate =
+        getSpecificProperty(PARAMETER_REASON_CHECKSUM, true, true, false);
     if (reasonTemplate == null) {
       reasonTemplate = getSpecificProperty(PARAMETER_REASON, true, true, false);
     }
@@ -215,16 +223,15 @@ public class CheckErrorAlgorithm108 extends CheckErrorAlgorithmISSN {
 
   /**
    * Return the parameters used to configure the algorithm.
-   * 
+   *
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_REASON,
-        GT._T("An explanation of the problem"));
+    parameters.put(PARAMETER_REASON, GT._T("An explanation of the problem"));
     return parameters;
   }
 }

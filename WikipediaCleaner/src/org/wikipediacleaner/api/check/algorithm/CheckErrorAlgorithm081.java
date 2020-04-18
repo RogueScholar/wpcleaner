@@ -14,9 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.swing.JOptionPane;
-
 import org.wikipediacleaner.api.check.AddTextActionProvider;
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.SimpleAction;
@@ -34,7 +32,6 @@ import org.wikipediacleaner.utils.StringCheckerReferenceName;
 import org.wikipediacleaner.utils.TextProvider;
 import org.wikipediacleaner.utils.TextProviderUrlTitle;
 
-
 /**
  * Algorithm for analyzing error 81 of check wikipedia project.
  * Error 81: Reference duplication.
@@ -50,7 +47,7 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
    * Possible global fixes.
    */
   private final static String[] globalFixes = new String[] {
-    GT._T("Fix reference duplication"),
+      GT._T("Fix reference duplication"),
   };
 
   public CheckErrorAlgorithm081() {
@@ -60,14 +57,14 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
 
   /**
    * Group tags by group and value.
-   * 
+   *
    * @param analysis Page analysis.
    * @param refs Tags (out).
    * @return True if there are several tags with the same text.
    */
-  private boolean groupTags(
-      PageAnalysis analysis,
-      Map<String, Map<String, List<PageElementTag>>> refs) {
+  private boolean
+  groupTags(PageAnalysis analysis,
+            Map<String, Map<String, List<PageElementTag>>> refs) {
     List<PageElementTag> completeRefTags =
         analysis.getCompleteTags(PageElementTag.TAG_WIKI_REF);
     String contents = analysis.getContents();
@@ -75,9 +72,7 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
     for (PageElementTag tag : completeRefTags) {
       int valueBeginIndex = tag.getValueBeginIndex();
       int valueEndIndex = tag.getValueEndIndex();
-      if ((!tag.isFullTag()) &&
-          (valueBeginIndex > 0) &&
-          (valueEndIndex > 0) &&
+      if ((!tag.isFullTag()) && (valueBeginIndex > 0) && (valueEndIndex > 0) &&
           (valueBeginIndex < valueEndIndex)) {
 
         // Retrieve references with the same group name
@@ -108,7 +103,7 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
 
   /**
    * Get all names used in a list of reference tags.
-   *  
+   *
    * @param refs List of reference tags.
    * @return List of names.
    */
@@ -128,13 +123,14 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
 
   /**
    * Construct a closed reference tag.
-   * 
+   *
    * @param groupName Name of the group.
    * @param tagName Name of the tag.
    * @param value Value of the tag.
    * @return Reference tag.
    */
-  private String getClosedRefTag(String groupName, String tagName, String value) {
+  private String getClosedRefTag(String groupName, String tagName,
+                                 String value) {
     StringBuilder result = new StringBuilder();
     result.append("<ref");
     if ((groupName != null) && (groupName.trim().length() > 0)) {
@@ -159,16 +155,17 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -186,13 +183,16 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
       return true;
     }
 
-    // Second pass for managing with several tags having the same group and value
+    // Second pass for managing with several tags having the same group and
+    // value
     List<PageElementTag> completeReferencesTags =
         analysis.getCompleteTags(PageElementTag.TAG_WIKI_REFERENCES);
     String contents = analysis.getContents();
-    for (Entry<String, Map<String, List<PageElementTag>>> entryGroup : refs.entrySet()) {
+    for (Entry<String, Map<String, List<PageElementTag>>> entryGroup :
+         refs.entrySet()) {
       String groupName = entryGroup.getKey();
-      for (Entry<String, List<PageElementTag>> entryValue : entryGroup.getValue().entrySet()) {
+      for (Entry<String, List<PageElementTag>> entryValue :
+           entryGroup.getValue().entrySet()) {
         List<PageElementTag> listTags = entryValue.getValue();
         if (listTags.size() > 1) {
 
@@ -202,23 +202,25 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
           if (mainTag != null) {
 
             // Create an error for each tag, except for the main tag
-            String selectedName = mainTag.getParameter("name").getTrimmedValue();
+            String selectedName =
+                mainTag.getParameter("name").getTrimmedValue();
             for (PageElementTag tag : listTags) {
               if (tag == mainTag) {
                 CheckErrorResult errorResult = createCheckErrorResult(
-                    analysis,
-                    tag.getCompleteBeginIndex(), tag.getCompleteEndIndex(),
+                    analysis, tag.getCompleteBeginIndex(),
+                    tag.getCompleteEndIndex(),
                     CheckErrorResult.ErrorLevel.CORRECT);
                 errors.add(errorResult);
               } else {
                 Parameter name = tag.getParameter("name");
-                String nameValue = (name != null) ? name.getTrimmedValue() : null;
+                String nameValue =
+                    (name != null) ? name.getTrimmedValue() : null;
                 if (nameValue != null) {
                   nameValue = nameValue.trim();
                 }
                 CheckErrorResult errorResult = createCheckErrorResult(
-                    analysis,
-                    tag.getCompleteBeginIndex(), tag.getCompleteEndIndex());
+                    analysis, tag.getCompleteBeginIndex(),
+                    tag.getCompleteEndIndex());
                 errorResult.addReplacement(
                     getClosedRefTag(groupName, selectedName, null),
                     selectedName.equals(nameValue) || (name == null));
@@ -232,8 +234,10 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
               int valueEndIndex = tag.getValueEndIndex();
 
               // Find if an external link is in the reference tag
-              List<PageElementExternalLink> externalLinks = analysis.getExternalLinks();
-              List<PageElementExternalLink> links = new ArrayList<PageElementExternalLink>();
+              List<PageElementExternalLink> externalLinks =
+                  analysis.getExternalLinks();
+              List<PageElementExternalLink> links =
+                  new ArrayList<PageElementExternalLink>();
               for (PageElementExternalLink externalLink : externalLinks) {
                 if ((externalLink.getBeginIndex() >= valueBeginIndex) &&
                     (externalLink.getEndIndex() <= valueEndIndex)) {
@@ -242,32 +246,33 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
               }
 
               // Register error
-              CheckErrorResult errorResult = createCheckErrorResult(
-                  analysis,
-                  tag.getCompleteBeginIndex(), tag.getCompleteEndIndex());
+              CheckErrorResult errorResult =
+                  createCheckErrorResult(analysis, tag.getCompleteBeginIndex(),
+                                         tag.getCompleteEndIndex());
 
               // Add an action for naming the reference tag
-              // TODO: manage a better action for naming the reference tag and replacing all other tags
+              // TODO: manage a better action for naming the reference tag and
+              // replacing all other tags
               TextProvider provider = null;
               if (links.size() > 0) {
                 provider = new TextProviderUrlTitle(links.get(0).getLink());
               }
-              String prefix = contents.substring(tag.getBeginIndex(), tag.getEndIndex() - 1);
-              String suffix = contents.substring(tag.getEndIndex() - 1, tag.getCompleteEndIndex());
+              String prefix = contents.substring(tag.getBeginIndex(),
+                                                 tag.getEndIndex() - 1);
+              String suffix = contents.substring(tag.getEndIndex() - 1,
+                                                 tag.getCompleteEndIndex());
               errorResult.addPossibleAction(
                   GT._T("Give a name to the <ref> tag"),
                   new AddTextActionProvider(
-                      prefix + " name=\"",
-                      "\"" + suffix,
-                      provider,
+                      prefix + " name=\"", "\"" + suffix, provider,
                       GT._T("What name would you like to use for the <ref> tag ?"),
                       nameChecker));
 
               // Add actions for external links
               for (PageElementExternalLink link : links) {
-                errorResult.addPossibleAction(new SimpleAction(
-                    GT._T("External Viewer"),
-                    new ActionExternalViewer(link.getLink())));
+                errorResult.addPossibleAction(
+                    new SimpleAction(GT._T("External Viewer"),
+                                     new ActionExternalViewer(link.getLink())));
               }
               errors.add(errorResult);
             }
@@ -288,7 +293,7 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
 
   /**
    * Fix all the errors in the page.
-   * 
+   *
    * @param fixName Fix name (extracted from getGlobalFixes()).
    * @param analysis Page analysis.
    * @param textPane Text pane.
@@ -309,12 +314,16 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
     // Memorize tag names by group and value
     Map<String, Map<String, List<String>>> refNamesByGroupAndValue =
         new HashMap<String, Map<String, List<String>>>();
-    for (Entry<String, Map<String, List<PageElementTag>>> refsByValueForGroup : refsByGroupAndValue.entrySet()) {
+    for (Entry<String, Map<String, List<PageElementTag>>> refsByValueForGroup :
+         refsByGroupAndValue.entrySet()) {
       String groupName = refsByValueForGroup.getKey();
-      Map<String, List<PageElementTag>> groupRefsByValue = refsByValueForGroup.getValue();
-      Map<String, List<String>> groupRefNamesByValue = new HashMap<String, List<String>>();
+      Map<String, List<PageElementTag>> groupRefsByValue =
+          refsByValueForGroup.getValue();
+      Map<String, List<String>> groupRefNamesByValue =
+          new HashMap<String, List<String>>();
       refNamesByGroupAndValue.put(groupName, groupRefNamesByValue);
-      for (Entry<String, List<PageElementTag>> refsForGroupAndValue : groupRefsByValue.entrySet()) {
+      for (Entry<String, List<PageElementTag>> refsForGroupAndValue :
+           groupRefsByValue.entrySet()) {
         String value = refsForGroupAndValue.getKey();
         List<PageElementTag> refTags = refsForGroupAndValue.getValue();
         List<String> possibleNames = getRefNames(refTags);
@@ -333,22 +342,27 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
 
       // Retrieve basic information
       PageElementTag.Parameter groupParameter = refTag.getParameter("group");
-      String groupName = (groupParameter != null) ? groupParameter.getValue() : null;
-      Map<String, List<PageElementTag>> groupRefs = refsByGroupAndValue.get(groupName);
-      String valueRef = contents.substring(refTag.getValueBeginIndex(), refTag.getValueEndIndex());
+      String groupName =
+          (groupParameter != null) ? groupParameter.getValue() : null;
+      Map<String, List<PageElementTag>> groupRefs =
+          refsByGroupAndValue.get(groupName);
+      String valueRef = contents.substring(refTag.getValueBeginIndex(),
+                                           refTag.getValueEndIndex());
       List<PageElementTag> valueRefs = groupRefs.get(valueRef);
 
       // Check if there is more than one tag with the same value
       if ((valueRefs != null) && (valueRefs.size() > 1)) {
 
         // Display selection
-        highlight = addHighlight(
-            textPane, refTag.getCompleteBeginIndex(), refTag.getCompleteEndIndex());
-        textPane.select(refTag.getCompleteBeginIndex(), refTag.getCompleteEndIndex());
-  
+        highlight = addHighlight(textPane, refTag.getCompleteBeginIndex(),
+                                 refTag.getCompleteEndIndex());
+        textPane.select(refTag.getCompleteBeginIndex(),
+                        refTag.getCompleteEndIndex());
+
         // Check if a name already exists
         String replacement = null;
-        List<String> possibleNames = refNamesByGroupAndValue.get(groupName).get(valueRef);
+        List<String> possibleNames =
+            refNamesByGroupAndValue.get(groupName).get(valueRef);
         if ((possibleNames != null) && (possibleNames.size() > 0)) {
           String selectedName = possibleNames.get(0);
           PageElementTag mainRef = PageElementTag.getMainRef(
@@ -356,9 +370,14 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
           if (mainRef != refTag) {
             String tmp = getClosedRefTag(groupName, selectedName, null);
             String message =
-                GT._T("A <ref> tag shares the same content, and is named \"{0}\".", selectedName) + "\n" +
-                GT._T("Do you want to replace this <ref> tag by \"{0}\" ?", tmp);
-            int answer = Utilities.displayYesNoCancelWarning(textPane.getParent(), message);
+                GT._T(
+                    "A <ref> tag shares the same content, and is named \"{0}\".",
+                    selectedName) +
+                "\n" +
+                GT._T("Do you want to replace this <ref> tag by \"{0}\" ?",
+                      tmp);
+            int answer = Utilities.displayYesNoCancelWarning(
+                textPane.getParent(), message);
             if (answer == JOptionPane.YES_OPTION) {
               replacement = tmp;
             } else if (answer == JOptionPane.CANCEL_OPTION) {
@@ -367,9 +386,11 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
           }
         } else {
           String message =
-              GT._T("Several <ref> tags share the same content, but none has been given a name.") +"\n" +
+              GT._T("Several <ref> tags share the same content, but none has been given a name.")
+              + "\n" +
               GT._T("What name do you want to use for this <ref> tag ?");
-          String newText = Utilities.askForValue(textPane.getParent(), message, (String) null, nameChecker);
+          String newText = Utilities.askForValue(textPane.getParent(), message,
+                                                 (String)null, nameChecker);
           if (newText != null) {
             replacement = getClosedRefTag(groupName, newText, valueRef);
             possibleNames = Collections.singletonList(newText);
@@ -380,7 +401,8 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
         // Do the replacement
         if (replacement != null) {
           if (currentIndex < refTag.getBeginIndex()) {
-            tmpContents.append(contents.substring(currentIndex, refTag.getCompleteBeginIndex()));
+            tmpContents.append(contents.substring(
+                currentIndex, refTag.getCompleteBeginIndex()));
           }
           tmpContents.append(replacement);
           currentIndex = refTag.getCompleteEndIndex();
@@ -404,17 +426,17 @@ public class CheckErrorAlgorithm081 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
   @Override
   protected String internalAutomaticFix(PageAnalysis analysis) {
     // TODO: move to initializeSettings()
-    List<String[]> refTemplates = analysis.getWPCConfiguration().getStringArrayList(
-        WPCConfigurationStringList.REFERENCES_TEMPLATES);
-    if ((refTemplates == null) ||
-        (refTemplates.isEmpty()) ||
+    List<String[]> refTemplates =
+        analysis.getWPCConfiguration().getStringArrayList(
+            WPCConfigurationStringList.REFERENCES_TEMPLATES);
+    if ((refTemplates == null) || (refTemplates.isEmpty()) ||
         analysis.getPage().isInUserNamespace()) {
       return analysis.getContents();
     }

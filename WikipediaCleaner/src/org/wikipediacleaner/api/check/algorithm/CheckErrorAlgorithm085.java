@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.CheckErrorResult.ErrorLevel;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
@@ -22,7 +21,6 @@ import org.wikipediacleaner.api.data.PageElementTemplate;
 import org.wikipediacleaner.api.data.contents.ContentsComment;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 85 of check wikipedia project.
  * Error 85: Tag without content
@@ -30,38 +28,34 @@ import org.wikipediacleaner.i18n.GT;
 public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
 
   private final static String[] interestingTags = {
-    PageElementTag.TAG_HTML_CENTER,
-    PageElementTag.TAG_HTML_DIV,
-    PageElementTag.TAG_HTML_SPAN,
-    PageElementTag.TAG_HTML_SUP,
-    PageElementTag.TAG_WIKI_INCLUDEONLY,
-    PageElementTag.TAG_WIKI_GALLERY,
-    PageElementTag.TAG_WIKI_NOINCLUDE,
+      PageElementTag.TAG_HTML_CENTER,      PageElementTag.TAG_HTML_DIV,
+      PageElementTag.TAG_HTML_SPAN,        PageElementTag.TAG_HTML_SUP,
+      PageElementTag.TAG_WIKI_INCLUDEONLY, PageElementTag.TAG_WIKI_GALLERY,
+      PageElementTag.TAG_WIKI_NOINCLUDE,
   };
 
   private final static String[] ignoredTags = {
-    PageElementTag.TAG_HTML_CODE,
-    PageElementTag.TAG_WIKI_NOWIKI,
-    PageElementTag.TAG_WIKI_PRE,
-    PageElementTag.TAG_WIKI_SCORE,
+      PageElementTag.TAG_HTML_CODE,
+      PageElementTag.TAG_WIKI_NOWIKI,
+      PageElementTag.TAG_WIKI_PRE,
+      PageElementTag.TAG_WIKI_SCORE,
   };
 
-  public CheckErrorAlgorithm085() {
-    super("Tag without content");
-  }
+  public CheckErrorAlgorithm085() { super("Tag without content"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -80,7 +74,7 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
             interesting = true;
           }
         }
-  
+
         // Check tag
         if (interesting) {
           ErrorLevel errorLevel = ErrorLevel.ERROR;
@@ -92,7 +86,8 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
           int currentIndex = tag.getValueBeginIndex();
           int lastIndex = tag.getValueEndIndex();
           StringBuilder replacementText = new StringBuilder();
-          replacementText.append(contents.substring(tag.getBeginIndex(), tag.getEndIndex()));
+          replacementText.append(
+              contents.substring(tag.getBeginIndex(), tag.getEndIndex()));
           boolean useReplacement = false;
           while (!textFound && (currentIndex < lastIndex)) {
             char currentChar = contents.charAt(currentIndex);
@@ -111,8 +106,9 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
                       ignoredText = true;
                       errorLevel = ErrorLevel.WARNING;
                       if (PageElementTag.TAG_WIKI_NOWIKI.equals(ignoredTag)) {
-                        replacementText.append(contents.substring(
-                            internalTag.getValueBeginIndex(), internalTag.getValueEndIndex()));
+                        replacementText.append(
+                            contents.substring(internalTag.getValueBeginIndex(),
+                                               internalTag.getValueEndIndex()));
                         useReplacement = true;
                       } else {
                         replacementText.append(contents.substring(
@@ -125,7 +121,8 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
                   ContentsComment comment = analysis.isInComment(currentIndex);
                   if (comment != null) {
                     ok = true;
-                    replacementText.append(contents.substring(currentIndex, comment.getEndIndex()));
+                    replacementText.append(contents.substring(
+                        currentIndex, comment.getEndIndex()));
                     errorLevel = ErrorLevel.WARNING;
                     currentIndex = comment.getEndIndex();
                   }
@@ -139,8 +136,8 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
             }
           }
           boolean shouldReport = !textFound;
-          replacementText.append(contents.substring(
-              tag.getValueEndIndex(), tag.getCompleteEndIndex()));
+          replacementText.append(contents.substring(tag.getValueEndIndex(),
+                                                    tag.getCompleteEndIndex()));
 
           // Check if tag has arguments
           boolean hasUnsafeArguments = false;
@@ -150,7 +147,8 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
               if (PageElementTag.TAG_WIKI_REF.equals(tagName)) {
                 shouldReport = false;
               } else if (PageElementTag.TAG_HTML_SPAN.equals(tagName)) {
-                for (int paramNum = 0; paramNum < tag.getParametersCount(); paramNum++) {
+                for (int paramNum = 0; paramNum < tag.getParametersCount();
+                     paramNum++) {
                   Parameter param = tag.getParameter(paramNum);
                   if (param != null) {
                     String paramName = param.getName();
@@ -160,10 +158,12 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
                   }
                 }
               } else if (PageElementTag.TAG_HTML_DIV.equals(tagName)) {
-                if ((tag.getParametersCount() == 1) && (tag.getParameter("id") != null)) {
+                if ((tag.getParametersCount() == 1) &&
+                    (tag.getParameter("id") != null)) {
                   shouldReport = false;
                 }
-                for (int paramNum = 0; paramNum < tag.getParametersCount(); paramNum++) {
+                for (int paramNum = 0; paramNum < tag.getParametersCount();
+                     paramNum++) {
                   hasUnsafeArguments = true;
                   Parameter param = tag.getParameter("style");
                   if (param != null) {
@@ -173,7 +173,8 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
                       for (String style : styles) {
                         int colonIndex = style.indexOf(':');
                         if ((colonIndex > 0) &&
-                            ("clear".equalsIgnoreCase(style.substring(0, colonIndex).trim()))) {
+                            ("clear".equalsIgnoreCase(
+                                style.substring(0, colonIndex).trim()))) {
                           shouldReport = false;
                         }
                       }
@@ -196,19 +197,23 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
             // Define the extension of the replacement
             int beginIndex = tag.getCompleteBeginIndex();
             int endIndex = tag.getCompleteEndIndex();
-            String internalValue = contents.substring(tag.getValueBeginIndex(), tag.getValueEndIndex());
+            String internalValue = contents.substring(tag.getValueBeginIndex(),
+                                                      tag.getValueEndIndex());
             if (!ignoredText) {
               if ((endIndex == contents.length()) ||
                   (contents.charAt(endIndex) == '\n')) {
                 int tmpBeginIndex = beginIndex;
-                while ((tmpBeginIndex > 0) && (contents.charAt(tmpBeginIndex - 1) == '\n')) {
+                while ((tmpBeginIndex > 0) &&
+                       (contents.charAt(tmpBeginIndex - 1) == '\n')) {
                   tmpBeginIndex--;
                 }
                 int tmpEndIndex = endIndex;
-                while ((tmpEndIndex < contents.length()) && (contents.charAt(tmpEndIndex) == '\n')) {
+                while ((tmpEndIndex < contents.length()) &&
+                       (contents.charAt(tmpEndIndex) == '\n')) {
                   tmpEndIndex++;
                 }
-                int countCR = (beginIndex - tmpBeginIndex) + (tmpEndIndex - endIndex);
+                int countCR =
+                    (beginIndex - tmpBeginIndex) + (tmpEndIndex - endIndex);
                 if (tmpBeginIndex == 0) {
                   countCR += 2;
                 }
@@ -221,8 +226,10 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
                     internalValue = internalValue.substring(1);
                   }
                   while ((internalValue.length() > 0) &&
-                         (Character.isWhitespace(internalValue.charAt(internalValue.length() - 1)))) {
-                    internalValue = internalValue.substring(0, internalValue.length() - 1);
+                         (Character.isWhitespace(internalValue.charAt(
+                             internalValue.length() - 1)))) {
+                    internalValue =
+                        internalValue.substring(0, internalValue.length() - 1);
                   }
                 }
                 /*if (countCR == 1) {
@@ -232,9 +239,11 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
                     internalValue = internalValue.substring(1);
                   }
                   while ((internalValue.length() > 1) &&
-                         (Character.isWhitespace(internalValue.charAt(internalValue.length() - 1))) &&
-                         (Character.isWhitespace(internalValue.charAt(internalValue.length() - 2)))) {
-                    internalValue = internalValue.substring(0, internalValue.length() - 1);
+                         (Character.isWhitespace(internalValue.charAt(internalValue.length()
+                - 1))) &&
+                         (Character.isWhitespace(internalValue.charAt(internalValue.length()
+                - 2)))) { internalValue = internalValue.substring(0,
+                internalValue.length() - 1);
                   }
                 }*/
                 if (countCR > 2) {
@@ -248,12 +257,14 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
                 }
               }
             }
-            CheckErrorResult errorResult = createCheckErrorResult(analysis, beginIndex, endIndex, errorLevel);
+            CheckErrorResult errorResult = createCheckErrorResult(
+                analysis, beginIndex, endIndex, errorLevel);
 
             // Suggest replacements
             if (!ignoredText) {
               if (internalValue.length() > 0) {
-                errorResult.addReplacement(internalValue, !hasUnsafeArguments && isEmpty);
+                errorResult.addReplacement(internalValue,
+                                           !hasUnsafeArguments && isEmpty);
                 errorResult.addReplacement("");
               } else {
                 errorResult.addReplacement("", !hasUnsafeArguments && isEmpty);
@@ -276,7 +287,8 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
                     replacement.append("}}");
                     errorResult.addReplacement(
                         replacement.toString(),
-                        GT._T("Use {0}", PageElementTemplate.createTemplate(template[0])));
+                        GT._T("Use {0}",
+                              PageElementTemplate.createTemplate(template[0])));
                   }
                 }
               }
@@ -291,7 +303,7 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -312,15 +324,18 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
-    String tmp = getSpecificProperty(PARAMETER_CENTER_TEMPLATES, true, true, false);
+    String tmp =
+        getSpecificProperty(PARAMETER_CENTER_TEMPLATES, true, true, false);
     centerTemplates.clear();
     if (tmp != null) {
-      List<String[]> tmpList = WPCConfiguration.convertPropertyToStringArrayList(tmp);
+      List<String[]> tmpList =
+          WPCConfiguration.convertPropertyToStringArrayList(tmp);
       if (tmpList != null) {
         centerTemplates.addAll(tmpList);
       }
@@ -332,7 +347,8 @@ public class CheckErrorAlgorithm085 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {

@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.regex.Matcher;
-
 import org.wikipediacleaner.api.check.Actionnable;
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.check.CompositeAction;
@@ -37,37 +36,35 @@ import org.wikipediacleaner.utils.Configuration;
 import org.wikipediacleaner.utils.ConfigurationValueInteger;
 import org.wikipediacleaner.utils.Performance;
 
-
 /**
  * Algorithm for analyzing error 501 of check wikipedia project.
  * Error 501: Spelling and typography
  */
 public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm501() {
-    super("Spelling and typography");
-  }
+  public CheckErrorAlgorithm501() { super("Spelling and typography"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors,
-      boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     boolean result = false;
     if ((analysis == null) || (!analysis.shouldCheckSpelling())) {
       return result;
     }
 
     // Initialize active suggestions
-    List<Suggestion> tmpSuggestions = onlyAutomatic ? automaticActiveSuggestions : allActiveSuggestions;
+    List<Suggestion> tmpSuggestions =
+        onlyAutomatic ? automaticActiveSuggestions : allActiveSuggestions;
     if (tmpSuggestions.isEmpty()) {
       return false;
     }
@@ -126,7 +123,8 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
           for (Replacement replacement1 : replacements1) {
             if (!Boolean.TRUE.equals(replacement1.isMultiple())) {
               for (Replacement replacement2 : replacements2) {
-                if (replacement1.getReplacement().equals(replacement2.getReplacement())) {
+                if (replacement1.getReplacement().equals(
+                        replacement2.getReplacement())) {
                   replacement1.setMultiple();
                   replacement2.setMultiple();
                 }
@@ -142,8 +140,8 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
     for (ReplacementGroup group : groups) {
 
       // Create error
-      CheckErrorResult error = createCheckErrorResult(
-          analysis, group.getBegin(), group.getEnd());
+      CheckErrorResult error =
+          createCheckErrorResult(analysis, group.getBegin(), group.getEnd());
       String previousComment = null;
       multiples.clear();
       for (Replacement replacement : group.getReplacements()) {
@@ -157,7 +155,8 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
         }
         previousComment = comment;
 
-        error.addReplacement(replacement.getReplacement(), replacement.isAutomatic());
+        error.addReplacement(replacement.getReplacement(),
+                             replacement.isAutomatic());
         if (Boolean.TRUE.equals(replacement.isMultiple())) {
           multiples.add(replacement.getReplacement());
         }
@@ -173,9 +172,12 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
         } else {
           List<Actionnable> actions = new ArrayList<Actionnable>();
           for (String multiple : multiples) {
-            actions.add(new SimpleAction(multiple, new MWPaneReplaceAllAction(group.getText(), multiple)));
+            actions.add(new SimpleAction(
+                multiple,
+                new MWPaneReplaceAllAction(group.getText(), multiple)));
           }
-          error.addPossibleAction(new CompositeAction(GT._T("Replace each time with"), actions));
+          error.addPossibleAction(
+              new CompositeAction(GT._T("Replace each time with"), actions));
         }
       }
       errors.add(error);
@@ -186,22 +188,23 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
 
   /**
    * Check spelling in normal text with native regular expressions.
-   * 
+   *
    * @param analysis Page analysis.
    * @param suggestions Active suggestions.
    * @param replacements List of possible replacements.
    * @return True if an error has been found.
    */
-  private boolean analyzeNativeText(
-      PageAnalysis analysis, List<Suggestion> suggestions,
-      List<Replacement> replacements) {
+  private boolean analyzeNativeText(PageAnalysis analysis,
+                                    List<Suggestion> suggestions,
+                                    List<Replacement> replacements) {
     boolean result = false;
 
     // Check every suggestion
     List<ContentsChunk> chunks = computeContentsChunks(analysis, true);
     String contents = analysis.getContents();
     Iterator<Suggestion> itSuggestion = suggestions.iterator();
-    List<Replacement> tmpReplacements = new ArrayList<CheckErrorAlgorithm501.Replacement>();
+    List<Replacement> tmpReplacements =
+        new ArrayList<CheckErrorAlgorithm501.Replacement>();
     while (itSuggestion.hasNext()) {
       Suggestion suggestion = itSuggestion.next();
       if (!suggestion.isOtherPattern()) {
@@ -228,9 +231,9 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
             }
             if (shouldKeep) {
               tmpReplacements.clear();
-              shouldKeep = addReplacements(
-                  begin, end, contents, authorizedBegin, chunk.getEnd(),
-                  suggestion, tmpReplacements);
+              shouldKeep =
+                  addReplacements(begin, end, contents, authorizedBegin,
+                                  chunk.getEnd(), suggestion, tmpReplacements);
             }
             if (shouldKeep && (analysis.getAreas().getEndArea(begin) > begin)) {
               shouldKeep = false;
@@ -258,22 +261,23 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
 
   /**
    * Check spelling in normal text with non native regular expressions.
-   * 
+   *
    * @param analysis Page analysis.
    * @param suggestions Active suggestions.
    * @param replacements List of possible replacements.
    * @return True if an error has been found.
    */
-  private boolean analyzeNonNativeText(
-      PageAnalysis analysis, List<Suggestion> suggestions,
-      List<Replacement> replacements) {
+  private boolean analyzeNonNativeText(PageAnalysis analysis,
+                                       List<Suggestion> suggestions,
+                                       List<Replacement> replacements) {
     boolean result = false;
 
     // Check every suggestion
     List<ContentsChunk> chunks = computeContentsChunks(analysis, false);
     String contents = analysis.getContents();
     Iterator<Suggestion> itSuggestion = suggestions.iterator();
-    List<Replacement> tmpReplacements = new ArrayList<CheckErrorAlgorithm501.Replacement>();
+    List<Replacement> tmpReplacements =
+        new ArrayList<CheckErrorAlgorithm501.Replacement>();
     while (itSuggestion.hasNext()) {
       Suggestion suggestion = itSuggestion.next();
       if (suggestion.isOtherPattern()) {
@@ -288,9 +292,9 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
             int begin = matcher.start();
             int end = matcher.end();
             tmpReplacements.clear();
-            boolean shouldKeep = addReplacements(
-                begin, end, contents, authorizedBegin, chunk.getEnd(),
-                suggestion, tmpReplacements);
+            boolean shouldKeep =
+                addReplacements(begin, end, contents, authorizedBegin,
+                                chunk.getEnd(), suggestion, tmpReplacements);
             if (shouldKeep) {
               shouldKeep = shouldKeep(contents, begin, end);
             }
@@ -311,7 +315,7 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
 
   /**
    * Decide if a potential spelling error should be kept as error.
-   * 
+   *
    * @param contents Text.
    * @param begin Begin index of the potential spelling error.
    * @param end End index of the potential spelling error.
@@ -349,27 +353,27 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
         }
         urlEnd++;
       }
-      //System.err.println(contents.substring(urlBegin, urlEnd));
+      // System.err.println(contents.substring(urlBegin, urlEnd));
       if ((urlEnd >= end) && (lastDot > 0) && onlyChars &&
           (urlEnd <= lastDot + 4) && (urlEnd > lastDot + 1)) {
         shouldKeep = false;
       }
     }
-    
+
     return shouldKeep;
   }
 
   /**
    * Check spelling in templates.
-   * 
+   *
    * @param analysis Page analysis.
    * @param suggestions Active suggestions.
    * @param replacements List of possible replacements.
    * @return True if an error has been found.
    */
-  private boolean analyzeTemplates(
-      PageAnalysis analysis, List<Suggestion> suggestions,
-      List<Replacement> replacements) {
+  private boolean analyzeTemplates(PageAnalysis analysis,
+                                   List<Suggestion> suggestions,
+                                   List<Replacement> replacements) {
     boolean result = false;
 
     // Check each suggestion
@@ -392,9 +396,9 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
             if ((end >= contentsLength) ||
                 (!Character.isLetterOrDigit(contents.charAt(end))) ||
                 (!Character.isLetterOrDigit(contents.charAt(end - 1)))) {
-              result |= addReplacements(
-                  begin, end, contents, begin, contentsLength,
-                  suggestion, replacements);
+              result |=
+                  addReplacements(begin, end, contents, begin, contentsLength,
+                                  suggestion, replacements);
             }
           }
         }
@@ -407,9 +411,9 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
             if ((end >= contentsLength) ||
                 (!Character.isLetterOrDigit(contents.charAt(end))) ||
                 (!Character.isLetterOrDigit(contents.charAt(end - 1)))) {
-              result |= addReplacements(
-                  begin, end, contents, begin, contentsLength,
-                  suggestion, replacements);
+              result |=
+                  addReplacements(begin, end, contents, begin, contentsLength,
+                                  suggestion, replacements);
             }
           }
         }
@@ -421,15 +425,15 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
 
   /**
    * Check spelling in internal links.
-   * 
+   *
    * @param analysis Page analysis.
    * @param suggestions Active suggestions.
    * @param replacements List of possible replacements.
    * @return True if an error has been found.
    */
-  private boolean analyzeInternalLinks(
-      PageAnalysis analysis, List<Suggestion> suggestions,
-      List<Replacement> replacements) {
+  private boolean analyzeInternalLinks(PageAnalysis analysis,
+                                       List<Suggestion> suggestions,
+                                       List<Replacement> replacements) {
     boolean result = false;
 
     // Check each suggestion
@@ -451,9 +455,9 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
             if ((end >= contentsLength) ||
                 (!Character.isLetterOrDigit(contents.charAt(end))) ||
                 (!Character.isLetterOrDigit(contents.charAt(end - 1)))) {
-              result |= addReplacements(
-                  begin, end, contents, begin, contentsLength,
-                  suggestion, replacements);
+              result |=
+                  addReplacements(begin, end, contents, begin, contentsLength,
+                                  suggestion, replacements);
             }
           }
         }
@@ -465,15 +469,15 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
 
   /**
    * Check spelling in tags.
-   * 
+   *
    * @param analysis Page analysis.
    * @param suggestions Active suggestions.
    * @param replacements List of possible replacements.
    * @return True if an error has been found.
    */
-  private boolean analyzeTags(
-      PageAnalysis analysis, List<Suggestion> suggestions,
-      List<Replacement> replacements) {
+  private boolean analyzeTags(PageAnalysis analysis,
+                              List<Suggestion> suggestions,
+                              List<Replacement> replacements) {
     boolean result = false;
 
     // Check each suggestion
@@ -495,9 +499,9 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
             if ((end >= contentsLength) ||
                 (!Character.isLetterOrDigit(contents.charAt(end))) ||
                 (!Character.isLetterOrDigit(contents.charAt(end - 1)))) {
-              result |= addReplacements(
-                  begin, end, contents, begin, contentsLength,
-                  suggestion, replacements);
+              result |=
+                  addReplacements(begin, end, contents, begin, contentsLength,
+                                  suggestion, replacements);
             }
           }
         }
@@ -509,7 +513,7 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
 
   /**
    * Memorize possible replacements for a text.
-   * 
+   *
    * @param begin Begin index of the initial text.
    * @param end End index of the initial text.
    * @param contents Current contents.
@@ -517,10 +521,10 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
    * @param replacements List of replacements.
    * @return True if a replacement has been added.
    */
-  private boolean addReplacements(
-      int begin, int end, String contents,
-      int authorizedBegin, int authorizedEnd,
-      Suggestion suggestion, List<Replacement> replacements) {
+  private boolean addReplacements(int begin, int end, String contents,
+                                  int authorizedBegin, int authorizedEnd,
+                                  Suggestion suggestion,
+                                  List<Replacement> replacements) {
     boolean result = false;
     String text = contents.substring(authorizedBegin, authorizedEnd);
     List<ElementarySuggestion> possibles = suggestion.getReplacements(
@@ -531,8 +535,7 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
         String possible = element.getReplacement();
         if (!text.equals(possible)) {
           Replacement replacement = new Replacement(
-              begin, end,
-              suggestion.getComment(), suggestion.isOtherPattern(),
+              begin, end, suggestion.getComment(), suggestion.isOtherPattern(),
               possible, element.isAutomatic());
           replacements.add(replacement);
           result = true;
@@ -547,7 +550,7 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
 
   /**
    * Retrieve first group of replacements.
-   * 
+   *
    * @param replacements List of replacements.
    * @return First group of replacements.
    */
@@ -568,13 +571,14 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
 
   /**
    * Split contents into analyzable chunks.
-   * 
+   *
    * @param analysis Page analysis.
-   * @param nativeRegexp True if creating chunks for WPCleaner regular expressions.
+   * @param nativeRegexp True if creating chunks for WPCleaner regular
+   *     expressions.
    * @return List of contents chunks.
    */
-  private List<ContentsChunk> computeContentsChunks(
-      PageAnalysis analysis, boolean nativeRegexp) {
+  private List<ContentsChunk> computeContentsChunks(PageAnalysis analysis,
+                                                    boolean nativeRegexp) {
     String contents = analysis.getContents();
     List<ContentsChunk> chunks = new LinkedList<ContentsChunk>();
     chunks.add(new ContentsChunk(0, contents.length()));
@@ -590,12 +594,15 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
     // Remove tags
     removeCompleteTags(chunks, analysis, PageElementTag.TAG_HTML_CODE);
     removeCompleteTags(chunks, analysis, PageElementTag.TAG_WIKI_GRAPH);
-    removeCompleteTags(chunks, analysis, PageElementTag.TAG_WIKI_IMAGEMAP); // TODO: keep descriptions
+    removeCompleteTags(
+        chunks, analysis,
+        PageElementTag.TAG_WIKI_IMAGEMAP); // TODO: keep descriptions
     removeCompleteTags(chunks, analysis, PageElementTag.TAG_WIKI_MATH);
     removeCompleteTags(chunks, analysis, PageElementTag.TAG_WIKI_MATH_CHEM);
     removeCompleteTags(chunks, analysis, PageElementTag.TAG_WIKI_SCORE);
     removeCompleteTags(chunks, analysis, PageElementTag.TAG_WIKI_SOURCE);
-    removeCompleteTags(chunks, analysis, PageElementTag.TAG_WIKI_SYNTAXHIGHLIGHT);
+    removeCompleteTags(chunks, analysis,
+                       PageElementTag.TAG_WIKI_SYNTAXHIGHLIGHT);
     removeCompleteTags(chunks, analysis, PageElementTag.TAG_WIKI_TIMELINE);
     removeGalleryTags(chunks, analysis);
 
@@ -630,31 +637,37 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
 
   /**
    * Remove complete tags from the list of chunks of text.
-   * 
+   *
    * @param chunks List of chunks of text.
    * @param analysis Page analysis.
    * @param tagName Tag name to remove.
    */
-  private void removeCompleteTags(List<ContentsChunk> chunks, PageAnalysis analysis, String tagName) {
+  private void removeCompleteTags(List<ContentsChunk> chunks,
+                                  PageAnalysis analysis, String tagName) {
     List<PageElementTag> tags = analysis.getCompleteTags(tagName);
     for (PageElementTag tag : tags) {
-      removeArea(chunks, tag.getCompleteBeginIndex(), tag.getCompleteEndIndex());
+      removeArea(chunks, tag.getCompleteBeginIndex(),
+                 tag.getCompleteEndIndex());
     }
   }
 
   /**
    * Remove gallery tags from the list of chunks of text.
-   * 
+   *
    * @param chunks List of chunks of text.
    * @param analysis Page analysis.
    */
-  private void removeGalleryTags(List<ContentsChunk> chunks, PageAnalysis analysis) {
-    Namespace imageNamespace = analysis.getWikiConfiguration().getNamespace(Namespace.IMAGE);
+  private void removeGalleryTags(List<ContentsChunk> chunks,
+                                 PageAnalysis analysis) {
+    Namespace imageNamespace =
+        analysis.getWikiConfiguration().getNamespace(Namespace.IMAGE);
     String contents = analysis.getContents();
-    List<PageElementTag> tags = analysis.getCompleteTags(PageElementTag.TAG_WIKI_GALLERY);
+    List<PageElementTag> tags =
+        analysis.getCompleteTags(PageElementTag.TAG_WIKI_GALLERY);
     for (PageElementTag tag : tags) {
       removeArea(chunks, tag.getBeginIndex(), tag.getEndIndex());
-      if (tag.isComplete() && !tag.isEndTag() && (tag.getMatchingTag() != null)) {
+      if (tag.isComplete() && !tag.isEndTag() &&
+          (tag.getMatchingTag() != null)) {
         PageElementTag endTag = tag.getMatchingTag();
         int beginIndex = tag.getEndIndex();
         int tmpIndex = beginIndex;
@@ -663,7 +676,8 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
               (contents.charAt(tmpIndex) == '\n')) {
             String line = contents.substring(beginIndex, tmpIndex).trim();
             int colonIndex = line.indexOf(':');
-            if ((colonIndex > 0) && (imageNamespace.isPossibleName(line.substring(0, colonIndex)))) {
+            if ((colonIndex > 0) && (imageNamespace.isPossibleName(
+                                        line.substring(0, colonIndex)))) {
               int pipeIndex = line.indexOf('|', colonIndex);
               if (pipeIndex < 0) {
                 removeArea(chunks, beginIndex, tmpIndex + 1);
@@ -684,7 +698,7 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
 
   /**
    * Remove an area from the list of chunks of text.
-   * 
+   *
    * @param chunks List of chunks of text.
    * @param begin Begin of the area to remove.
    * @param end End of the area to remove.
@@ -709,7 +723,7 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of some errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -733,13 +747,9 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
       this.end = end;
     }
 
-    public int getBegin() {
-      return begin;
-    }
+    public int getBegin() { return begin; }
 
-    public int getEnd() {
-      return end;
-    }
+    public int getEnd() { return end; }
   }
 
   /**
@@ -754,10 +764,8 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
     private final boolean automatic;
     private Boolean multiple;
 
-    public Replacement(
-        int begin, int end,
-        String comment, boolean otherPattern,
-        String replacement, boolean automatic) {
+    public Replacement(int begin, int end, String comment, boolean otherPattern,
+                       String replacement, boolean automatic) {
       this.begin = begin;
       this.end = end;
       this.otherPattern = otherPattern;
@@ -767,37 +775,21 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
       this.multiple = null;
     }
 
-    public int getBegin() {
-      return begin;
-    }
+    public int getBegin() { return begin; }
 
-    public int getEnd() {
-      return end;
-    }
+    public int getEnd() { return end; }
 
-    public String getComment() {
-      return comment;
-    }
+    public String getComment() { return comment; }
 
-    public boolean isOtherPattern() {
-      return otherPattern;
-    }
+    public boolean isOtherPattern() { return otherPattern; }
 
-    public String getReplacement() {
-      return replacement;
-    }
+    public String getReplacement() { return replacement; }
 
-    public boolean isAutomatic() {
-      return automatic;
-    }
+    public boolean isAutomatic() { return automatic; }
 
-    public Boolean isMultiple() {
-      return multiple;
-    }
+    public Boolean isMultiple() { return multiple; }
 
-    public void setMultiple() {
-      multiple = Boolean.TRUE;
-    }
+    public void setMultiple() { multiple = Boolean.TRUE; }
     /**
      * @param o
      * @return
@@ -818,13 +810,13 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
   /**
    * Utility class to sort Replacement in a group.
    */
-  private static class ReplacementComparator implements Comparator<Replacement> {
+  private static class ReplacementComparator
+      implements Comparator<Replacement> {
 
     /**
      * Constructor.
      */
-    public ReplacementComparator() {
-    }
+    public ReplacementComparator() {}
 
     /**
      * @param o1
@@ -834,7 +826,7 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
      */
     @Override
     public int compare(Replacement o1, Replacement o2) {
-      
+
       // Comparison on native pattern
       if (o1.isOtherPattern() != o2.isOtherPattern()) {
         return (o1.isOtherPattern() ? 1 : -1);
@@ -900,7 +892,7 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
 
     /**
      * Create a group of replacements.
-     * 
+     *
      * @param replacements Ordered list of replacements.
      * @param contents Page contents.
      */
@@ -929,15 +921,13 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
             alreadyAdded.add(newText);
           }
         } else {
-          String newText =
-              contents.substring(begin, replacement.getBegin()) +
-              replacement.getReplacement() +
-              contents.substring(replacement.getEnd(), end);
+          String newText = contents.substring(begin, replacement.getBegin()) +
+                           replacement.getReplacement() +
+                           contents.substring(replacement.getEnd(), end);
           if (!alreadyAdded.contains(newText)) {
-            group.add(
-                new Replacement(
-                    begin, end, replacement.getComment(),replacement.isOtherPattern(),
-                    newText, replacement.isAutomatic()));
+            group.add(new Replacement(begin, end, replacement.getComment(),
+                                      replacement.isOtherPattern(), newText,
+                                      replacement.isAutomatic()));
             alreadyAdded.add(newText);
           }
         }
@@ -947,30 +937,22 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
     /**
      * @return Minimum index for the group of replacements.
      */
-    public int getBegin() {
-      return begin;
-    }
+    public int getBegin() { return begin; }
 
     /**
      * @return Maximum index for the group of replacements.
      */
-    public int getEnd() {
-      return end;
-    }
+    public int getEnd() { return end; }
 
     /**
      * @return Original text.
      */
-    public String getText() {
-      return text;
-    }
+    public String getText() { return text; }
 
     /**
      * @return List of possible replacements.
      */
-    public List<Replacement> getReplacements() {
-      return group;
-    }
+    public List<Replacement> getReplacements() { return group; }
   }
 
   /* ====================================================================== */
@@ -979,15 +961,17 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
     // Initialize active suggestions
     allActiveSuggestions.clear();
     automaticActiveSuggestions.clear();
-    Map<String, Suggestion> suggestions = getWPCConfiguration().getSuggestions();
+    Map<String, Suggestion> suggestions =
+        getWPCConfiguration().getSuggestions();
     if (suggestions != null) {
       for (Suggestion suggestion : suggestions.values()) {
         if (suggestion.isActive()) {
@@ -1008,7 +992,8 @@ public class CheckErrorAlgorithm501 extends CheckErrorAlgorithmBase {
   private final List<Suggestion> allActiveSuggestions = new LinkedList<>();
 
   /** Active suggestions with automatic replacements */
-  private final List<Suggestion> automaticActiveSuggestions = new LinkedList<>();
+  private final List<Suggestion> automaticActiveSuggestions =
+      new LinkedList<>();
 
   /** Limit for reporting a regular expression as being slow */
   private int slowRegexp = 1000;
