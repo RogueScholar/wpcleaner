@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: nicove@users.sourceforge.net\n"
-"POT-Creation-Date: 2020-04-18 14:14+0200\n"
+"POT-Creation-Date: 2020-04-25 18:56+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -761,6 +761,14 @@ msgstr ""
 msgid "To report only links to local wikis"
 msgstr ""
 
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm092.java:242
+msgid "Maximum level of titles to report"
+msgstr ""
+
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm092.java:245
+msgid "To report only consecutive titles"
+msgstr ""
+
 #: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm101.java:161
 msgid "List of ordinal suffixes"
 msgstr ""
@@ -855,17 +863,21 @@ msgid "Both values are equal"
 msgstr ""
 
 #: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:132
+msgid "Other value is empty"
+msgstr ""
+
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:134
 #, java-format
 msgid "Other value: {0}"
 msgstr ""
 
-#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:235
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:237
 #: org/wikipediacleaner/gui/swing/NewSectionWindow.java:115
 #: org/wikipediacleaner/gui/swing/OnePageWindow.java:529
 msgid "Comment"
 msgstr ""
 
-#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:391
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:396
 #: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm527.java:273
 #: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm528.java:255
 #: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm529.java:381
@@ -873,7 +885,7 @@ msgstr ""
 msgid "A category containing the list of pages in error"
 msgstr ""
 
-#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:394
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:399
 msgid "Values that can be safely ignored for a given template and argument"
 msgstr ""
 
@@ -964,7 +976,8 @@ msgid "List of categorizing templates"
 msgstr ""
 
 #: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm548.java:351
-#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm550.java:187
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm550.java:193
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm551.java:190
 msgid "Links to ignore"
 msgstr ""
 
@@ -1320,18 +1333,18 @@ msgstr ""
 msgid "Retrieving templates"
 msgstr ""
 
-#: org/wikipediacleaner/api/impl/MediaWikiAPI.java:680
+#: org/wikipediacleaner/api/impl/MediaWikiAPI.java:681
 #, java-format
 msgid "URL {0} is blacklisted"
 msgstr ""
 
-#: org/wikipediacleaner/api/impl/MediaWikiAPI.java:1871
+#: org/wikipediacleaner/api/impl/MediaWikiAPI.java:1872
 msgid ""
 "This action is protected by a CAPTCHA.\n"
 "What is the answer to the following question ?"
 msgstr ""
 
-#: org/wikipediacleaner/api/impl/MediaWikiAPI.java:1878
+#: org/wikipediacleaner/api/impl/MediaWikiAPI.java:1879
 msgid ""
 "This action is protected by a CAPTCHA.\n"
 "What is the answer to the question displayed in your browser ?"
@@ -3021,21 +3034,21 @@ msgstr ""
 msgid "Only check articles previously reported"
 msgstr ""
 
-#: org/wikipediacleaner/gui/swing/bot/ListCWWorker.java:565
+#: org/wikipediacleaner/gui/swing/bot/ListCWWorker.java:567
 #, java-format
 msgid "{0} page has been analyzed"
 msgid_plural "{0} pages have been analyzed"
 msgstr[0] ""
 msgstr[1] ""
 
-#: org/wikipediacleaner/gui/swing/bot/ListCWWorker.java:573
+#: org/wikipediacleaner/gui/swing/bot/ListCWWorker.java:575
 #, java-format
 msgid "{0} page has been detected for algorithm {1}"
 msgid_plural "{0} pages have been detected for algorithm {1}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: org/wikipediacleaner/gui/swing/bot/ListCWWorker.java:743
+#: org/wikipediacleaner/gui/swing/bot/ListCWWorker.java:745
 #, java-format
 msgid "{0} pages processed"
 msgstr ""

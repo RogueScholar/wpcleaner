@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.wikipediacleaner.api.check.CheckErrorResult;
@@ -34,39 +33,37 @@ import org.wikipediacleaner.api.data.PageElementTemplate;
 import org.wikipediacleaner.api.data.PageElementTemplate.Parameter;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * Algorithm for analyzing error 69 of check wikipedia project.
  * Error 69: ISBN wrong syntax
  */
 public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
 
-  public CheckErrorAlgorithm069() {
-    super("ISBN wrong syntax");
-  }
+  public CheckErrorAlgorithm069() { super("ISBN wrong syntax"); }
 
   /** List of strings that could be before an ISBN in <nowiki>. */
   private final static String[] EXTEND_BEFORE_NOWIKI = {
-    "<nowiki>",
-    "<small>",
-    "(",
+      "<nowiki>",
+      "<small>",
+      "(",
   };
 
   /** List of strings that could be after an ISBN in <nowiki>. */
   private final static String[] EXTEND_AFTER_NOWIKI = {
-    "</nowiki>",
-    "</small>",
-    ")",
+      "</nowiki>",
+      "</small>",
+      ")",
   };
 
   /** List of strings that could be between "ISBN" and its value. */
   private final static String[] FIRST_SEPARATOR = {
-    "&nbsp;",
-    "&#x20;",
+      "&nbsp;",
+      "&#x20;",
   };
 
   /** Names of special page BookSources depending on the wiki */
-  private final static Map<String, Pair<Set<String>, Set<String>>> BOOK_SOURCES = new HashMap<>();
+  private final static Map<String, Pair<Set<String>, Set<String>>>
+      BOOK_SOURCES = new HashMap<>();
 
   static {
     Pair<Set<String>, Set<String>> wiki = null;
@@ -79,16 +76,27 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
     pageNames = new HashSet<>();
     pageNames.add("Zdroje knih");
     pageNames.add("KnižnéZdroje");
-    wiki = new ImmutablePair<Set<String>, Set<String>>(namespaceNames, pageNames);
-    BOOK_SOURCES.put("de", wiki);
+    wiki =
+        new ImmutablePair<Set<String>, Set<String>>(namespaceNames, pageNames);
+    BOOK_SOURCES.put("cs", wiki);
 
     // DE
     namespaceNames = new HashSet<>();
     namespaceNames.add("Spezial");
     pageNames = new HashSet<>();
     pageNames.add("ISBN-Suche");
-    wiki = new ImmutablePair<Set<String>, Set<String>>(namespaceNames, pageNames);
+    wiki =
+        new ImmutablePair<Set<String>, Set<String>>(namespaceNames, pageNames);
     BOOK_SOURCES.put("de", wiki);
+
+    // EN
+    namespaceNames = new HashSet<>();
+    namespaceNames.add("Special");
+    pageNames = new HashSet<>();
+    pageNames.add("BookSources");
+    wiki =
+        new ImmutablePair<Set<String>, Set<String>>(namespaceNames, pageNames);
+    BOOK_SOURCES.put("en", wiki);
 
     // FR
     namespaceNames = new HashSet<>();
@@ -102,7 +110,8 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
     pageNames.add("Recherche isbn");
     pageNames.add("RechercheISBN");
     pageNames.add("Rechercheisbn");
-    wiki = new ImmutablePair<Set<String>, Set<String>>(namespaceNames, pageNames);
+    wiki =
+        new ImmutablePair<Set<String>, Set<String>>(namespaceNames, pageNames);
     BOOK_SOURCES.put("fr", wiki);
 
     // IT
@@ -110,22 +119,24 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
     namespaceNames.add("Speciale");
     pageNames = new HashSet<>();
     pageNames.add("RicercaISBN");
-    wiki = new ImmutablePair<Set<String>, Set<String>>(namespaceNames, pageNames);
+    wiki =
+        new ImmutablePair<Set<String>, Set<String>>(namespaceNames, pageNames);
     BOOK_SOURCES.put("it", wiki);
   }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -134,7 +145,8 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
     boolean result = false;
     result |= analyzeISBN(analysis, errors);
 
-    // Report also ISBN like [[International Standard Book Number|ISBN]]&nbsp;978-0321637734
+    // Report also ISBN like [[International Standard Book
+    // Number|ISBN]]&nbsp;978-0321637734
     result |= analyzeInternalLinks(analysis, errors);
 
     // Report also ISBN inside <nowiki> tags
@@ -148,14 +160,13 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
 
   /**
    * Analyze ISBN to check if an ISBN error is present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
    * @return Flag indicating if the error was found.
    */
-  public boolean analyzeISBN(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors) {
+  public boolean analyzeISBN(PageAnalysis analysis,
+                             Collection<CheckErrorResult> errors) {
 
     boolean result = false;
     List<PageElementISBN> isbns = analysis.getISBNs();
@@ -171,16 +182,18 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
         List<String[]> specialValues = config.getStringArrayList(
             WPCConfigurationStringList.ISBN_SPECIAL_VALUES);
         if ((specialValues != null) && !specialValues.isEmpty()) {
-          PageElementTemplate template = analysis.isInTemplate(isbn.getBeginIndex());
+          PageElementTemplate template =
+              analysis.isInTemplate(isbn.getBeginIndex());
           if (template != null) {
-            Parameter param = template.getParameterAtIndex(isbn.getBeginIndex());
-            if ((param != null) &&
-                (param.getName() != null) &&
+            Parameter param =
+                template.getParameterAtIndex(isbn.getBeginIndex());
+            if ((param != null) && (param.getName() != null) &&
                 (param.getName().trim().length() > 0)) {
               String name = param.getName().trim();
               for (String[] specialValue : specialValues) {
                 if ((specialValue.length > 2) &&
-                    (Page.areSameTitle(template.getTemplateName(), specialValue[0])) &&
+                    (Page.areSameTitle(template.getTemplateName(),
+                                       specialValue[0])) &&
                     (name.equals(specialValue[1])) &&
                     (isbn.getISBNNotTrimmed().equals(specialValue[2]))) {
                   isError = false;
@@ -192,10 +205,10 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
       }
 
       // Exclude parameters in templates
-      if (isError &&
-          isbn.isTemplateParameter() &&
+      if (isError && isbn.isTemplateParameter() &&
           analysis.isInNamespace(Namespace.TEMPLATE)) {
-        PageElementTemplate template = analysis.isInTemplate(isbn.getBeginIndex());
+        PageElementTemplate template =
+            analysis.isInTemplate(isbn.getBeginIndex());
         if (template != null) {
           Parameter param = template.getParameterAtIndex(isbn.getBeginIndex());
           if (param != null) {
@@ -242,29 +255,34 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
         }
         final String SMALL_OPEN = "<small>";
         final String SMALL_CLOSE = "</small>";
-        if ((beginIndex >= SMALL_OPEN.length()) && (endIndex < contents.length())) {
-          if (contents.startsWith(SMALL_OPEN, beginIndex - SMALL_OPEN.length()) &&
+        if ((beginIndex >= SMALL_OPEN.length()) &&
+            (endIndex < contents.length())) {
+          if (contents.startsWith(SMALL_OPEN,
+                                  beginIndex - SMALL_OPEN.length()) &&
               contents.startsWith(SMALL_CLOSE, endIndex)) {
             beginIndex -= SMALL_OPEN.length();
             endIndex += SMALL_CLOSE.length();
           }
         }
 
-        CheckErrorResult errorResult = createCheckErrorResult(analysis, isbn, false);
+        CheckErrorResult errorResult =
+            createCheckErrorResult(analysis, isbn, false);
         String prefix = null;
         String suffix = null;
-        if ((beginIndex < isbn.getBeginIndex()) && (endIndex > isbn.getEndIndex())) {
+        if ((beginIndex < isbn.getBeginIndex()) &&
+            (endIndex > isbn.getEndIndex())) {
           prefix = contents.substring(beginIndex, isbn.getBeginIndex());
           suffix = contents.substring(isbn.getEndIndex(), endIndex);
-          errorResult = createCheckErrorResult(
-              analysis, beginIndex, endIndex, errorResult.getErrorLevel());
+          errorResult = createCheckErrorResult(analysis, beginIndex, endIndex,
+                                               errorResult.getErrorLevel());
         }
         addSuggestions(analysis, errorResult, isbn);
         errors.add(errorResult);
         List<String> replacements = isbn.getCorrectISBN();
         if (replacements != null) {
           for (String replacement : replacements) {
-            if (!replacement.equals(analysis.getContents().substring(isbn.getBeginIndex(), isbn.getEndIndex()))) {
+            if (!replacement.equals(analysis.getContents().substring(
+                    isbn.getBeginIndex(), isbn.getEndIndex()))) {
               if ((prefix != null) && (suffix != null)) {
                 errorResult.addReplacement(prefix + replacement + suffix);
               }
@@ -278,8 +296,10 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
       if (!reported && !isbn.isTemplateParameter()) {
         PageElement element = null;
         ErrorLevel level = ErrorLevel.CORRECT;
-        String isbnText = analysis.getContents().substring(isbn.getBeginIndex(), isbn.getEndIndex());
-        PageElementInternalLink link = analysis.isInInternalLink(isbn.getBeginIndex());
+        String isbnText = analysis.getContents().substring(isbn.getBeginIndex(),
+                                                           isbn.getEndIndex());
+        PageElementInternalLink link =
+            analysis.isInInternalLink(isbn.getBeginIndex());
         if ((link != null) && (isbnText.equals(link.getText()))) {
           level = isSpecialBookSources(analysis, link.getLink());
           if (level != ErrorLevel.CORRECT) {
@@ -287,7 +307,8 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
           }
         }
         if (element == null) {
-          PageElementInterwikiLink iwLink = analysis.isInInterwikiLink(isbn.getBeginIndex());
+          PageElementInterwikiLink iwLink =
+              analysis.isInInterwikiLink(isbn.getBeginIndex());
           if ((iwLink != null) && (isbnText.equals(iwLink.getText()))) {
             level = isSpecialBookSources(analysis, iwLink.getLink());
             if (level != ErrorLevel.CORRECT) {
@@ -313,16 +334,18 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
 
       // Analyze if ISBN is inside an external link
       if (!reported && !isbn.isTemplateParameter()) {
-        PageElementExternalLink link = analysis.isInExternalLink(isbn.getBeginIndex());
+        PageElementExternalLink link =
+            analysis.isInExternalLink(isbn.getBeginIndex());
         if ((link != null) && link.hasSquare() &&
-            (isbn.getBeginIndex() >= link.getBeginIndex() + link.getTextOffset()) &&
+            (isbn.getBeginIndex() >=
+             link.getBeginIndex() + link.getTextOffset()) &&
             (link.getText() != null)) {
           if (errors == null) {
             return true;
           }
           result = true;
           reported = true;
-          
+
           CheckErrorResult errorResult = createCheckErrorResult(
               analysis, link.getBeginIndex(), link.getEndIndex());
           int beginIndex = isbn.getBeginIndex();
@@ -354,38 +377,49 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
                 contents.substring(endIndex, link.getEndIndex()) +
                 contents.substring(beginIndex, isbn.getBeginIndex());
             String textPrefix =
-                contents.substring(link.getBeginIndex(), link.getBeginIndex() + 7) +
-                "...]" +
-                contents.substring(beginIndex, isbn.getBeginIndex());
+                contents.substring(link.getBeginIndex(),
+                                   link.getBeginIndex() + 7) +
+                "...]" + contents.substring(beginIndex, isbn.getBeginIndex());
             List<String> replacements = isbn.getCorrectISBN();
             for (String replacement : replacements) {
               errorResult.addReplacement(
-                  replacementPrefix + replacement + contents.substring(realEndIndex, endIndex),
-                  textPrefix + replacement + contents.substring(realEndIndex, endIndex));
+                  replacementPrefix + replacement +
+                      contents.substring(realEndIndex, endIndex),
+                  textPrefix + replacement +
+                      contents.substring(realEndIndex, endIndex));
             }
             errorResult.addReplacement(
-                replacementPrefix + contents.substring(isbn.getBeginIndex(), isbn.getEndIndex()),
-                textPrefix + contents.substring(isbn.getBeginIndex(), isbn.getEndIndex()));
+                replacementPrefix + contents.substring(isbn.getBeginIndex(),
+                                                       isbn.getEndIndex()),
+                textPrefix + contents.substring(isbn.getBeginIndex(),
+                                                isbn.getEndIndex()));
             if (endIndex < link.getEndIndex()) {
               replacementPrefix =
-                  contents.substring(link.getBeginIndex(), beginIndex) +
-                  "]" +
+                  contents.substring(link.getBeginIndex(), beginIndex) + "]" +
                   contents.substring(beginIndex, isbn.getBeginIndex());
               for (String replacement : replacements) {
                 errorResult.addReplacement(
-                    replacementPrefix + replacement + contents.substring(isbn.getEndIndex(), link.getEndIndex() - 1),
-                    textPrefix + replacement + contents.substring(isbn.getEndIndex(), link.getEndIndex() - 1));
+                    replacementPrefix + replacement +
+                        contents.substring(isbn.getEndIndex(),
+                                           link.getEndIndex() - 1),
+                    textPrefix + replacement +
+                        contents.substring(isbn.getEndIndex(),
+                                           link.getEndIndex() - 1));
               }
               errorResult.addReplacement(
-                  replacementPrefix + contents.substring(isbn.getBeginIndex(), link.getEndIndex() - 1),
-                  textPrefix + contents.substring(isbn.getBeginIndex(), link.getEndIndex() - 1));
+                  replacementPrefix +
+                      contents.substring(isbn.getBeginIndex(),
+                                         link.getEndIndex() - 1),
+                  textPrefix + contents.substring(isbn.getBeginIndex(),
+                                                  link.getEndIndex() - 1));
             }
           } else if (endIndex >= link.getEndIndex() - 1) {
             List<String> replacements = isbn.getCorrectISBN();
             for (String replacement : replacements) {
               errorResult.addReplacement(replacement);
             }
-            errorResult.addReplacement(contents.substring(isbn.getBeginIndex(), isbn.getEndIndex()));
+            errorResult.addReplacement(
+                contents.substring(isbn.getBeginIndex(), isbn.getEndIndex()));
           }
           errors.add(errorResult);
         }
@@ -397,14 +431,13 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
 
   /**
    * Analyze internal links to check if an ISBN error is present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
    * @return Flag indicating if the error was found.
    */
-  public boolean analyzeInternalLinks(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors) {
+  public boolean analyzeInternalLinks(PageAnalysis analysis,
+                                      Collection<CheckErrorResult> errors) {
 
     List<PageElementInternalLink> links = analysis.getInternalLinks();
     if (links == null) {
@@ -424,17 +457,17 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
   }
 
   /**
-   * Analyze an internal link to check if an ISBN error is present due to ISBN prefix.
-   * 
+   * Analyze an internal link to check if an ISBN error is present due to ISBN
+   * prefix.
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
    * @param link Internal link to be checked.
    * @return Flag indicating if the error was found.
    */
-  private boolean analyzeInternalLinkPrefix(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors,
-      PageElementInternalLink link) {
+  private boolean analyzeInternalLinkPrefix(PageAnalysis analysis,
+                                            Collection<CheckErrorResult> errors,
+                                            PageElementInternalLink link) {
 
     // Check for the presence of the ISBN prefix
     if (!PageElementISBN.ISBN_PREFIX.equals(link.getDisplayedText().trim())) {
@@ -493,7 +526,8 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
       boolean endFound = false;
       while (!endFound) {
         endFound = true;
-        if ((tmpIndex < contents.length()) && (contents.charAt(tmpIndex) == '<')) {
+        if ((tmpIndex < contents.length()) &&
+            (contents.charAt(tmpIndex) == '<')) {
           PageElementTag tag = analysis.isInTag(tmpIndex);
           if ((tag != null) && (tag.getBeginIndex() == tmpIndex)) {
             tmpIndex = tag.getEndIndex();
@@ -502,7 +536,8 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
         }
       }
       if ((tmpIndex < contents.length()) &&
-          (PageElementISBN.POSSIBLE_CHARACTERS.indexOf(contents.charAt(tmpIndex)) >= 0)) {
+          (PageElementISBN.POSSIBLE_CHARACTERS.indexOf(
+               contents.charAt(tmpIndex)) >= 0)) {
         isbnFound = true;
       }
       if (nextLink != null) {
@@ -513,8 +548,10 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
         tmpIndex = nextLinkE.getEndIndex();
       } else {
         while ((tmpIndex < contents.length()) &&
-               ((PageElementISBN.POSSIBLE_CHARACTERS.indexOf(contents.charAt(tmpIndex)) >= 0) ||
-                (PageElementISBN.EXTRA_CHARACTERS.indexOf(contents.charAt(tmpIndex)) >= 0 ))) {
+               ((PageElementISBN.POSSIBLE_CHARACTERS.indexOf(
+                     contents.charAt(tmpIndex)) >= 0) ||
+                (PageElementISBN.EXTRA_CHARACTERS.indexOf(
+                     contents.charAt(tmpIndex)) >= 0))) {
           tmpIndex++;
         }
         suffix = contents.substring(beginISBN, tmpIndex);
@@ -528,26 +565,26 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
     if (errors == null) {
       return true;
     }
-    CheckErrorResult errorResult = createCheckErrorResult(
-        analysis, link.getBeginIndex(), tmpIndex);
-    errorResult.addReplacement(
-        PageElementISBN.ISBN_PREFIX + " " + suffix);
+    CheckErrorResult errorResult =
+        createCheckErrorResult(analysis, link.getBeginIndex(), tmpIndex);
+    errorResult.addReplacement(PageElementISBN.ISBN_PREFIX + " " + suffix);
     errors.add(errorResult);
     return true;
   }
 
   /**
-   * Analyze an internal link to check if an ISBN error is present due to similarity with an interwiki link.
-   * 
+   * Analyze an internal link to check if an ISBN error is present due to
+   * similarity with an interwiki link.
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
    * @param link Internal link to be checked.
    * @return Flag indicating if the error was found.
    */
-  private boolean analyzeInternalLinkInterwiki(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors,
-      PageElementInternalLink link) {
+  private boolean
+  analyzeInternalLinkInterwiki(PageAnalysis analysis,
+                               Collection<CheckErrorResult> errors,
+                               PageElementInternalLink link) {
 
     // Check that the target of the links contains a name space separator.
     String target = link.getLink();
@@ -560,7 +597,8 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
     String prefix = target.substring(0, colonIndex);
     String suffix = target.substring(colonIndex + 1);
     int slashIndex = suffix.indexOf('/');
-    String suffix2 = (slashIndex > 0) ? suffix.substring(0, slashIndex) : suffix;
+    String suffix2 =
+        (slashIndex > 0) ? suffix.substring(0, slashIndex) : suffix;
     for (Pair<Set<String>, Set<String>> bookSource : BOOK_SOURCES.values()) {
       boolean prefixFound = false;
       for (String possiblePrefix : bookSource.getLeft()) {
@@ -573,7 +611,8 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
             if (errors == null) {
               return true;
             }
-            CheckErrorResult errorResult  = createCheckErrorResult(analysis, link.getBeginIndex(), link.getEndIndex());
+            CheckErrorResult errorResult = createCheckErrorResult(
+                analysis, link.getBeginIndex(), link.getEndIndex());
             errorResult.addReplacement(link.getDisplayedText());
             errors.add(errorResult);
             return true;
@@ -587,16 +626,16 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
 
   /**
    * Analyze nowiki tags to check if an ISBN is present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
    * @return Flag indicating if the error was found.
    */
-  public boolean analyzeNowikiTags(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors) {
+  public boolean analyzeNowikiTags(PageAnalysis analysis,
+                                   Collection<CheckErrorResult> errors) {
 
-    List<PageElementTag> nowikiTags = analysis.getCompleteTags(PageElementTag.TAG_WIKI_NOWIKI);
+    List<PageElementTag> nowikiTags =
+        analysis.getCompleteTags(PageElementTag.TAG_WIKI_NOWIKI);
     if (nowikiTags == null) {
       return false;
     }
@@ -612,8 +651,9 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
           if (nowikiContent.startsWith(PageElementISBN.ISBN_PREFIX, index)) {
             int tmpIndex = index + PageElementISBN.ISBN_PREFIX.length();
             boolean hasSeparator = false;
-            while ((tmpIndex < nowikiContent.length()) && 
-                   (PageElementISBN.EXTRA_CHARACTERS.indexOf(nowikiContent.charAt(tmpIndex)) >= 0)) {
+            while ((tmpIndex < nowikiContent.length()) &&
+                   (PageElementISBN.EXTRA_CHARACTERS.indexOf(
+                        nowikiContent.charAt(tmpIndex)) >= 0)) {
               hasSeparator = true;
               tmpIndex++;
             }
@@ -624,11 +664,13 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
               int tmpIndex2 = tmpIndex;
               shouldContinue = false;
               while ((tmpIndex2 < nowikiContent.length()) &&
-                     (PageElementISBN.EXTRA_CHARACTERS.indexOf(nowikiContent.charAt(tmpIndex2)) >= 0)) {
+                     (PageElementISBN.EXTRA_CHARACTERS.indexOf(
+                          nowikiContent.charAt(tmpIndex2)) >= 0)) {
                 tmpIndex2++;
               }
               while ((tmpIndex2 < nowikiContent.length()) &&
-                     (PageElementISBN.POSSIBLE_CHARACTERS.indexOf(nowikiContent.charAt(tmpIndex2)) >= 0)) {
+                     (PageElementISBN.POSSIBLE_CHARACTERS.indexOf(
+                          nowikiContent.charAt(tmpIndex2)) >= 0)) {
                 hasCharacter = true;
                 shouldContinue = true;
                 tmpIndex2++;
@@ -650,7 +692,8 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
                 extensionFound = false;
                 for (String before : EXTEND_BEFORE_NOWIKI) {
                   if ((beginIndex >= before.length()) &&
-                      (contents.startsWith(before, beginIndex - before.length()))) {
+                      (contents.startsWith(before,
+                                           beginIndex - before.length()))) {
                     extensionFound = true;
                     beginIndex -= before.length();
                   }
@@ -669,22 +712,24 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
               } while (extensionFound);
 
               // Report error
-              CheckErrorResult errorResult = createCheckErrorResult(
-                  analysis, beginIndex, endIndex);
+              CheckErrorResult errorResult =
+                  createCheckErrorResult(analysis, beginIndex, endIndex);
               if ((beginIndex <= nowikiTag.getCompleteBeginIndex()) &&
                   (endIndex >= nowikiTag.getCompleteEndIndex())) {
                 errorResult.addReplacement(contents.substring(
                     nowikiTag.getValueBeginIndex() + index,
                     nowikiTag.getValueBeginIndex() + tmpIndex));
-                List<String[]> isbnTemplates = analysis.getWPCConfiguration().getStringArrayList(
-                    WPCConfigurationStringList.ISBN_TEMPLATES);
+                List<String[]> isbnTemplates =
+                    analysis.getWPCConfiguration().getStringArrayList(
+                        WPCConfigurationStringList.ISBN_TEMPLATES);
                 if (isbnTemplates != null) {
                   for (String[] isbnTemplate : isbnTemplates) {
                     if (isbnTemplate.length > 2) {
                       String templateName = isbnTemplate[0];
                       String[] params = isbnTemplate[1].split(",");
                       Boolean suggested = Boolean.valueOf(isbnTemplate[2]);
-                      if ((params.length > 0) && (Boolean.TRUE.equals(suggested))) {
+                      if ((params.length > 0) &&
+                          (Boolean.TRUE.equals(suggested))) {
                         StringBuilder replacement = new StringBuilder();
                         replacement.append("{{");
                         replacement.append(templateName);
@@ -693,7 +738,8 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
                           replacement.append(params[0]);
                           replacement.append("=");
                         }
-                        replacement.append(nowikiContent.substring(indexCharacter, tmpIndex));
+                        replacement.append(
+                            nowikiContent.substring(indexCharacter, tmpIndex));
                         replacement.append("}}");
                         errorResult.addReplacement(replacement.toString());
                       }
@@ -718,14 +764,13 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
 
   /**
    * Analyze interwiki links to check if an ISBN is present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
    * @return Flag indicating if the error was found.
    */
-  public boolean analyzeInterwikiLinks(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors) {
+  public boolean analyzeInterwikiLinks(PageAnalysis analysis,
+                                       Collection<CheckErrorResult> errors) {
 
     List<PageElementInterwikiLink> iwLinks = analysis.getInterwikiLinks();
     if (iwLinks == null) {
@@ -741,8 +786,7 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
         String iwText = iwLink.getInterwikiText();
         Pair<Set<String>, Set<String>> wiki = BOOK_SOURCES.get(iwText);
         if ("Special".equals(namespace) ||
-            ((wiki != null) &&
-             (wiki.getLeft() != null) &&
+            ((wiki != null) && (wiki.getLeft() != null) &&
              wiki.getLeft().contains(namespace))) {
           String target = link.substring(anchorIndex + 1);
           int slashIndex = target.indexOf('/');
@@ -751,8 +795,7 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
           }
           target.replaceAll("_", " ");
           if ("BookSources".equals(target) ||
-              ((wiki != null) &&
-               (wiki.getRight() != null) &&
+              ((wiki != null) && (wiki.getRight() != null) &&
                (wiki.getRight().contains(target)))) {
             if (errors == null) {
               return true;
@@ -787,7 +830,8 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
       colonIndex = link.indexOf(':');
     }
     if (colonIndex > 0) {
-      Namespace special = analysis.getWikiConfiguration().getNamespace(Namespace.SPECIAL);
+      Namespace special =
+          analysis.getWikiConfiguration().getNamespace(Namespace.SPECIAL);
       String prefix = link.substring(0, colonIndex);
       if ((special != null) && (special.isPossibleName(prefix))) {
         if (link.startsWith("BookSources", colonIndex + 1)) {
@@ -820,8 +864,9 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -833,16 +878,15 @@ public class CheckErrorAlgorithm069 extends CheckErrorAlgorithmISBN {
 
   /**
    * Return the parameters used to configure the algorithm.
-   * 
+   *
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {
     Map<String, String> parameters = super.getParameters();
-    parameters.put(
-        PARAMETER_REASON,
-        GT._T("An explanation of the problem"));
+    parameters.put(PARAMETER_REASON, GT._T("An explanation of the problem"));
     return parameters;
   }
 }

@@ -5,14 +5,13 @@
  *  See README.txt file for licensing information.
  */
 
-package org.wikipediacleaner.api;
+package org.wikipediacleaner.api.http.hc3;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
-
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -20,17 +19,19 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.wikipediacleaner.api.APIException;
+import org.wikipediacleaner.api.ResponseManager;
+import org.wikipediacleaner.api.http.HttpServer;
 
 /**
  * Manage interactions with the tool server.
  */
-public class HttpServer {
+public class Hc3HttpServer implements HttpServer {
 
   /**
    * Logs.
    */
-  private final Logger log = LoggerFactory.getLogger(HttpServer.class);
+  private final Logger log = LoggerFactory.getLogger(Hc3HttpServer.class);
 
   /**
    * HTTP Client.
@@ -49,32 +50,31 @@ public class HttpServer {
 
   /**
    * Create an HttpServer object.
-   * 
+   *
    * @param httpClient HTTP client.
+   * @param baseUrl Base URL.
    */
-  HttpServer(HttpClient httpClient, String baseUrl) {
+  public Hc3HttpServer(HttpClient httpClient, String baseUrl) {
     this.httpClient = httpClient;
     this.baseUrl = baseUrl;
   }
 
   /**
    * Send a POST request to the Tool Server.
-   * 
+   *
    * @param path Path on the tool server.
    * @param properties Request properties.
    * @param manager Response manager.
    * @throws APIException Exception thrown by the API.
    */
-  public void sendPost(
-      String              path,
-      Map<String, String> properties,
-      ResponseManager     manager) throws APIException {
+  @Override
+  public void sendPost(String path, Map<String, String> properties,
+                       ResponseManager manager) throws APIException {
     HttpMethod method = null;
     InputStream inputStream = null;
     int statusCode = HttpStatus.SC_SEE_OTHER;
     int count = 0;
-    while ((statusCode != HttpStatus.SC_OK) &&
-           (count < MAX_ATTEMPTS)) {
+    while ((statusCode != HttpStatus.SC_OK) && (count < MAX_ATTEMPTS)) {
       if (count > 0) {
         try {
           Thread.sleep(2000 * count);
@@ -85,7 +85,7 @@ public class HttpServer {
       count++;
       try {
         String url = baseUrl + path;
-        method = HttpUtils.createHttpMethod(url, properties, false);
+        method = Hc3HttpUtils.createHttpMethod(url, properties, false);
         statusCode = httpClient.executeMethod(method);
         inputStream = method.getResponseBodyAsStream();
         inputStream = new BufferedInputStream(inputStream);
@@ -100,7 +100,8 @@ public class HttpServer {
             manager.manageResponse(inputStream);
           }
         } else {
-          log.warn("Error accessing url: " + statusCode + "-" + HttpStatus.getStatusText(statusCode));
+          log.warn("Error accessing url: " + statusCode + "-" +
+                   HttpStatus.getStatusText(statusCode));
           for (Header header : method.getResponseHeaders()) {
             log.warn("  Header " + header.getName() + ": " + header.getValue());
           }
@@ -140,26 +141,26 @@ public class HttpServer {
       }
     }
     if (statusCode != HttpStatus.SC_OK) {
-      throw new APIException("URL access returned " + HttpStatus.getStatusText(statusCode));
+      throw new APIException("URL access returned " +
+                             HttpStatus.getStatusText(statusCode));
     }
   }
 
   /**
    * Send a GET request to the Tool Server.
-   * 
+   *
    * @param path Path on the tool server.
    * @param manager Response manager.
    * @throws APIException Exception thrown by the API.
    */
-  public void sendGet(
-      String          path,
-      ResponseManager manager) throws APIException {
+  @Override
+  public void sendGet(String path, ResponseManager manager)
+      throws APIException {
     HttpMethod method = null;
     InputStream inputStream = null;
     int statusCode = HttpStatus.SC_SEE_OTHER;
     int count = 0;
-    while ((statusCode != HttpStatus.SC_OK) &&
-           (count < MAX_ATTEMPTS)) {
+    while ((statusCode != HttpStatus.SC_OK) && (count < MAX_ATTEMPTS)) {
       if (count > 0) {
         try {
           Thread.sleep(2000 * count);
@@ -170,7 +171,7 @@ public class HttpServer {
       count++;
       try {
         String url = baseUrl + path;
-        method = HttpUtils.createHttpMethod(url, null, true);
+        method = Hc3HttpUtils.createHttpMethod(url, null, true);
         statusCode = httpClient.executeMethod(method);
         if (statusCode == HttpStatus.SC_NOT_FOUND) {
           return;
@@ -188,7 +189,8 @@ public class HttpServer {
             manager.manageResponse(inputStream);
           }
         } else {
-          log.warn("Error accessing url: " + statusCode + "-" + HttpStatus.getStatusText(statusCode));
+          log.warn("Error accessing url: " + statusCode + "-" +
+                   HttpStatus.getStatusText(statusCode));
           waitBeforeRetrying(count);
         }
         try {
@@ -216,13 +218,15 @@ public class HttpServer {
       }
     }
     if (statusCode != HttpStatus.SC_OK) {
-      throw new APIException("URL access returned " + HttpStatus.getStatusText(statusCode));
+      throw new APIException("URL access returned " +
+                             HttpStatus.getStatusText(statusCode));
     }
   }
 
   /**
    * @return Base URL.
    */
+  @Override
   public String getBaseUrl() {
     return baseUrl;
   }

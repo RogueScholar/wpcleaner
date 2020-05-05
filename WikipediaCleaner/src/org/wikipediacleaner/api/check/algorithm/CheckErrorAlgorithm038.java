@@ -9,12 +9,11 @@ package org.wikipediacleaner.api.check.algorithm;
 
 import java.util.Collection;
 import java.util.List;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
+import org.wikipediacleaner.api.data.Namespace;
 import org.wikipediacleaner.api.data.PageAnalysis;
 import org.wikipediacleaner.api.data.PageElementTag;
 import org.wikipediacleaner.i18n.GT;
-
 
 /**
  * Algorithm for analyzing error 38 of check wikipedia project.
@@ -22,26 +21,28 @@ import org.wikipediacleaner.i18n.GT;
  */
 public class CheckErrorAlgorithm038 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm038() {
-    super("HTML text style element <i>");
-  }
+  public CheckErrorAlgorithm038() { super("HTML text style element <i>"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if ((analysis == null) || (analysis.getPage() == null)) {
       return false;
     }
     if (!analysis.getPage().isArticle()) {
+      return false;
+    }
+    if (Namespace.IMAGE == analysis.getPage().getNamespace()) {
       return false;
     }
 
@@ -65,11 +66,16 @@ public class CheckErrorAlgorithm038 extends CheckErrorAlgorithmBase {
       // Check that error should be reported
       int beginIndex = iTag.getCompleteBeginIndex();
       if (errorFound) {
-        if ((analysis.getSurroundingTag(PageElementTag.TAG_WIKI_MATH, beginIndex) != null) ||
-            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_NOWIKI, beginIndex) != null) ||
-            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_PRE, beginIndex) != null) ||
-            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SOURCE, beginIndex) != null) ||
-            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SYNTAXHIGHLIGHT, beginIndex) != null)) {
+        if ((analysis.getSurroundingTag(PageElementTag.TAG_WIKI_MATH,
+                                        beginIndex) != null) ||
+            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_NOWIKI,
+                                        beginIndex) != null) ||
+            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_PRE,
+                                        beginIndex) != null) ||
+            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SOURCE,
+                                        beginIndex) != null) ||
+            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SYNTAXHIGHLIGHT,
+                                        beginIndex) != null)) {
           errorFound = false;
         }
       }
@@ -81,24 +87,21 @@ public class CheckErrorAlgorithm038 extends CheckErrorAlgorithmBase {
         }
         result = true;
         if (!iTag.isFullTag() && iTag.isComplete()) {
-          CheckErrorResult error = createCheckErrorResult(
-              analysis,
-              iTag.getCompleteBeginIndex(),
-              iTag.getCompleteEndIndex());
+          CheckErrorResult error =
+              createCheckErrorResult(analysis, iTag.getCompleteBeginIndex(),
+                                     iTag.getCompleteEndIndex());
           String text = analysis.getContents().substring(
-              iTag.getValueBeginIndex(),
-              iTag.getValueEndIndex());
+              iTag.getValueBeginIndex(), iTag.getValueEndIndex());
           if ((text != null) && (text.trim().length() > 0)) {
             String visibleText = text;
             if (text.length() > 30) {
-              visibleText = text.substring(0, 10) + "…" + text.substring(text.length() - 10); 
+              visibleText = text.substring(0, 10) + "…" +
+                            text.substring(text.length() - 10);
             }
             error.addReplacement(
                 "''" + text + "''",
                 GT._T("Replace with {0}", "''" + visibleText + "''"));
-            error.addReplacement(
-                text,
-                GT._T("Replace with {0}", visibleText));
+            error.addReplacement(text, GT._T("Replace with {0}", visibleText));
           } else {
             error.addReplacement("", GT._T("Delete"));
           }

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wikicleaner\n"
 "Report-Msgid-Bugs-To: nicove@users.sourceforge.net\n"
-"POT-Creation-Date: 2020-04-18 14:14+0200\n"
+"POT-Creation-Date: 2020-04-25 18:56+0200\n"
 "PO-Revision-Date: 2018-01-01 01:34+0000\n"
 "Last-Translator: Andi Chandler <Unknown>\n"
 "Language-Team: English (United Kingdom) <en_GB@li.org>\n"
@@ -800,6 +800,15 @@ msgstr "To report only links to other languages"
 msgid "To report only links to local wikis"
 msgstr "To report only links to local wikis"
 
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm092.java:242
+msgid "Maximum level of titles to report"
+msgstr ""
+
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm092.java:245
+#, fuzzy
+msgid "To report only consecutive titles"
+msgstr "To report only links to other languages"
+
 #: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm101.java:161
 msgid "List of ordinal suffixes"
 msgstr "List of ordinal suffixes"
@@ -895,17 +904,22 @@ msgid "Both values are equal"
 msgstr ""
 
 #: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:132
+#, fuzzy
+msgid "Other value is empty"
+msgstr "Other Language"
+
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:134
 #, fuzzy, java-format
 msgid "Other value: {0}"
 msgstr "Other Language"
 
-#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:235
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:237
 #: org/wikipediacleaner/gui/swing/NewSectionWindow.java:115
 #: org/wikipediacleaner/gui/swing/OnePageWindow.java:529
 msgid "Comment"
 msgstr "Comment"
 
-#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:391
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:396
 #: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm527.java:273
 #: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm528.java:255
 #: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm529.java:381
@@ -913,7 +927,7 @@ msgstr "Comment"
 msgid "A category containing the list of pages in error"
 msgstr "A category containing the list of pages in error"
 
-#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:394
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm524.java:399
 msgid "Values that can be safely ignored for a given template and argument"
 msgstr "Values that can be safely ignored for a given template and argument"
 
@@ -1010,7 +1024,8 @@ msgid "List of categorizing templates"
 msgstr "Uncategorised templates"
 
 #: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm548.java:351
-#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm550.java:187
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm550.java:193
+#: org/wikipediacleaner/api/check/algorithm/CheckErrorAlgorithm551.java:190
 #, fuzzy
 msgid "Links to ignore"
 msgstr "Links to {0}"
@@ -1367,12 +1382,12 @@ msgstr "Parsing text"
 msgid "Retrieving templates"
 msgstr "Retrieving templates"
 
-#: org/wikipediacleaner/api/impl/MediaWikiAPI.java:680
+#: org/wikipediacleaner/api/impl/MediaWikiAPI.java:681
 #, java-format
 msgid "URL {0} is blacklisted"
 msgstr "URL {0} is blacklisted"
 
-#: org/wikipediacleaner/api/impl/MediaWikiAPI.java:1871
+#: org/wikipediacleaner/api/impl/MediaWikiAPI.java:1872
 msgid ""
 "This action is protected by a CAPTCHA.\n"
 "What is the answer to the following question ?"
@@ -1380,7 +1395,7 @@ msgstr ""
 "This action is protected by a CAPTCHA.\n"
 "What is the answer to the following question ?"
 
-#: org/wikipediacleaner/api/impl/MediaWikiAPI.java:1878
+#: org/wikipediacleaner/api/impl/MediaWikiAPI.java:1879
 msgid ""
 "This action is protected by a CAPTCHA.\n"
 "What is the answer to the question displayed in your browser ?"
@@ -3107,21 +3122,21 @@ msgstr "Check last version of article before reporting an error"
 msgid "Only check articles previously reported"
 msgstr "Only check articles previously reported"
 
-#: org/wikipediacleaner/gui/swing/bot/ListCWWorker.java:565
+#: org/wikipediacleaner/gui/swing/bot/ListCWWorker.java:567
 #, java-format
 msgid "{0} page has been analyzed"
 msgid_plural "{0} pages have been analyzed"
 msgstr[0] "{0} page has been analyzed"
 msgstr[1] "{0} pages have been analyzed"
 
-#: org/wikipediacleaner/gui/swing/bot/ListCWWorker.java:573
+#: org/wikipediacleaner/gui/swing/bot/ListCWWorker.java:575
 #, java-format
 msgid "{0} page has been detected for algorithm {1}"
 msgid_plural "{0} pages have been detected for algorithm {1}"
 msgstr[0] "{0} page has been detected for algorithm {1}"
 msgstr[1] "{0} pages have been detected for algorithm {1}"
 
-#: org/wikipediacleaner/gui/swing/bot/ListCWWorker.java:743
+#: org/wikipediacleaner/gui/swing/bot/ListCWWorker.java:745
 #, java-format
 msgid "{0} pages processed"
 msgstr "{0} pages processed"

@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
 import org.wikipediacleaner.api.APIException;
 import org.wikipediacleaner.api.MediaWiki;
 import org.wikipediacleaner.api.check.CheckError;
@@ -27,10 +26,10 @@ import org.wikipediacleaner.api.data.Page;
 import org.wikipediacleaner.api.data.PageAnalysis;
 import org.wikipediacleaner.api.data.PageElementExternalLink;
 import org.wikipediacleaner.api.data.PageElementISBN;
+import org.wikipediacleaner.api.data.PageElementTag;
 import org.wikipediacleaner.gui.swing.basic.BasicWindow;
 import org.wikipediacleaner.gui.swing.basic.BasicWorker;
 import org.wikipediacleaner.i18n.GT;
-
 
 /**
  * Tools for updating ISBN warnings.
@@ -43,10 +42,10 @@ public class UpdateISBNWarningTools extends UpdateWarningTools {
    * @param createWarning Create warning if necessary.
    * @param automaticEdit True if the edits are automatic.
    */
-  public UpdateISBNWarningTools(
-      EnumWikipedia wiki, BasicWorker worker,
-      boolean createWarning, boolean automaticEdit) {
-    this(wiki, worker, (worker != null) ? worker.getWindow() : null, createWarning, automaticEdit);
+  public UpdateISBNWarningTools(EnumWikipedia wiki, BasicWorker worker,
+                                boolean createWarning, boolean automaticEdit) {
+    this(wiki, worker, (worker != null) ? worker.getWindow() : null,
+         createWarning, automaticEdit);
   }
 
   /**
@@ -54,7 +53,8 @@ public class UpdateISBNWarningTools extends UpdateWarningTools {
    * @param window Window.
    * @param createWarning Create warning if necessary.
    */
-  public UpdateISBNWarningTools(EnumWikipedia wiki, BasicWindow window, boolean createWarning) {
+  public UpdateISBNWarningTools(EnumWikipedia wiki, BasicWindow window,
+                                boolean createWarning) {
     this(wiki, null, window, createWarning, false);
   }
 
@@ -65,23 +65,22 @@ public class UpdateISBNWarningTools extends UpdateWarningTools {
    * @param createWarning Create warning if necessary.
    * @param automaticEdit True if the edits are automatic.
    */
-  private UpdateISBNWarningTools(
-      EnumWikipedia wiki,
-      BasicWorker worker, BasicWindow window,
-      boolean createWarning, boolean automaticEdit) {
+  private UpdateISBNWarningTools(EnumWikipedia wiki, BasicWorker worker,
+                                 BasicWindow window, boolean createWarning,
+                                 boolean automaticEdit) {
     super(wiki, worker, window, createWarning, automaticEdit);
   }
 
   /**
    * Retrieve information in the pages to construct the warning.
-   * 
+   *
    * @param pages List of pages.
    * @return True if information was retrieved.
    * @throws APIException Exception thrown by the API.
    */
   @Override
-  protected boolean retrievePageInformation(
-      List<Page> pages) throws APIException {
+  protected boolean retrievePageInformation(List<Page> pages)
+      throws APIException {
 
     // Retrieving page contents
     if (!getContentsAvailable()) {
@@ -94,26 +93,32 @@ public class UpdateISBNWarningTools extends UpdateWarningTools {
 
   /**
    * Extract information about ISBN with errors.
-   * 
-   * @param analysis Page analysis (must have enough information to compute the list of ISBN errors).
+   *
+   * @param analysis Page analysis (must have enough information to compute the
+   *     list of ISBN errors).
    * @param talkPage Talk page.
    * @param todoSubpage to do sub-page.
    * @return List of ISBN errors.
    */
   @Override
-  protected Collection<String> constructWarningElements(
-      PageAnalysis analysis, Page talkPage, Page todoSubpage) {
+  protected Collection<String> constructWarningElements(PageAnalysis analysis,
+                                                        Page talkPage,
+                                                        Page todoSubpage) {
     if ((analysis == null) || (analysis.getPage() == null)) {
       return null;
     }
 
     // Prepare list of algorithms
     List<CheckErrorAlgorithm> algorithms = new ArrayList<CheckErrorAlgorithm>();
-    algorithms.add(CheckErrorAlgorithms.getAlgorithm(wiki, 69)); // Incorrect syntax
-    algorithms.add(CheckErrorAlgorithms.getAlgorithm(wiki, 70)); // Incorrect length
+    algorithms.add(
+        CheckErrorAlgorithms.getAlgorithm(wiki, 69)); // Incorrect syntax
+    algorithms.add(
+        CheckErrorAlgorithms.getAlgorithm(wiki, 70)); // Incorrect length
     algorithms.add(CheckErrorAlgorithms.getAlgorithm(wiki, 71)); // Incorrect X
-    algorithms.add(CheckErrorAlgorithms.getAlgorithm(wiki, 72)); // Incorrect ISBN-10
-    algorithms.add(CheckErrorAlgorithms.getAlgorithm(wiki, 73)); // Incorrect ISBN-13
+    algorithms.add(
+        CheckErrorAlgorithms.getAlgorithm(wiki, 72)); // Incorrect ISBN-10
+    algorithms.add(
+        CheckErrorAlgorithms.getAlgorithm(wiki, 73)); // Incorrect ISBN-13
 
     // Retrieve list of errors
     List<CheckErrorResult> errorResults = new ArrayList<CheckErrorResult>();
@@ -144,14 +149,22 @@ public class UpdateISBNWarningTools extends UpdateWarningTools {
         next++;
       }
       String error = analysis.getContents().substring(beginIndex, endIndex);
-      error = error.replaceAll("\\=", "&#x3D;"); // Replace "=" by its HTML value
-      error = error.replaceAll("\n", "\u21b5"); // Replacer \n by a visual character
-      error = error.replaceAll("\\<", "&lt;"); // Replace "<" by its HTML element
-      error = error.replaceAll("\\[", "&#x5B;"); // Replace "[" by its HTML value
-      error = error.replaceAll("\\]", "&#x5D;"); // Replace "]" by its HTML value
-      error = error.replaceAll("\\{", "&#x7B;"); // Replace "{" by its HTML value
-      error = error.replaceAll("\\|", "&#x7C;"); // Replace "|" by its HTML value
-      error = error.replaceAll("\\}", "&#x7D;"); // Replace "}" by its HTML value
+      error =
+          error.replaceAll("\\=", "&#x3D;"); // Replace "=" by its HTML value
+      error =
+          error.replaceAll("\n", "\u21b5"); // Replacer \n by a visual character
+      error =
+          error.replaceAll("\\<", "&lt;"); // Replace "<" by its HTML element
+      error =
+          error.replaceAll("\\[", "&#x5B;"); // Replace "[" by its HTML value
+      error =
+          error.replaceAll("\\]", "&#x5D;"); // Replace "]" by its HTML value
+      error =
+          error.replaceAll("\\{", "&#x7B;"); // Replace "{" by its HTML value
+      error =
+          error.replaceAll("\\|", "&#x7C;"); // Replace "|" by its HTML value
+      error =
+          error.replaceAll("\\}", "&#x7D;"); // Replace "}" by its HTML value
       boolean keep = true;
       StringBuilder comment = new StringBuilder();
       while (pos < next) {
@@ -161,7 +174,8 @@ public class UpdateISBNWarningTools extends UpdateWarningTools {
         if (isbn != null) {
           if ((algorithm != null) &&
               (algorithm instanceof CheckErrorAlgorithmISBN)) {
-            CheckErrorAlgorithmISBN isbnAlgo = (CheckErrorAlgorithmISBN) algorithm;
+            CheckErrorAlgorithmISBN isbnAlgo =
+                (CheckErrorAlgorithmISBN)algorithm;
             String reason = isbnAlgo.getReason(isbn);
             if ((reason != null) && (reason.length() > 0)) {
               if (comment.length() > 0) {
@@ -174,13 +188,14 @@ public class UpdateISBNWarningTools extends UpdateWarningTools {
             if (error.toUpperCase().startsWith("ISBN")) {
               error = error.substring(4).trim();
             }
-            PageElementExternalLink link = analysis.isInExternalLink(beginIndex);
+            PageElementExternalLink link =
+                analysis.isInExternalLink(beginIndex);
             if (link != null) {
-              if (!link.hasSquare() ||
-                  (link.getText() == null) ||
+              if (!link.hasSquare() || (link.getText() == null) ||
                   link.getText().isEmpty()) {
                 keep = false;
-              } else if (beginIndex < link.getBeginIndex() + link.getLink().length()) {
+              } else if (beginIndex <
+                         link.getBeginIndex() + link.getLink().length()) {
                 keep = false;
               }
             }
@@ -189,7 +204,11 @@ public class UpdateISBNWarningTools extends UpdateWarningTools {
         pos++;
       }
       if (keep) {
-        elements.add(error);
+        elements.add(PageElementTag.createTag(PageElementTag.TAG_WIKI_NOWIKI,
+                                              false, false) +
+                     error +
+                     PageElementTag.createTag(PageElementTag.TAG_WIKI_NOWIKI,
+                                              true, false));
         elements.add(comment.toString());
         memorizeError(error, analysis.getPage().getTitle());
       }
@@ -222,7 +241,8 @@ public class UpdateISBNWarningTools extends UpdateWarningTools {
    */
   @Override
   protected boolean useSection0() {
-    return configuration.getBoolean(WPCConfigurationBoolean.ISBN_WARNING_SECTION_0);
+    return configuration.getBoolean(
+        WPCConfigurationBoolean.ISBN_WARNING_SECTION_0);
   }
 
   /**
@@ -256,7 +276,7 @@ public class UpdateISBNWarningTools extends UpdateWarningTools {
    */
   @Override
   protected String getMessageRemoveWarning(String title) {
-    return GT._T("Removing {1} warning - {0}", new Object[] { title, "ISBN" });
+    return GT._T("Removing {1} warning - {0}", new Object[] {title, "ISBN"});
   }
 
   /**
@@ -265,6 +285,6 @@ public class UpdateISBNWarningTools extends UpdateWarningTools {
    */
   @Override
   protected String getMessageUpdateWarning(String title) {
-    return GT._T("Updating {1} warning - {0}", new Object[] { title, "ISBN" });
+    return GT._T("Updating {1} warning - {0}", new Object[] {title, "ISBN"});
   }
 }

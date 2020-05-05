@@ -5,7 +5,6 @@
  *  See README.txt file for licensing information.
  */
 
-
 package org.wikipediacleaner.api.constants;
 
 import java.net.URI;
@@ -14,10 +13,8 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.wikipediacleaner.api.HttpUtils;
 import org.wikipediacleaner.api.constants.wiki.AbstractWikiSettings;
-
+import org.wikipediacleaner.api.http.HttpUtils;
 
 /**
  * Analysis of URL representing articles.
@@ -107,8 +104,7 @@ public class ArticleUrl {
     if (scheme == null) {
       return null;
     }
-    if (!scheme.equalsIgnoreCase("http") &&
-        !scheme.equalsIgnoreCase("https")) {
+    if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
       return null;
     }
 
@@ -150,7 +146,8 @@ public class ArticleUrl {
     StringBuilder buffer = new StringBuilder();
     buffer.append("//");
     buffer.append(uri.getAuthority());
-    buffer.append(HttpUtils.parseEncodedString(uri.getPath(), utf8Charset, iso88591Charset));
+    buffer.append(HttpUtils.parseEncodedString(uri.getPath(), utf8Charset,
+                                               iso88591Charset));
     int paramIndex = base.indexOf("$1");
     if (paramIndex < 0) {
       return null;
@@ -182,7 +179,8 @@ public class ArticleUrl {
       }
     }
 
-    return new ArticleUrl(bufferStr.substring(paramIndex), paramValues, uri.getFragment());
+    return new ArticleUrl(bufferStr.substring(paramIndex), paramValues,
+                          uri.getFragment());
   }
 
   /**
@@ -191,7 +189,8 @@ public class ArticleUrl {
    * @param paramName Parameter name for title.
    * @return Information about article if URL is a link following the base URL.
    */
-  private static ArticleUrl isArticleParamUrl(String url, String base, String paramName) {
+  private static ArticleUrl isArticleParamUrl(String url, String base,
+                                              String paramName) {
     if ((url == null) || (base == null) || (paramName == null)) {
       return null;
     }
@@ -211,7 +210,8 @@ public class ArticleUrl {
     StringBuilder buffer = new StringBuilder();
     buffer.append("//");
     buffer.append(uri.getAuthority());
-    buffer.append(HttpUtils.parseEncodedString(uri.getRawPath(), utf8Charset, iso88591Charset));
+    buffer.append(HttpUtils.parseEncodedString(uri.getRawPath(), utf8Charset,
+                                               iso88591Charset));
     String bufferStr = buffer.toString();
     if (!bufferStr.equals(base)) {
       return null;
@@ -263,7 +263,8 @@ public class ArticleUrl {
    * @param title Article title.
    * @param attributes Attributes.
    */
-  private ArticleUrl(String title, Map<String, String> attributes, String fragment) {
+  private ArticleUrl(String title, Map<String, String> attributes,
+                     String fragment) {
     String tmpTitle = title;
     if (tmpTitle != null) {
       tmpTitle = tmpTitle.replaceAll("\\_", " ");
@@ -273,30 +274,25 @@ public class ArticleUrl {
       }
     }
     this.title = tmpTitle;
-    this.attributes = (attributes != null) ? Collections.unmodifiableMap(attributes) : null;
+    this.attributes =
+        (attributes != null) ? Collections.unmodifiableMap(attributes) : null;
     this.fragment = fragment;
   }
 
   /**
    * @return Article title.
    */
-  public String getTitle() {
-    return title;
-  }
+  public String getTitle() { return title; }
 
   /**
    * @return Attributes.
    */
-  public Map<String, String> getAttributes() {
-    return attributes;
-  }
+  public Map<String, String> getAttributes() { return attributes; }
 
   /**
    * @return Fragment (anchor).
    */
-  public String getFragment() {
-    return fragment;
-  }
+  public String getFragment() { return fragment; }
 
   /**
    * @return Title with optional fragment.

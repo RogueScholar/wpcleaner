@@ -9,9 +9,9 @@ package org.wikipediacleaner.api.data;
 
 import org.wikipediacleaner.api.constants.EnumWikipedia;
 
-
 /**
- * Class containing information about a complete internal link ([[link#anchor|text]]). 
+ * Class containing information about a complete internal link
+ * ([[link#anchor|text]]).
  */
 public class PageElementInternalLink extends PageElement {
 
@@ -21,18 +21,18 @@ public class PageElementInternalLink extends PageElement {
   private final String anchor;
   private final String textNotTrimmed;
   private final String text;
-  private final int    textOffset;
+  private final int textOffset;
 
   /**
    * Analyze contents to check if it matches an internal link.
-   * 
+   *
    * @param wiki Wiki.
    * @param contents Contents.
    * @param index Block start index.
    * @return Block details it there's a block.
    */
-  public static PageElementInternalLink analyzeBlock(
-      EnumWikipedia wiki, String contents, int index) {
+  public static PageElementInternalLink
+  analyzeBlock(EnumWikipedia wiki, String contents, int index) {
     // Verify arguments
     if (contents == null) {
       return null;
@@ -52,8 +52,7 @@ public class PageElementInternalLink extends PageElement {
     int pipeIndex = -1;
     int endIndex = -1;
     int level3CurlyBrackets = 0;
-    while ((tmpIndex < contents.length()) &&
-           (endIndex < 0) &&
+    while ((tmpIndex < contents.length()) && (endIndex < 0) &&
            (pipeIndex < 0)) {
       switch (contents.charAt(tmpIndex)) {
       case '[':
@@ -85,8 +84,7 @@ public class PageElementInternalLink extends PageElement {
         }
         break;
       case '#':
-        if ((level3CurlyBrackets == 0) &&
-            (anchorIndex < 0)) {
+        if ((level3CurlyBrackets == 0) && (anchorIndex < 0)) {
           anchorIndex = tmpIndex;
         }
         break;
@@ -182,20 +180,22 @@ public class PageElementInternalLink extends PageElement {
       String namespaceName = linkTrimmed.substring(0, colonIndex);
 
       // Is it a category ?
-      Namespace category = wiki.getWikiConfiguration().getNamespace(Namespace.CATEGORY);
+      Namespace category =
+          wiki.getWikiConfiguration().getNamespace(Namespace.CATEGORY);
       if ((category != null) && (category.isPossibleName(namespaceName))) {
         return null;
       }
 
       // Is it a file / image ?
-      Namespace image = wiki.getWikiConfiguration().getNamespace(Namespace.IMAGE);
+      Namespace image =
+          wiki.getWikiConfiguration().getNamespace(Namespace.IMAGE);
       if ((image != null) && (image.isPossibleName(namespaceName))) {
         return null;
       }
 
       // Is it a language link ?
-      if (Language.isLanguageCode(
-          wiki.getWikiConfiguration().getLanguages(), namespaceName)) {
+      if (Language.isLanguageCode(wiki.getWikiConfiguration().getLanguages(),
+                                  namespaceName)) {
         return null;
       }
     }
@@ -213,8 +213,7 @@ public class PageElementInternalLink extends PageElement {
       } else {
         namespaceName = linkTrimmed.substring(0, colonIndex);
       }
-      if ((namespaceName != null) &&
-          (wiki.getWikiConfiguration() != null) &&
+      if ((namespaceName != null) && (wiki.getWikiConfiguration() != null) &&
           (wiki.getWikiConfiguration().getInterwikis() != null)) {
         for (Interwiki iw : wiki.getWikiConfiguration().getInterwikis()) {
           if (iw.getPrefix().equals(namespaceName)) {
@@ -230,23 +229,17 @@ public class PageElementInternalLink extends PageElement {
     }
 
     // Create internal link
-    return new PageElementInternalLink(
-        wiki,
-        index, endIndex + 2,
-        link, anchor, text, textOffset);
+    return new PageElementInternalLink(wiki, index, endIndex + 2, link, anchor,
+                                       text, textOffset);
   }
 
-  public String getLink() {
-    return link;
-  }
+  public String getLink() { return link; }
 
   public String getLinkNotNormalized() {
     return (linkNotTrimmed != null) ? linkNotTrimmed.trim() : null;
   }
 
-  public String getAnchor() {
-    return anchor;
-  }
+  public String getAnchor() { return anchor; }
 
   public String getFullLink() {
     if (anchor == null) {
@@ -255,13 +248,9 @@ public class PageElementInternalLink extends PageElement {
     return link + "#" + anchor;
   }
 
-  public String getText() {
-    return text;
-  }
+  public String getText() { return text; }
 
-  public int getTextOffset() {
-    return textOffset;
-  }
+  public int getTextOffset() { return textOffset; }
 
   public String getDisplayedText() {
     if (text != null) {
@@ -283,11 +272,9 @@ public class PageElementInternalLink extends PageElement {
     return linkNotTrimmed + "#" + anchorNotTrimmed;
   }
 
-  private PageElementInternalLink(
-      EnumWikipedia wikipedia,
-      int beginIndex, int endIndex,
-      String link, String anchor,
-      String text, int textOffset) {
+  private PageElementInternalLink(EnumWikipedia wikipedia, int beginIndex,
+                                  int endIndex, String link, String anchor,
+                                  String text, int textOffset) {
     super(beginIndex, endIndex);
     this.linkNotTrimmed = link;
     this.link = (link != null) ? wikipedia.normalizeTitle(link) : null;
@@ -308,7 +295,7 @@ public class PageElementInternalLink extends PageElement {
 
   /**
    * Create an internal link.
-   * 
+   *
    * @param link Link.
    * @param text Displayed text.
    * @return Internal link.
@@ -319,22 +306,52 @@ public class PageElementInternalLink extends PageElement {
 
   /**
    * Create an internal link.
-   * 
+   *
+   * @param colon True to add a colon at the beginning.
+   * @param link Link.
+   * @param text Displayed text.
+   * @return Internal link.
+   */
+  public static String createInternalLink(boolean colon, String link,
+                                          String text) {
+    return createInternalLink(colon, link, null, text);
+  }
+
+  /**
+   * Create an internal link.
+   *
    * @param link Link.
    * @param anchor Anchor
    * @param text Displayed text.
    * @return Internal link.
    */
-  public static String createInternalLink(String link, String anchor, String text) {
+  public static String createInternalLink(String link, String anchor,
+                                          String text) {
+    return createInternalLink(false, link, anchor, text);
+  }
+
+  /**
+   * Create an internal link.
+   *
+   * @param colon True to add a colon at the beginning.
+   * @param link Link.
+   * @param anchor Anchor
+   * @param text Displayed text.
+   * @return Internal link.
+   */
+  public static String createInternalLink(boolean colon, String link,
+                                          String anchor, String text) {
     StringBuilder sb = new StringBuilder();
     sb.append("[[");
     String fullLink = null;
     if ((link != null) || (anchor != null)) {
-      fullLink =
-          ((link != null) ? link.trim() : "") +
-          ((anchor != null) ? ("#" + anchor.trim()) : "");
+      fullLink = ((link != null) ? link.trim() : "") +
+                 ((anchor != null) ? ("#" + anchor.trim()) : "");
     }
     if ((fullLink != null) && (fullLink.startsWith("/"))) {
+      colon = true;
+    }
+    if (colon) {
       fullLink = ":" + fullLink;
     }
     if (text != null) {

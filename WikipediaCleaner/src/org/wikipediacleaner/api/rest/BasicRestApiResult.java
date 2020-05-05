@@ -8,14 +8,12 @@
 package org.wikipediacleaner.api.rest;
 
 import java.util.Map;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wikipediacleaner.api.HttpUtils;
 import org.wikipediacleaner.api.constants.EnumWikipedia;
-
+import org.wikipediacleaner.api.http.hc3.Hc3HttpUtils;
 
 /**
  * MediaWiki REST API results.
@@ -25,7 +23,8 @@ public abstract class BasicRestApiResult implements RestApiResult {
   /**
    * Logger.
    */
-  protected final Logger log = LoggerFactory.getLogger(BasicRestApiResult.class);
+  protected final Logger log =
+      LoggerFactory.getLogger(BasicRestApiResult.class);
 
   /**
    * Wiki on which request are made.
@@ -41,9 +40,7 @@ public abstract class BasicRestApiResult implements RestApiResult {
    * @param wiki Wiki on which requests are made.
    * @param httpClient HTTP client for making requests.
    */
-  protected BasicRestApiResult(
-      EnumWikipedia wiki,
-      HttpClient httpClient) {
+  protected BasicRestApiResult(EnumWikipedia wiki, HttpClient httpClient) {
     this.wiki = wiki;
     this.httpClient = httpClient;
   }
@@ -70,14 +67,14 @@ public abstract class BasicRestApiResult implements RestApiResult {
 
   /**
    * Create an HttpMethod.
-   * 
+   *
    * @param properties Properties to drive the API.
    * @param path Path to REST API method.
    * @param param Parameter for REST API method.
    * @return HttpMethod.
    */
-  protected HttpMethod createHttpMethod(
-      Map<String, String> properties, String path, String param) {
+  protected HttpMethod createHttpMethod(Map<String, String> properties,
+                                        String path, String param) {
     String encodedPath = path;
     if ((param != null) && !param.isEmpty()) {
       encodedPath += "/" + param;
@@ -88,7 +85,7 @@ public abstract class BasicRestApiResult implements RestApiResult {
         // Nothing
       }*/
     }
-    return HttpUtils.createHttpMethod(
+    return Hc3HttpUtils.createHttpMethod(
         getWiki().getSettings().getHostURL(true) + "/" + encodedPath,
         properties, false);
   }
