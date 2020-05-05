@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -36,7 +35,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
-
 import org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithm;
 import org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithms;
 import org.wikipediacleaner.api.constants.EnumWikipedia;
@@ -48,7 +46,6 @@ import org.wikipediacleaner.images.EnumImageSize;
 import org.wikipediacleaner.utils.Configuration;
 import org.wikipediacleaner.utils.ConfigurationValueBoolean;
 import org.wikipediacleaner.utils.ConfigurationValueInteger;
-
 
 /**
  * A panel for Check Wiki bot tools.
@@ -81,7 +78,7 @@ public class CWToolsPanel extends BotToolsPanel {
 
   /**
    * Construct a Check Wiki bot tools panel.
-   * 
+   *
    * @param window Parent window.
    */
   public CWToolsPanel(BasicWindow window) {
@@ -112,7 +109,8 @@ public class CWToolsPanel extends BotToolsPanel {
     constraints.weighty = 0;
 
     // Label
-    JLabel labelCW = Utilities.createJLabel(GT._T("Automatic fixing for Check Wiki"));
+    JLabel labelCW =
+        Utilities.createJLabel(GT._T("Automatic fixing for Check Wiki"));
     add(labelCW, constraints);
     constraints.gridy++;
 
@@ -125,8 +123,10 @@ public class CWToolsPanel extends BotToolsPanel {
     Utilities.addRowSorter(tableCWAutomaticFixing, modelCWAutomaticFixing);
     JScrollPane paneCWAutomaticFixing = new JScrollPane(tableCWAutomaticFixing);
     paneCWAutomaticFixing.setMinimumSize(new Dimension(200, 200));
-    paneCWAutomaticFixing.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-    paneCWAutomaticFixing.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+    paneCWAutomaticFixing.setHorizontalScrollBarPolicy(
+        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+    paneCWAutomaticFixing.setVerticalScrollBarPolicy(
+        ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
     constraints.weighty = 1;
     add(paneCWAutomaticFixing, constraints);
     constraints.gridy++;
@@ -134,10 +134,15 @@ public class CWToolsPanel extends BotToolsPanel {
 
     // Explanation
     String txtExplanation =
-      GT._T("To use Check Wiki bot tools:") + "\n" +
-      "  - " + GT._T("Select algorithms for which automatic fixing will be applied") + "\n" +
-      "  - " + GT._T("Select algorithms that will be used to create a list of pages to work on") + "\n" +
-      "  - " + GT._T("Run the tools below");
+        GT._T("To use Check Wiki bot tools:")
+        + "\n"
+        + "  - " +
+        GT._T("Select algorithms for which automatic fixing will be applied")
+        + "\n"
+        + "  - " +
+        GT._T("Select algorithms that will be used to create a list of pages to work on")
+        + "\n"
+        + "  - " + GT._T("Run the tools below");
     JTextArea lblExplanation = new JTextArea(txtExplanation);
     lblExplanation.setEditable(false);
     lblExplanation.setBackground(getBackground());
@@ -159,7 +164,8 @@ public class CWToolsPanel extends BotToolsPanel {
 
     // Number of errors
     modelNbPages = new SpinnerNumberModel(
-        config.getInt(null, ConfigurationValueInteger.CHECK_BOT_NB_PAGES), 1, 10000, 1);
+        config.getInt(null, ConfigurationValueInteger.CHECK_BOT_NB_PAGES), 1,
+        10000, 1);
     JSpinner spinNbPages = new JSpinner(modelNbPages);
     JLabel labelNbPages = Utilities.createJLabel(GT._T("Number of pages:"));
     labelNbPages.setLabelFor(spinNbPages);
@@ -208,35 +214,35 @@ public class CWToolsPanel extends BotToolsPanel {
     toolbarButtons.add(buttonCWAutomaticMarking);
 
     // Button for checking white lists
-    JButton buttonCWCheckWhiteLists = Utilities.createJButton(
-        "gnome-edit-find.png", EnumImageSize.NORMAL,
-        GT._T("Check whitelists"), false, null);
+    JButton buttonCWCheckWhiteLists =
+        Utilities.createJButton("gnome-edit-find.png", EnumImageSize.NORMAL,
+                                GT._T("Check whitelists"), false, null);
     buttonCWCheckWhiteLists.addActionListener(EventHandler.create(
         ActionListener.class, this, "actionCWCheckWhiteLists"));
     toolbarButtons.add(buttonCWCheckWhiteLists);
 
     // Button for listing errors from dump file
-    JButton buttonListCW = Utilities.createJButton(
-        "gnome-logviewer.png", EnumImageSize.NORMAL,
-        GT._T("Analyze dump file"), false, null);
-    buttonListCW.addActionListener(EventHandler.create(
-        ActionListener.class, this, "actionCWLists"));
+    JButton buttonListCW =
+        Utilities.createJButton("gnome-logviewer.png", EnumImageSize.NORMAL,
+                                GT._T("Analyze dump file"), false, null);
+    buttonListCW.addActionListener(
+        EventHandler.create(ActionListener.class, this, "actionCWLists"));
     toolbarButtons.add(buttonListCW);
 
     // Button for saving selection
-    JButton buttonSaveSelection = Utilities.createJButton(
-        "gnome-document-save.png", EnumImageSize.NORMAL,
-        GT._T("Save selection"), false, null);
-    buttonSaveSelection.addActionListener(EventHandler.create(
-        ActionListener.class, this, "actionSaveSelection"));
+    JButton buttonSaveSelection =
+        Utilities.createJButton("gnome-document-save.png", EnumImageSize.NORMAL,
+                                GT._T("Save selection"), false, null);
+    buttonSaveSelection.addActionListener(
+        EventHandler.create(ActionListener.class, this, "actionSaveSelection"));
     toolbarButtons.add(buttonSaveSelection);
 
     // Button for loading selection
     buttonLoadSelection = Utilities.createJButton(
         "gnome-drive-harddisk.png", EnumImageSize.NORMAL,
         GT._T("Load selection"), false, null);
-    buttonLoadSelection.addActionListener(EventHandler.create(
-        ActionListener.class, this, "actionLoadSelection"));
+    buttonLoadSelection.addActionListener(
+        EventHandler.create(ActionListener.class, this, "actionLoadSelection"));
     toolbarButtons.add(buttonLoadSelection);
 
     constraints.gridwidth = maxX;
@@ -245,23 +251,20 @@ public class CWToolsPanel extends BotToolsPanel {
     constraints.gridy++;
 
     // Select errors that can be fixed by bot
-    ListSelectionModel selectionModel = tableCWAutomaticFixing.getSelectionModel();
+    ListSelectionModel selectionModel =
+        tableCWAutomaticFixing.getSelectionModel();
     selectionModel.clearSelection();
   }
 
   /**
    * Action called when Automatic Check Wiki Fixing button is pressed.
    */
-  public void actionCWAutomaticFixing() {
-    automaticFixing(true);
-  }
+  public void actionCWAutomaticFixing() { automaticFixing(true); }
 
   /**
    * Action called when Automatic Check Wiki Marking button is pressed.
    */
-  public void actionCWAutomaticMarking() {
-    automaticFixing(false);
-  }
+  public void actionCWAutomaticMarking() { automaticFixing(false); }
 
   /**
    * @param saveModifications True if modifications should be saved.
@@ -269,18 +272,21 @@ public class CWToolsPanel extends BotToolsPanel {
   private void automaticFixing(boolean saveModifications) {
     EnumWikipedia wiki = window.getWikipedia();
     if (!wiki.getCWConfiguration().isProjectAvailable()) {
-      Utilities.displayMissingConfiguration(
-          window.getParentComponent(), null);
+      Utilities.displayMissingConfiguration(window.getParentComponent(), null);
       return;
     }
-    List<CheckErrorAlgorithm> fixAlgorithms = modelCWAutomaticFixing.getFixAlgorithms();
+    List<CheckErrorAlgorithm> fixAlgorithms =
+        modelCWAutomaticFixing.getFixAlgorithms();
     if ((fixAlgorithms == null) || fixAlgorithms.isEmpty()) {
-      window.displayWarning(GT._T("You must select at least one algorithm for fixing errors"));
+      window.displayWarning(
+          GT._T("You must select at least one algorithm for fixing errors"));
       return;
     }
-    List<CheckErrorAlgorithm> listAlgorithms = modelCWAutomaticFixing.getListAlgorithms();
+    List<CheckErrorAlgorithm> listAlgorithms =
+        modelCWAutomaticFixing.getListAlgorithms();
     if ((listAlgorithms == null) || listAlgorithms.isEmpty()) {
-      window.displayWarning(GT._T("You must select at least one algorithm for listing errors"));
+      window.displayWarning(
+          GT._T("You must select at least one algorithm for listing errors"));
       return;
     }
     int answer = window.displayYesNoWarning(BasicWindow.experimentalMessage);
@@ -296,16 +302,14 @@ public class CWToolsPanel extends BotToolsPanel {
     boolean analyze = false;
     if (saveModifications) {
       analyze = chkCWAnalyze.isSelected();
-      config.setBoolean(null, ConfigurationValueBoolean.CHECK_BOT_ANALYZE, analyze);
+      config.setBoolean(null, ConfigurationValueBoolean.CHECK_BOT_ANALYZE,
+                        analyze);
     }
     boolean noLimit = chkNoLimit.isSelected();
     config.setInt(null, ConfigurationValueInteger.CHECK_BOT_NB_PAGES, max);
     AutomaticCWWorker worker = new AutomaticCWWorker(
-        wiki, window,
-        listAlgorithms, max, noLimit,
-        fixAlgorithms,
-        txtComment.getText(),
-        saveModifications, analyze);
+        wiki, window, listAlgorithms, max, noLimit, fixAlgorithms,
+        txtComment.getText(), saveModifications, analyze);
     worker.start();
   }
 
@@ -324,13 +328,14 @@ public class CWToolsPanel extends BotToolsPanel {
   public void actionCWLists() {
     EnumWikipedia wiki = window.getWikipedia();
     if (!wiki.getCWConfiguration().isProjectAvailable()) {
-      Utilities.displayMissingConfiguration(
-          window.getParentComponent(), null);
+      Utilities.displayMissingConfiguration(window.getParentComponent(), null);
       return;
     }
-    List<CheckErrorAlgorithm> listAlgorithms = modelCWAutomaticFixing.getListAlgorithms();
+    List<CheckErrorAlgorithm> listAlgorithms =
+        modelCWAutomaticFixing.getListAlgorithms();
     if ((listAlgorithms == null) || listAlgorithms.isEmpty()) {
-      window.displayWarning(GT._T("You must select at least one algorithm for listing errors"));
+      window.displayWarning(
+          GT._T("You must select at least one algorithm for listing errors"));
       return;
     }
     int answer = window.displayYesNoWarning(BasicWindow.experimentalMessage);
@@ -358,9 +363,8 @@ public class CWToolsPanel extends BotToolsPanel {
       exportPage = panel.getExportPage();
       checkWiki = panel.checkWiki();
       onlyRecheck = panel.onlyRecheck();
-      if ((dumpFile != null) &&
-          ((exportWiki && (exportPage != null)) ||
-           (!exportWiki && (outputDir != null)))) {
+      if ((dumpFile != null) && ((exportWiki && (exportPage != null)) ||
+                                 (!exportWiki && (outputDir != null)))) {
         done = true;
         panel.saveConfiguration();
       }
@@ -368,15 +372,12 @@ public class CWToolsPanel extends BotToolsPanel {
     ListCWWorker worker = null;
     if (exportWiki) {
       worker = new ListCWWorker(
-          wiki, window, dumpFile, exportPage,
-          listAlgorithms,
-          Collections.singleton(Namespace.MAIN),
-          checkWiki, onlyRecheck);
+          wiki, window, dumpFile, exportPage, listAlgorithms,
+          Collections.singleton(Namespace.MAIN), checkWiki, onlyRecheck);
     } else {
-      worker = new ListCWWorker(
-          wiki, window, dumpFile, outputDir,
-          listAlgorithms, Collections.singleton(Namespace.MAIN),
-          checkWiki);
+      worker =
+          new ListCWWorker(wiki, window, dumpFile, outputDir, listAlgorithms,
+                           Collections.singleton(Namespace.MAIN), checkWiki);
     }
     worker.start();
   }
@@ -386,14 +387,16 @@ public class CWToolsPanel extends BotToolsPanel {
    */
   public void actionSaveSelection() {
     // Retrieve configuration name
-    String name = window.askForValue(GT._T("What is the name of the selection?"), null, null);
+    String name = window.askForValue(
+        GT._T("What is the name of the selection?"), null, null);
     if ((name == null) || (name.isEmpty())) {
       return;
     }
 
     // Create a string representing the current selection
     StringBuilder buffer = new StringBuilder();
-    List<CheckErrorAlgorithm> algorithms = modelCWAutomaticFixing.getFixAlgorithms();
+    List<CheckErrorAlgorithm> algorithms =
+        modelCWAutomaticFixing.getFixAlgorithms();
     if (algorithms != null) {
       for (int i = 0; i < algorithms.size(); i++) {
         if (i > 0) {
@@ -415,7 +418,8 @@ public class CWToolsPanel extends BotToolsPanel {
 
     // Save configuration
     Configuration config = Configuration.getConfiguration();
-    config.setSubString(null, Configuration.ARRAY_CHECK_BOT_SELECTION, name, buffer.toString());
+    config.setSubString(null, Configuration.ARRAY_CHECK_BOT_SELECTION, name,
+                        buffer.toString());
   }
 
   /**
@@ -425,7 +429,8 @@ public class CWToolsPanel extends BotToolsPanel {
 
     // Retrieve possible selections
     Configuration config = Configuration.getConfiguration();
-    Properties properties = config.getProperties(null, Configuration.ARRAY_CHECK_BOT_SELECTION);
+    Properties properties =
+        config.getProperties(null, Configuration.ARRAY_CHECK_BOT_SELECTION);
     if ((properties == null) || (properties.isEmpty())) {
       return;
     }
@@ -445,15 +450,12 @@ public class CWToolsPanel extends BotToolsPanel {
           ActionListener.class, this, "actionLoadSelection", "actionCommand"));
       menu.add(item);
     }
-    menu.show(
-        buttonLoadSelection,
-        0,
-        buttonLoadSelection.getHeight());
+    menu.show(buttonLoadSelection, 0, buttonLoadSelection.getHeight());
   }
 
   /**
    * Action called when Load Selection menu item is selected.
-   * 
+   *
    * @param selection Selection.
    */
   public void actionLoadSelection(String selection) {
@@ -467,8 +469,8 @@ public class CWToolsPanel extends BotToolsPanel {
       for (int i = 0; i < elements.length; i++) {
         try {
           int errorNumber = Integer.parseInt(elements[i]);
-          CheckErrorAlgorithm algorithm = CheckErrorAlgorithms.getAlgorithm(
-              window.getWiki(), errorNumber);
+          CheckErrorAlgorithm algorithm =
+              CheckErrorAlgorithms.getAlgorithm(window.getWiki(), errorNumber);
           if (algorithm != null) {
             algorithms.add(algorithm);
           }
@@ -484,8 +486,8 @@ public class CWToolsPanel extends BotToolsPanel {
       for (int i = 0; i < elements.length; i++) {
         try {
           int errorNumber = Integer.parseInt(elements[i]);
-          CheckErrorAlgorithm algorithm = CheckErrorAlgorithms.getAlgorithm(
-              window.getWiki(), errorNumber);
+          CheckErrorAlgorithm algorithm =
+              CheckErrorAlgorithms.getAlgorithm(window.getWiki(), errorNumber);
           if (algorithm != null) {
             algorithms.add(algorithm);
           }

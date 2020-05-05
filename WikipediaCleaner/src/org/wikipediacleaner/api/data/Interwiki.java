@@ -9,7 +9,6 @@ package org.wikipediacleaner.api.data;
 
 import org.wikipediacleaner.api.http.HttpUtils;
 
-
 /**
  * Information about interwiki.
  */
@@ -33,12 +32,14 @@ public class Interwiki implements Comparable<Interwiki> {
     this.language = language;
     this.url = url;
     int colonIndex = (url != null) ? url.indexOf(':') : -1;
-    this.urlWithoutProtocol = ((colonIndex < 0) || (url == null)) ? null : url.substring(colonIndex + 1);
+    this.urlWithoutProtocol = ((colonIndex < 0) || (url == null))
+                                  ? null
+                                  : url.substring(colonIndex + 1);
   }
 
   /**
    * Test if an URL matches an article.
-   * 
+   *
    * @param test URL to be tested.
    * @return Article if the URL matches an article.
    */
@@ -58,30 +59,22 @@ public class Interwiki implements Comparable<Interwiki> {
   /**
    * @return Interwiki prefix.
    */
-  public String getPrefix() {
-    return prefix;
-  }
+  public String getPrefix() { return prefix; }
 
   /**
    * @return Interwiki local.
    */
-  public boolean getLocal() {
-    return local;
-  }
+  public boolean getLocal() { return local; }
 
   /**
    * @return Interwiki language.
    */
-  public String getLanguage() {
-    return language;
-  }
+  public String getLanguage() { return language; }
 
   /**
    * @return Interwiki URL.
    */
-  public String getURL() {
-    return url;
-  }
+  public String getURL() { return url; }
 
   /* (non-Javadoc)
    * @see java.lang.Comparable#compareTo(java.lang.Object)
@@ -110,11 +103,12 @@ public class Interwiki implements Comparable<Interwiki> {
     if ((o == null) || (o.getClass() != getClass())) {
       return false;
     }
-    Interwiki iw = (Interwiki) o;
+    Interwiki iw = (Interwiki)o;
     boolean equals = true;
     equals &= prefix.equals(iw.prefix);
     equals &= (local == iw.local);
-    equals &= (language == null) ? (iw.language == null) : language.equals(iw.language);
+    equals &= (language == null) ? (iw.language == null)
+                                 : language.equals(iw.language);
     equals &= (url == null) ? (iw.url == null) : url.equals(iw.url);
     return equals;
   }

@@ -9,7 +9,6 @@ package org.wikipediacleaner.api.check.algorithm;
 
 import java.util.Collection;
 import java.util.List;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.data.PageAnalysis;
 import org.wikipediacleaner.api.data.PageElementCategory;
@@ -18,29 +17,27 @@ import org.wikipediacleaner.api.data.PageElementLanguageLink;
 import org.wikipediacleaner.api.data.PageElementTitle;
 import org.wikipediacleaner.api.data.contents.ContentsComment;
 
-
 /**
  * Algorithm for analyzing error 52 of check wikipedia project.
  * Error 52: Category before last headline.
  */
 public class CheckErrorAlgorithm052 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm052() {
-    super("Category before last headline");
-  }
+  public CheckErrorAlgorithm052() { super("Category before last headline"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -60,9 +57,7 @@ public class CheckErrorAlgorithm052 extends CheckErrorAlgorithmBase {
         }
         result = true;
         CheckErrorResult errorResult = createCheckErrorResult(
-            analysis,
-            category.getBeginIndex(),
-            category.getEndIndex());
+            analysis, category.getBeginIndex(), category.getEndIndex());
         String categoryName = category.getName();
         if ((categoryName == null) || ("".equals(categoryName))) {
           errorResult.addReplacement("", true);
@@ -76,7 +71,7 @@ public class CheckErrorAlgorithm052 extends CheckErrorAlgorithmBase {
 
   /**
    * Retrieve last title.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Last title.
    */
@@ -87,7 +82,8 @@ public class CheckErrorAlgorithm052 extends CheckErrorAlgorithmBase {
     }
     PageElementTitle title = null;
     for (PageElementTitle tmpTitle : titles) {
-      if ((title == null) || (title.getBeginIndex() < tmpTitle.getBeginIndex())) {
+      if ((title == null) ||
+          (title.getBeginIndex() < tmpTitle.getBeginIndex())) {
         title = tmpTitle;
       }
     }
@@ -96,7 +92,7 @@ public class CheckErrorAlgorithm052 extends CheckErrorAlgorithmBase {
 
   /**
    * Retrieve last default sort.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Last default sort.
    */
@@ -110,7 +106,7 @@ public class CheckErrorAlgorithm052 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of some errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -197,18 +193,21 @@ public class CheckErrorAlgorithm052 extends CheckErrorAlgorithmBase {
           int defaultSortBeginIndex = defaultSort.getBeginIndex();
           int defaultSortEndIndex = defaultSort.getEndIndex();
           if (defaultSortBeginIndex > lastIndex) {
-            newContent.append(contents.substring(lastIndex, defaultSortBeginIndex));
+            newContent.append(
+                contents.substring(lastIndex, defaultSortBeginIndex));
           }
           lastIndex = defaultSortEndIndex;
           if (contents.charAt(lastIndex) == '\n') {
-            if ((defaultSortBeginIndex <= 0) || (contents.charAt(defaultSortBeginIndex - 1) == '\n')) {
+            if ((defaultSortBeginIndex <= 0) ||
+                (contents.charAt(defaultSortBeginIndex - 1) == '\n')) {
               lastIndex++;
             }
           }
           if (newCategories.length() > 0) {
             newCategories.append('\n');
           }
-          newCategories.append(contents.substring(defaultSortBeginIndex, defaultSortEndIndex));
+          newCategories.append(
+              contents.substring(defaultSortBeginIndex, defaultSortEndIndex));
           defaultSort = null;
         }
 
@@ -218,14 +217,13 @@ public class CheckErrorAlgorithm052 extends CheckErrorAlgorithmBase {
         }
         int tmpIndex = categoryEndIndex;
         while ((tmpIndex < contents.length()) &&
-            (contents.charAt(tmpIndex) == ' ')) {
+               (contents.charAt(tmpIndex) == ' ')) {
           tmpIndex++;
         }
         if ((tmpIndex < contents.length()) &&
             (contents.charAt(tmpIndex) == '<')) {
           ContentsComment comment = analysis.isInComment(tmpIndex);
-          if ((comment != null) &&
-              (comment.getBeginIndex() == tmpIndex)) {
+          if ((comment != null) && (comment.getBeginIndex() == tmpIndex)) {
             categoryEndIndex = comment.getEndIndex();
           }
         }
@@ -239,7 +237,8 @@ public class CheckErrorAlgorithm052 extends CheckErrorAlgorithmBase {
         if (newCategories.length() > 0) {
           newCategories.append('\n');
         }
-        newCategories.append(contents.substring(categoryBeginIndex, categoryEndIndex));
+        newCategories.append(
+            contents.substring(categoryBeginIndex, categoryEndIndex));
       }
     }
     if (newCategories.length() == 0) {

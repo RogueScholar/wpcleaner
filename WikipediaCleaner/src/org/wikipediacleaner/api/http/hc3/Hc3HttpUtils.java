@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.URIException;
@@ -19,7 +18,6 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.wikipediacleaner.api.http.HttpUtils;
-
 
 /**
  * Utilities class for HTTP requests.
@@ -32,16 +30,15 @@ public class Hc3HttpUtils extends HttpUtils {
 
   /**
    * Create an HttpMethod.
-   * 
+   *
    * @param url URL of the request.
    * @param properties Properties to add to the request.
    * @param canUseGetMethod Flag indicating if a GET method can be used.
    * @return HttpMethod.
    */
-  public static HttpMethod createHttpMethod(
-      String url,
-      Map<String, String> properties,
-      boolean canUseGetMethod) {
+  public static HttpMethod createHttpMethod(String url,
+                                            Map<String, String> properties,
+                                            boolean canUseGetMethod) {
     try {
       if (canUseGetMethod) {
         return createHttpGetMethod(url, properties);
@@ -55,17 +52,19 @@ public class Hc3HttpUtils extends HttpUtils {
 
   /**
    * Create an HTTP POST Method.
-   * 
+   *
    * @param url URL of the request.
    * @param properties Properties to drive the API.
    * @return POST Method
    * @throws URIException Exception if the URL is not correct.
    */
-  private static PostMethod createHttpPostMethod(
-      String url,
-      Map<String, String> properties) throws URIException {
-    StringBuilder debugUrl = (DEBUG_URL) ? new StringBuilder("POST " + url) : null;
-    org.apache.commons.httpclient.URI uri = new org.apache.commons.httpclient.URI(url, false, "UTF8");
+  private static PostMethod createHttpPostMethod(String url,
+                                                 Map<String, String> properties)
+      throws URIException {
+    StringBuilder debugUrl =
+        (DEBUG_URL) ? new StringBuilder("POST " + url) : null;
+    org.apache.commons.httpclient.URI uri =
+        new org.apache.commons.httpclient.URI(url, false, "UTF8");
     PostMethod method = new PostMethod();
     method.setURI(uri);
     method.getParams().setSoTimeout(60000);
@@ -73,7 +72,8 @@ public class Hc3HttpUtils extends HttpUtils {
     method.setRequestHeader("Accept-Encoding", "gzip");
     if (properties != null) {
       boolean first = true;
-      Iterator<Map.Entry<String, String>> iter = properties.entrySet().iterator();
+      Iterator<Map.Entry<String, String>> iter =
+          properties.entrySet().iterator();
       while (iter.hasNext()) {
         Map.Entry<String, String> property = iter.next();
         String key = property.getKey();
@@ -90,18 +90,19 @@ public class Hc3HttpUtils extends HttpUtils {
 
   /**
    * Create an HTTP GET Method.
-   * 
+   *
    * @param url URL of the request.
    * @param properties Properties to drive the API.
    * @return GET Method
    * @throws URIException Exception if the URL is not correct.
    */
-  private static GetMethod createHttpGetMethod(
-      String url,
-      Map<String, String> properties) throws URIException {
+  private static GetMethod createHttpGetMethod(String url,
+                                               Map<String, String> properties)
+      throws URIException {
 
     // Initialize GET Method
-    org.apache.commons.httpclient.URI uri = new org.apache.commons.httpclient.URI(url, false, "UTF8");
+    org.apache.commons.httpclient.URI uri =
+        new org.apache.commons.httpclient.URI(url, false, "UTF8");
     GetMethod method = new GetMethod();
     method.setURI(uri);
     method.getParams().setSoTimeout(60000);
@@ -109,11 +110,13 @@ public class Hc3HttpUtils extends HttpUtils {
     method.setRequestHeader("Accept-Encoding", "gzip");
 
     // Manager query string
-    StringBuilder debugUrl = (DEBUG_URL) ? new StringBuilder("GET  " + url) : null;
+    StringBuilder debugUrl =
+        (DEBUG_URL) ? new StringBuilder("GET  " + url) : null;
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     if (properties != null) {
       boolean first = true;
-      Iterator<Map.Entry<String, String>> iter = properties.entrySet().iterator();
+      Iterator<Map.Entry<String, String>> iter =
+          properties.entrySet().iterator();
       while (iter.hasNext()) {
         Map.Entry<String, String> property = iter.next();
         String key = property.getKey();
@@ -133,15 +136,15 @@ public class Hc3HttpUtils extends HttpUtils {
 
   /**
    * Create an HTTP HEAD Method.
-   * 
+   *
    * @param url URL of the request.
    * @param properties Properties to drive the API.
    * @return HEAD Method
    * @throws URIException Exception if the URL is not correct.
    */
-  public static HeadMethod createHttpHeadMethod(
-      String url,
-      Map<String, String> properties) throws URIException {
+  public static HeadMethod createHttpHeadMethod(String url,
+                                                Map<String, String> properties)
+      throws URIException {
 
     // Initialize HEAD Method
     org.apache.commons.httpclient.URI uri = null;
@@ -157,11 +160,13 @@ public class Hc3HttpUtils extends HttpUtils {
     method.setRequestHeader("Accept-Encoding", "gzip");
 
     // Manager query string
-    StringBuilder debugUrl = (DEBUG_URL) ? new StringBuilder("HEAD " + url) : null;
+    StringBuilder debugUrl =
+        (DEBUG_URL) ? new StringBuilder("HEAD " + url) : null;
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     if (properties != null) {
       boolean first = true;
-      Iterator<Map.Entry<String, String>> iter = properties.entrySet().iterator();
+      Iterator<Map.Entry<String, String>> iter =
+          properties.entrySet().iterator();
       while (iter.hasNext()) {
         Map.Entry<String, String> property = iter.next();
         String key = property.getKey();

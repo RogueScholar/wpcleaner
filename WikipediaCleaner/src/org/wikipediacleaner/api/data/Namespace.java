@@ -8,9 +8,7 @@
 package org.wikipediacleaner.api.data;
 
 import java.util.LinkedList;
-
 import org.wikipediacleaner.api.constants.EnumCaseSensitiveness;
-
 
 /**
  * Information about namespaces.
@@ -53,9 +51,8 @@ public class Namespace implements Comparable<Namespace> {
    * @param caseSensitiveness Case sensitiveness.
    * @param subPages True if sub pages are allowed.
    */
-  public Namespace(
-      String id, String title, String canonicalTitle,
-      EnumCaseSensitiveness caseSensitiveness, boolean subPages) {
+  public Namespace(String id, String title, String canonicalTitle,
+                   EnumCaseSensitiveness caseSensitiveness, boolean subPages) {
     Integer tmpId = null;
     try {
       tmpId = Integer.parseInt(id);
@@ -74,7 +71,7 @@ public class Namespace implements Comparable<Namespace> {
 
   /**
    * Tells if CW handles this namespace.
-   * 
+   *
    * @param namespace Namespace.
    * @return True if CW handles this namespace.
    */
@@ -90,7 +87,7 @@ public class Namespace implements Comparable<Namespace> {
 
   /**
    * Tells if colons are required for internal links.
-   * 
+   *
    * @param namespace Namespace.
    * @return True if colons are required for this namespace.
    */
@@ -107,23 +104,17 @@ public class Namespace implements Comparable<Namespace> {
   /**
    * @return Namespace id.
    */
-  public Integer getId() {
-    return id;
-  }
+  public Integer getId() { return id; }
 
   /**
    * @return Title.
    */
-  public String getTitle() {
-    return title;
-  }
+  public String getTitle() { return title; }
 
   /**
    * @return Canonical title.
    */
-  public String getCanonicalTitle() {
-    return canonicalTitle;
-  }
+  public String getCanonicalTitle() { return canonicalTitle; }
 
   /**
    * @return Case sensitiveness.
@@ -135,17 +126,13 @@ public class Namespace implements Comparable<Namespace> {
   /**
    * @return True if sub pages are allowed.
    */
-  public boolean areSubPagesAllowed() {
-    return subPages;
-  }
+  public boolean areSubPagesAllowed() { return subPages; }
 
   /**
    * @return Aliases.
    */
-  public LinkedList<String> getAliases() {
-    return aliases;
-  }
-  
+  public LinkedList<String> getAliases() { return aliases; }
+
   /**
    * @param alias Alias to be added.
    */
@@ -199,7 +186,7 @@ public class Namespace implements Comparable<Namespace> {
 
     // Title
     compare = title.compareTo(bl.title);
-    
+
     return compare;
   }
 
@@ -214,7 +201,7 @@ public class Namespace implements Comparable<Namespace> {
     if ((o == null) || (o.getClass() != getClass())) {
       return false;
     }
-    Namespace bl = (Namespace) o;
+    Namespace bl = (Namespace)o;
     boolean equals = true;
     equals &= id.equals(bl.id);
     equals &= title.equals(bl.title);

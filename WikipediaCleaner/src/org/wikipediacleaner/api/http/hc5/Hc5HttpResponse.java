@@ -5,7 +5,6 @@
  *  See README.txt file for licensing information.
  */
 
-
 package org.wikipediacleaner.api.http.hc5;
 
 import java.io.InputStream;

@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
-
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -165,7 +164,6 @@ import org.wikipediacleaner.utils.Configuration;
 import org.wikipediacleaner.utils.ConfigurationValueBoolean;
 import org.wikipediacleaner.utils.ConfigurationValueInteger;
 
-
 /**
  * MediaWiki API implementation.
  */
@@ -176,7 +174,8 @@ public class MediaWikiAPI implements API {
   private final static int MAX_PAGES_PER_QUERY = 50;
 
   private static boolean DEBUG_XML = false;
-  private static XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
+  private static XMLOutputter xmlOutputter =
+      new XMLOutputter(Format.getPrettyFormat());
 
   private HttpClient httpClient;
 
@@ -188,20 +187,17 @@ public class MediaWikiAPI implements API {
 
   /**
    * Constructor.
-   * 
+   *
    * @param httpClient HTTP client.
    */
-  public MediaWikiAPI(HttpClient httpClient) {
-    this.httpClient = httpClient;
-  }
+  public MediaWikiAPI(HttpClient httpClient) { this.httpClient = httpClient; }
 
   /**
    * Update configuration.
    */
   public static void updateConfiguration() {
     Configuration config = Configuration.getConfiguration();
-    DEBUG_XML = config.getBoolean(
-        null, ConfigurationValueBoolean.DEBUG_API);
+    DEBUG_XML = config.getBoolean(null, ConfigurationValueBoolean.DEBUG_API);
     HttpUtils.updateConfiguration();
     ApiXmlResult.updateConfiguration();
   }
@@ -220,14 +216,13 @@ public class MediaWikiAPI implements API {
 
   /**
    * Load Wiki configuration.
-   * 
+   *
    * @param wiki Wiki.
    * @param userName User name.
    */
   @Override
-  public void loadConfiguration(
-      EnumWikipedia wiki,
-      String userName) throws APIException {
+  public void loadConfiguration(EnumWikipedia wiki, String userName)
+      throws APIException {
 
     // Retrieve site data
     loadSiteInfo(wiki);
@@ -237,16 +232,14 @@ public class MediaWikiAPI implements API {
 
       // Decide which pages to be retrieved
       String configPageName = wiki.getConfigurationPage();
-      Page page = DataManager.getPage(
-          wiki, configPageName, null, null, null);
+      Page page = DataManager.getPage(wiki, configPageName, null, null, null);
       Page userConfigPage = null;
       if ((userName != null) && (userName.trim().length() > 0) &&
           (wiki.getUserConfigurationPage(userName) != null) &&
-          (!Page.areSameTitle(wiki.getUserConfigurationPage(userName), configPageName))) {
+          (!Page.areSameTitle(wiki.getUserConfigurationPage(userName),
+                              configPageName))) {
         userConfigPage = DataManager.getPage(
-            wiki,
-            wiki.getUserConfigurationPage(userName),
-            null, null, null);
+            wiki, wiki.getUserConfigurationPage(userName), null, null, null);
       }
 
       // Retrieve contents
@@ -260,24 +253,26 @@ public class MediaWikiAPI implements API {
       // Set configuration
       wiki.getConfiguration().setConfiguration(
           new StringReader(page.getContents()),
-          (userConfigPage != null) && Boolean.TRUE.equals(userConfigPage.isExisting()) ?
-              new StringReader(userConfigPage.getContents()) :
-              null);
+          (userConfigPage != null) &&
+                  Boolean.TRUE.equals(userConfigPage.isExisting())
+              ? new StringReader(userConfigPage.getContents())
+              : null);
     }
   }
 
   /**
    * Retrieves the contents of a section in a <code>page</code>.
-   * 
+   *
    * @param wikipedia Wikipedia.
    * @param page Page.
    * @param section Section number.
    * @throws APIException Exception thrown by the API.
    */
   @Override
-  public void retrieveSectionContents(EnumWikipedia wikipedia, Page page, int section)
-    throws APIException {
-    Map<String, String> properties = getProperties(ApiRequest.ACTION_QUERY, true);
+  public void retrieveSectionContents(EnumWikipedia wikipedia, Page page,
+                                      int section) throws APIException {
+    Map<String, String> properties =
+        getProperties(ApiRequest.ACTION_QUERY, true);
     properties.put("prop", "revisions|info");
     properties.put("continue", "");
     properties.put("titles", page.getTitle());
@@ -285,10 +280,9 @@ public class MediaWikiAPI implements API {
     properties.put("rvslots", "main");
     properties.put("rvsection", Integer.toString(section));
     try {
-      constructContents(
-          page,
-          getRoot(wikipedia, properties, ApiRequest.MAX_ATTEMPTS),
-          "/api/query/pages/page");
+      constructContents(page,
+                        getRoot(wikipedia, properties, ApiRequest.MAX_ATTEMPTS),
+                        "/api/query/pages/page");
     } catch (JDOMParseException e) {
       log.error("Error retrieving page content", e);
       throw new APIException("Error parsing XML", e);
@@ -311,9 +305,11 @@ public class MediaWikiAPI implements API {
    * @param pages List of pages.
    * @throws APIException Exception thrown by the API.
    */
-  public void retrieveContentsWithoutRedirects(EnumWikipedia wikipedia, List<Page> pages)
+  public void retrieveContentsWithoutRedirects(EnumWikipedia wikipedia,
+                                               List<Page> pages)
       throws APIException {
-    Map<String, String> properties = getProperties(ApiRequest.ACTION_QUERY, true);
+    Map<String, String> properties =
+        getProperties(ApiRequest.ACTION_QUERY, true);
     properties.put("prop", "revisions");
     properties.put("continue", "");
     properties.put("rvprop", "content");
@@ -321,7 +317,8 @@ public class MediaWikiAPI implements API {
     StringBuilder titles = new StringBuilder();
     for (int i = 0; i < pages.size();) {
       titles.setLength(0);
-      for (int j = 0; (j < MAX_PAGES_PER_QUERY) && (i < pages.size()); i++, j++) {
+      for (int j = 0; (j < MAX_PAGES_PER_QUERY) && (i < pages.size());
+           i++, j++) {
         Page p = pages.get(i);
         if (j > 0) {
           titles.append("|");
@@ -331,8 +328,7 @@ public class MediaWikiAPI implements API {
       properties.put("titles", titles.toString());
       try {
         constructContents(
-            pages,
-            getRoot(wikipedia, properties, ApiRequest.MAX_ATTEMPTS),
+            pages, getRoot(wikipedia, properties, ApiRequest.MAX_ATTEMPTS),
             "/api/query/pages/page");
       } catch (JDOMParseException e) {
         log.error("Error retrieving redirects", e);
@@ -343,7 +339,7 @@ public class MediaWikiAPI implements API {
 
   /**
    * Update a page on Wikipedia.
-   * 
+   *
    * @param wikipedia Wikipedia.
    * @param page Page.
    * @param newContents New contents to use.
@@ -355,10 +351,10 @@ public class MediaWikiAPI implements API {
    * @throws APIException Exception thrown by the API.
    */
   @Override
-  public QueryResult updatePage(
-      EnumWikipedia wikipedia, Page page,
-      String newContents, String comment,
-      boolean minor, boolean automatic, boolean forceWatch) throws APIException {
+  public QueryResult updatePage(EnumWikipedia wikipedia, Page page,
+                                String newContents, String comment,
+                                boolean minor, boolean automatic,
+                                boolean forceWatch) throws APIException {
     if (page == null) {
       throw new APIException("Page is null");
     }
@@ -371,14 +367,15 @@ public class MediaWikiAPI implements API {
     ConnectionInformation connection = wikipedia.getConnection();
     if ((connection.getLgToken() == null) &&
         (connection.getLgUserId() == null) &&
-        (connection.getLgUserName() == null)){
+        (connection.getLgUserName() == null)) {
       throw new APIException("You must be logged in to update pages");
     }
     int attemptNumber = 0;
     QueryResult result = null;
     do {
       attemptNumber++;
-      Map<String, String> properties = getProperties(ApiRequest.ACTION_EDIT, true);
+      Map<String, String> properties =
+          getProperties(ApiRequest.ACTION_EDIT, true);
       properties.put("assert", "user");
       if (page.getContentsTimestamp() != null) {
         properties.put("basetimestamp", page.getContentsTimestamp());
@@ -397,16 +394,17 @@ public class MediaWikiAPI implements API {
         properties.put("token", wikipedia.getConnection().getEditToken());
       }
       properties.put("watchlist", forceWatch ? "watch" : "nochange");
-      CommentManager.manageComment(wikipedia.getConfiguration(), properties, "summary", "tags", automatic);
-      checkTimeForEdit(wikipedia.getConnection().getUser(), page.getNamespace());
+      CommentManager.manageComment(wikipedia.getConfiguration(), properties,
+                                   "summary", "tags", automatic);
+      checkTimeForEdit(wikipedia.getConnection().getUser(),
+                       page.getNamespace());
       try {
         boolean hasCaptcha = false;
         do {
           hasCaptcha = false;
           try {
-            result = constructEdit(
-                getRoot(wikipedia, properties, 1),
-                "/api/edit");
+            result =
+                constructEdit(getRoot(wikipedia, properties, 1), "/api/edit");
           } catch (CaptchaException e) {
             String captchaAnswer = getCaptchaAnswer(wikipedia, e);
             if (captchaAnswer != null) {
@@ -420,16 +418,17 @@ public class MediaWikiAPI implements API {
         } while (hasCaptcha);
       } catch (APIException e) {
         if (e.getHttpStatus() == HttpStatus.SC_GATEWAY_TIMEOUT) {
-          log.warn("Gateway timeout, waiting to see if modification has been taken into account");
+          log.warn(
+              "Gateway timeout, waiting to see if modification has been taken into account");
           waitBeforeRetrying();
           Page tmpPage = page.replicatePage();
-          retrieveContents(wikipedia, Collections.singletonList(tmpPage), false, false);
+          retrieveContents(wikipedia, Collections.singletonList(tmpPage), false,
+                           false);
           String tmpContents = tmpPage.getContents();
-          if ((tmpContents != null) &&
-              (tmpContents.equals(newContents))) {
+          if ((tmpContents != null) && (tmpContents.equals(newContents))) {
             return QueryResult.createCorrectQuery(
-                tmpPage.getPageId(), tmpPage.getTitle(),
-                page.getPageId(), tmpPage.getPageId());
+                tmpPage.getPageId(), tmpPage.getTitle(), page.getPageId(),
+                tmpPage.getPageId());
           }
         }
         if (attemptNumber > 1) {
@@ -451,7 +450,7 @@ public class MediaWikiAPI implements API {
 
   /**
    * Add a new section in a page.
-   * 
+   *
    * @param wikipedia Wikipedia.
    * @param page Page.
    * @param title Title of the new section.
@@ -463,20 +462,21 @@ public class MediaWikiAPI implements API {
    * @throws APIException Exception thrown by the API.
    */
   @Override
-  public QueryResult addNewSection(
-      EnumWikipedia wikipedia,
-      Page page, String title, String contents,
-      boolean minor, boolean automatic, boolean forceWatch) throws APIException {
-    return updateSection(wikipedia, page, title, "new", contents, minor, automatic, forceWatch);
+  public QueryResult addNewSection(EnumWikipedia wikipedia, Page page,
+                                   String title, String contents, boolean minor,
+                                   boolean automatic, boolean forceWatch)
+      throws APIException {
+    return updateSection(wikipedia, page, title, "new", contents, minor,
+                         automatic, forceWatch);
   }
 
   /**
    * Update a section in a page.
-   * 
+   *
    * @param wikipedia Wikipedia.
    * @param page Page.
    * @param title Title of the new section.
-   * @param section Section. 
+   * @param section Section.
    * @param contents Contents.
    * @param minor True if the modification should be tagged as minor.
    * @param automatic True if the modification is automatic.
@@ -485,21 +485,21 @@ public class MediaWikiAPI implements API {
    * @throws APIException Exception thrown by the API.
    */
   @Override
-  public QueryResult updateSection(
-      EnumWikipedia wikipedia,
-      Page page, String title, int section,
-      String contents,
-      boolean minor, boolean automatic, boolean forceWatch) throws APIException {
-    return updateSection(wikipedia, page, title, Integer.toString(section), contents, minor, automatic, forceWatch);
+  public QueryResult updateSection(EnumWikipedia wikipedia, Page page,
+                                   String title, int section, String contents,
+                                   boolean minor, boolean automatic,
+                                   boolean forceWatch) throws APIException {
+    return updateSection(wikipedia, page, title, Integer.toString(section),
+                         contents, minor, automatic, forceWatch);
   }
 
   /**
    * Update a section or create a new section in a page.
-   * 
+   *
    * @param wikipedia Wikipedia.
    * @param page Page.
    * @param title Title of the new section.
-   * @param section Section ("new" for a new section). 
+   * @param section Section ("new" for a new section).
    * @param contents Contents.
    * @param minor True if the modification should be tagged as minor.
    * @param forceWatch Force watching the page.
@@ -507,11 +507,11 @@ public class MediaWikiAPI implements API {
    * @return Result of the command.
    * @throws APIException Exception thrown by the API.
    */
-  private QueryResult updateSection(
-      EnumWikipedia wikipedia,
-      Page page, String title, String section,
-      String contents,
-      boolean minor, boolean automatic, boolean forceWatch) throws APIException {
+  private QueryResult updateSection(EnumWikipedia wikipedia, Page page,
+                                    String title, String section,
+                                    String contents, boolean minor,
+                                    boolean automatic, boolean forceWatch)
+      throws APIException {
     if (page == null) {
       throw new APIException("Page is null");
     }
@@ -524,14 +524,15 @@ public class MediaWikiAPI implements API {
     ConnectionInformation connection = wikipedia.getConnection();
     if ((connection.getLgToken() == null) &&
         (connection.getLgUserId() == null) &&
-        (connection.getLgUserName() == null)){
+        (connection.getLgUserName() == null)) {
       throw new APIException("You must be logged in to update pages");
     }
     int attemptNumber = 0;
     QueryResult result = null;
     do {
       attemptNumber++;
-      Map<String, String> properties = getProperties(ApiRequest.ACTION_EDIT, true);
+      Map<String, String> properties =
+          getProperties(ApiRequest.ACTION_EDIT, true);
       properties.put("assert", "user");
       if (page.getContentsTimestamp() != null) {
         properties.put("basetimestamp", page.getContentsTimestamp());
@@ -552,16 +553,17 @@ public class MediaWikiAPI implements API {
       properties.put("title", page.getTitle());
       properties.put("token", wikipedia.getConnection().getEditToken());
       properties.put("watchlist", forceWatch ? "watch" : "nochange");
-      CommentManager.manageComment(wikipedia.getConfiguration(), properties, "summary", "tags", automatic);
-      checkTimeForEdit(wikipedia.getConnection().getUser(), page.getNamespace());
+      CommentManager.manageComment(wikipedia.getConfiguration(), properties,
+                                   "summary", "tags", automatic);
+      checkTimeForEdit(wikipedia.getConnection().getUser(),
+                       page.getNamespace());
       try {
         boolean hasCaptcha = false;
         do {
           hasCaptcha = false;
           try {
-            result = constructEdit(
-                getRoot(wikipedia, properties, 1),
-                "/api/edit");
+            result =
+                constructEdit(getRoot(wikipedia, properties, 1), "/api/edit");
           } catch (CaptchaException e) {
             String captchaAnswer = getCaptchaAnswer(wikipedia, e);
             if (captchaAnswer != null) {
@@ -592,23 +594,25 @@ public class MediaWikiAPI implements API {
 
   /**
    * Initialize the information concerning redirects.
-   * 
+   *
    * @param wiki Wiki.
    * @param pages List of pages.
    * @throws APIException Exception thrown by the API.
    */
   @Override
-  public void initializeRedirect(
-      EnumWikipedia wiki, List<Page> pages) throws APIException {
+  public void initializeRedirect(EnumWikipedia wiki, List<Page> pages)
+      throws APIException {
     if ((pages == null) || (pages.isEmpty())) {
       return;
     }
-    Map<String, String> properties = getProperties(ApiRequest.ACTION_QUERY, true);
+    Map<String, String> properties =
+        getProperties(ApiRequest.ACTION_QUERY, true);
     properties.put("redirects", "");
     StringBuilder titles = new StringBuilder();
     for (int i = 0; i < pages.size();) {
       titles.setLength(0);
-      for (int j = 0; (j < MAX_PAGES_PER_QUERY) && (i < pages.size()); i++, j++) {
+      for (int j = 0; (j < MAX_PAGES_PER_QUERY) && (i < pages.size());
+           i++, j++) {
         Page p = pages.get(i);
         if (j > 0) {
           titles.append("|");
@@ -618,8 +622,7 @@ public class MediaWikiAPI implements API {
       properties.put("titles", titles.toString());
       try {
         updateRedirectStatus(
-            wiki, pages,
-            getRoot(wiki, properties, ApiRequest.MAX_ATTEMPTS));
+            wiki, pages, getRoot(wiki, properties, ApiRequest.MAX_ATTEMPTS));
       } catch (JDOMParseException e) {
         log.error("Error retrieving redirects", e);
         throw new APIException("Error parsing XML", e);
@@ -629,7 +632,7 @@ public class MediaWikiAPI implements API {
 
   /**
    * @param root Root element in MediaWiki answer.
-   * 
+   *
    * @param query Path to the answer.
    * @return Result of the query.
    * @throws APIException Exception thrown by the API.
@@ -638,8 +641,8 @@ public class MediaWikiAPI implements API {
   private QueryResult constructEdit(Element root, String query)
       throws APIException, CaptchaException {
 
-    XPathExpression<Element> xpa = XPathFactory.instance().compile(
-        query, Filters.element());
+    XPathExpression<Element> xpa =
+        XPathFactory.instance().compile(query, Filters.element());
     Element node = xpa.evaluateFirst(root);
     if (node != null) {
       String result = node.getAttributeValue("result");
@@ -662,15 +665,16 @@ public class MediaWikiAPI implements API {
         } catch (NumberFormatException e) {
           //
         }
-        return QueryResult.createCorrectQuery(
-            pageId, node.getAttributeValue("title"),
-            pageOldRevId, pageNewRevId);
+        return QueryResult.createCorrectQuery(pageId,
+                                              node.getAttributeValue("title"),
+                                              pageOldRevId, pageNewRevId);
       } else if ("Failure".equalsIgnoreCase(result)) {
-        XPathExpression<Element> xpaCaptcha = XPathFactory.instance().compile(
-            "./captcha", Filters.element());
+        XPathExpression<Element> xpaCaptcha =
+            XPathFactory.instance().compile("./captcha", Filters.element());
         Element captcha = xpaCaptcha.evaluateFirst(node);
         if (captcha != null) {
-          CaptchaException exception = new CaptchaException("Captcha", captcha.getAttributeValue("type"));
+          CaptchaException exception = new CaptchaException(
+              "Captcha", captcha.getAttributeValue("type"));
           exception.setMime(captcha.getAttributeValue("mime"));
           exception.setId(captcha.getAttributeValue("id"));
           exception.setURL(captcha.getAttributeValue("url"));
@@ -678,12 +682,14 @@ public class MediaWikiAPI implements API {
         }
         String spamBlacklist = node.getAttributeValue("spamblacklist");
         if (spamBlacklist != null) {
-          throw new APIException(GT._T("URL {0} is blacklisted", spamBlacklist));
+          throw new APIException(
+              GT._T("URL {0} is blacklisted", spamBlacklist));
         }
         throw new APIException(xmlOutputter.outputString(node));
       }
-      return QueryResult.createErrorQuery(
-          result, node.getAttributeValue("details"), node.getAttributeValue("wait"));
+      return QueryResult.createErrorQuery(result,
+                                          node.getAttributeValue("details"),
+                                          node.getAttributeValue("wait"));
     }
 
     return QueryResult.createErrorQuery(null, null, null);
@@ -692,7 +698,7 @@ public class MediaWikiAPI implements API {
   /**
    * @param page Page.
    * @param root Root element.
-   * @param query XPath query to retrieve the contents 
+   * @param query XPath query to retrieve the contents
    * @throws APIException Exception thrown by the API.
    */
   private boolean constructContents(Page page, Element root, String query)
@@ -702,8 +708,8 @@ public class MediaWikiAPI implements API {
     }
     boolean redirect = false;
 
-    XPathExpression<Element> xpaPage = XPathFactory.instance().compile(
-        query, Filters.element());
+    XPathExpression<Element> xpaPage =
+        XPathFactory.instance().compile(query, Filters.element());
     Element node = xpaPage.evaluateFirst(root);
     if (node != null) {
       page.setNamespace(node.getAttributeValue("ns"));
@@ -721,15 +727,16 @@ public class MediaWikiAPI implements API {
         query + "/revisions/rev", Filters.element());
     node = xpa.evaluateFirst(root);
     if (node != null) {
-      XPathExpression<Element> xpaSlot = XPathFactory.instance().compile(
-          "slots/slot", Filters.element());
+      XPathExpression<Element> xpaSlot =
+          XPathFactory.instance().compile("slots/slot", Filters.element());
       Element nodeSlot = xpaSlot.evaluateFirst(node);
       page.setContents(nodeSlot != null ? nodeSlot.getText() : node.getText());
       page.setExisting(Boolean.TRUE);
       page.setRevisionId(node.getAttributeValue("revid"));
       page.setContentsTimestamp(node.getAttributeValue("timestamp"));
     }
-    xpa = XPathFactory.instance().compile(query + "/protection/pr", Filters.element());
+    xpa = XPathFactory.instance().compile(query + "/protection/pr",
+                                          Filters.element());
     for (Element prNode : xpa.evaluate(root)) {
       if ("edit".equals(prNode.getAttributeValue("type"))) {
         page.setEditProtectionLevel(prNode.getAttributeValue("level"));
@@ -742,7 +749,7 @@ public class MediaWikiAPI implements API {
   /**
    * @param pages Pages.
    * @param root Root element.
-   * @param query XPath query to retrieve the contents 
+   * @param query XPath query to retrieve the contents
    * @throws APIException Exception thrown by the API.
    */
   private void constructContents(List<Page> pages, Element root, String query)
@@ -751,12 +758,12 @@ public class MediaWikiAPI implements API {
       throw new APIException("Pages is null");
     }
 
-    XPathExpression<Element> xpaPage = XPathFactory.instance().compile(
-        query, Filters.element());
-    XPathExpression<Element> xpaRev = XPathFactory.instance().compile(
-        "./revisions/rev", Filters.element());
-    XPathExpression<Element> xpaSlot = XPathFactory.instance().compile(
-        "./slots/slot", Filters.element());
+    XPathExpression<Element> xpaPage =
+        XPathFactory.instance().compile(query, Filters.element());
+    XPathExpression<Element> xpaRev =
+        XPathFactory.instance().compile("./revisions/rev", Filters.element());
+    XPathExpression<Element> xpaSlot =
+        XPathFactory.instance().compile("./slots/slot", Filters.element());
     List<Element> resultPages = xpaPage.evaluate(root);
     Iterator<Element> iterPages = resultPages.iterator();
     while (iterPages.hasNext()) {
@@ -767,7 +774,8 @@ public class MediaWikiAPI implements API {
         if (Page.areSameTitle(page.getTitle(), title)) {
           Element currentRev = xpaRev.evaluateFirst(currentPage);
           Element currentSlot = xpaSlot.evaluateFirst(xpaRev);
-          String contents = (currentSlot != null) ? currentSlot.getText() : currentRev.getText();
+          String contents = (currentSlot != null) ? currentSlot.getText()
+                                                  : currentRev.getText();
           page.setContents(contents);
         }
       }
@@ -776,19 +784,17 @@ public class MediaWikiAPI implements API {
 
   /**
    * Update redirect information of a list of pages.
-   * 
+   *
    * @param wiki Wiki.
    * @param pages List of pages.
    * @param root Root element.
    * @throws APIException Exception thrown by the API.
    */
-  private void updateRedirectStatus(
-      EnumWikipedia wiki,
-      List<Page> pages,
-      Element root)
-      throws APIException {
+  private void updateRedirectStatus(EnumWikipedia wiki, List<Page> pages,
+                                    Element root) throws APIException {
     try {
-      ApiXmlPropertiesResult result = new ApiXmlPropertiesResult(wiki, httpClient);
+      ApiXmlPropertiesResult result =
+          new ApiXmlPropertiesResult(wiki, httpClient);
       result.updateRedirect(root, pages);
     } catch (JDOMException e) {
       log.error("Error redirects", e);
@@ -803,7 +809,7 @@ public class MediaWikiAPI implements API {
   /**
    * Login into Wiki.
    * (<code>action=login</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param username User name.
    * @param password Password.
@@ -813,11 +819,8 @@ public class MediaWikiAPI implements API {
    * @see <a href="http://www.mediawiki.org/wiki/API:Login">API:Login</a>
    */
   @Override
-  public LoginResult login(
-      EnumWikipedia wiki,
-      String username,
-      String password,
-      boolean login) throws APIException {
+  public LoginResult login(EnumWikipedia wiki, String username, String password,
+                           boolean login) throws APIException {
     logout(wiki);
     if (login) {
       // Retrieve login token
@@ -836,7 +839,7 @@ public class MediaWikiAPI implements API {
   /**
    * Logout.
    * (<code>action=logout</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @see <a href="http://www.mediawiki.org/wiki/API:Logout">API:Logout</a>
    */
@@ -857,7 +860,7 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieve tokens.
    * (<code>action=tokens</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @throws APIException Exception thrown by the API.
    */
@@ -875,10 +878,11 @@ public class MediaWikiAPI implements API {
   /**
    * Load site information.
    * (<code>action=query</code>, <code>meta=siteinfo</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Meta#siteinfo_.2F_si">API:Meta</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Meta#siteinfo_.2F_si">API:Meta</a>
    */
   private void loadSiteInfo(EnumWikipedia wiki) throws APIException {
     ApiSiteInfoResult result = new ApiXmlSiteInfoResult(wiki, httpClient);
@@ -893,15 +897,17 @@ public class MediaWikiAPI implements API {
   /**
    * Load messages.
    * (<code>action=query</code>, <code>meta=allmessages</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param messageName Message name.
    * @return Message.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="https://www.mediawiki.org/wiki/API:Allmessages">API:Allmessages</a>
+   * @see <a
+   *     href="https://www.mediawiki.org/wiki/API:Allmessages">API:Allmessages</a>
    */
   @Override
-  public String loadMessage(EnumWikipedia wiki, String messageName) throws APIException {
+  public String loadMessage(EnumWikipedia wiki, String messageName)
+      throws APIException {
     ApiAllMessagesResult result = new ApiXmlAllMessagesResult(wiki, httpClient);
     ApiAllMessagesRequest request = new ApiAllMessagesRequest(wiki, result);
     return request.loadMessage(messageName);
@@ -910,15 +916,18 @@ public class MediaWikiAPI implements API {
   /**
    * Load messages.
    * (<code>action=query</code>, <code>meta=allmessages</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param messageNames Message name.
    * @return Messages.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="https://www.mediawiki.org/wiki/API:Allmessages">API:Allmessages</a>
+   * @see <a
+   *     href="https://www.mediawiki.org/wiki/API:Allmessages">API:Allmessages</a>
    */
   @Override
-  public Map<String, String> loadMessages(EnumWikipedia wiki, List<String> messageNames) throws APIException {
+  public Map<String, String> loadMessages(EnumWikipedia wiki,
+                                          List<String> messageNames)
+      throws APIException {
     ApiAllMessagesResult result = new ApiXmlAllMessagesResult(wiki, httpClient);
     ApiAllMessagesRequest request = new ApiAllMessagesRequest(wiki, result);
     return request.loadMessages(messageNames);
@@ -931,16 +940,16 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieves the categories of a page.
    * (<code>action=query</code>, <code>prop=categories</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param page Page.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="https://www.mediawiki.org/wiki/API:Categories">API:Categories</a>
+   * @see <a
+   *     href="https://www.mediawiki.org/wiki/API:Categories">API:Categories</a>
    */
   @Override
-  public void retrieveCategories(
-      EnumWikipedia wiki,
-      Page page) throws APIException {
+  public void retrieveCategories(EnumWikipedia wiki, Page page)
+      throws APIException {
     ApiCategoriesResult result = new ApiXmlCategoriesResult(wiki, httpClient);
     ApiCategoriesRequest request = new ApiCategoriesRequest(wiki, result);
     request.retrieveCategories(page);
@@ -949,16 +958,16 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieves the informations of a list of pages.
    * (<code>action=query</code>, <code>prop=info</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param pages List of pages.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Properties#info_.2F_in">API:Properties#info</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Properties#info_.2F_in">API:Properties#info</a>
    */
   @Override
-  public void retrieveInfo(
-      EnumWikipedia wiki,
-      Collection<Page> pages) throws APIException {
+  public void retrieveInfo(EnumWikipedia wiki, Collection<Page> pages)
+      throws APIException {
     ApiInfoResult result = new ApiXmlInfoResult(wiki, httpClient);
     ApiInfoRequest request = new ApiInfoRequest(wiki, result);
     request.loadInformations(pages);
@@ -967,19 +976,19 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieves the contents of a list of pages.
    * (<code>action=query</code>, <code>prop=revisions</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param pages List of pages.
    * @param usePageId True if page identifiers should be used.
-   * @param withRedirects Flag indicating if redirects information should be retrieved.
+   * @param withRedirects Flag indicating if redirects information should be
+   *     retrieved.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Properties#revisions_.2F_rv">API:Properties#revisions</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Properties#revisions_.2F_rv">API:Properties#revisions</a>
    */
   @Override
-  public void retrieveContents(
-      EnumWikipedia wiki,
-      Collection<Page> pages, boolean usePageId,
-      boolean withRedirects)
+  public void retrieveContents(EnumWikipedia wiki, Collection<Page> pages,
+                               boolean usePageId, boolean withRedirects)
       throws APIException {
     ApiRevisionsResult result = new ApiXmlRevisionsResult(wiki, httpClient);
     ApiRevisionsRequest request = new ApiRevisionsRequest(wiki, result);
@@ -988,7 +997,7 @@ public class MediaWikiAPI implements API {
 
   /**
    * Retrieves the templates of <code>page</code>.
-   * 
+   *
    * @param wiki Wiki.
    * @param page The page.
    */
@@ -1004,18 +1013,21 @@ public class MediaWikiAPI implements API {
    * Initialize the disambiguation flags of a list of <code>pages</code>.
    * (<code>action=query</code>, <code>prop=categories</code>) or
    * (<code>action=query</code>, <code>prop=templates</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param pages List of pages.
-   * @param forceApiCall True if API call should be forced even if the list of disambiguation pages is loaded.
+   * @param forceApiCall True if API call should be forced even if the list of
+   *     disambiguation pages is loaded.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Properties#categories_.2F_cl">API:Properties#categories</a>
-   * @see <a href="http://www.mediawiki.org/wiki/API:Properties#templates_.2F_tl">API:Properties#templates</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Properties#categories_.2F_cl">API:Properties#categories</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Properties#templates_.2F_tl">API:Properties#templates</a>
    */
   @Override
-  public void initializeDisambiguationStatus(
-      EnumWikipedia wiki, List<Page> pages,
-      boolean forceApiCall)
+  public void initializeDisambiguationStatus(EnumWikipedia wiki,
+                                             List<Page> pages,
+                                             boolean forceApiCall)
       throws APIException {
     if ((pages == null) || (pages.isEmpty())) {
       return;
@@ -1043,9 +1055,11 @@ public class MediaWikiAPI implements API {
       }
 
       // Use categories if possible
-      List<Page> dabCategories = wiki.getConfiguration().getDisambiguationCategories();
+      List<Page> dabCategories =
+          wiki.getConfiguration().getDisambiguationCategories();
       if ((dabCategories != null) && (dabCategories.size() > 0)) {
-        ApiCategoriesResult result = new ApiXmlCategoriesResult(wiki, httpClient);
+        ApiCategoriesResult result =
+            new ApiXmlCategoriesResult(wiki, httpClient);
         ApiCategoriesRequest request = new ApiCategoriesRequest(wiki, result);
         request.setDisambiguationStatus(pages);
         return;
@@ -1061,11 +1075,12 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieves internal links of pages.
    * (<code>action=query</code>, <code>prop=links</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param pages List of pages.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Properties#links_.2F_pl">API:Properties#links</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Properties#links_.2F_pl">API:Properties#links</a>
    */
   @Override
   public void retrieveLinks(EnumWikipedia wiki, Collection<Page> pages)
@@ -1078,7 +1093,7 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieves internal links of one page.
    * (<code>action=query</code>, <code>prop=links</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param page Page.
    * @param namespace Restrict the list to a given namespace.
@@ -1086,14 +1101,13 @@ public class MediaWikiAPI implements API {
    * @param redirects True if redirects are requested.
    * @param disambigNeeded True if disambiguation information is needed.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Properties#links_.2F_pl">API:Properties#links</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Properties#links_.2F_pl">API:Properties#links</a>
    */
   @Override
-  public void retrieveLinks(
-      EnumWikipedia wiki, Page page, Integer namespace,
-      List<Page> knownPages,
-      boolean redirects, boolean disambigNeeded)
-      throws APIException {
+  public void retrieveLinks(EnumWikipedia wiki, Page page, Integer namespace,
+                            List<Page> knownPages, boolean redirects,
+                            boolean disambigNeeded) throws APIException {
     ApiLinksResult result = new ApiXmlLinksResult(wiki, httpClient);
     ApiLinksRequest request = new ApiLinksRequest(wiki, result);
     boolean useDisambig = wiki.getConfiguration().getBoolean(
@@ -1116,20 +1130,21 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieves links to the <code>page</code> and initialize redirect status.
    * (<code>action=query</code>, <code>prop=linkshere</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param page The page.
    * @param redirects True if it should also retrieve links through redirects.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Linkshere">API:Linkshere</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Linkshere">API:Linkshere</a>
    */
   @Override
-  public void retrieveLinksHere(
-      EnumWikipedia wiki, Page page,
-      boolean redirects)
-      throws APIException {
-    ApiRedirectsResult redirectResult = new ApiXmlRedirectsResult(wiki, httpClient);
-    ApiRedirectsRequest redirectRequest = new ApiRedirectsRequest(wiki, redirectResult);
+  public void retrieveLinksHere(EnumWikipedia wiki, Page page,
+                                boolean redirects) throws APIException {
+    ApiRedirectsResult redirectResult =
+        new ApiXmlRedirectsResult(wiki, httpClient);
+    ApiRedirectsRequest redirectRequest =
+        new ApiRedirectsRequest(wiki, redirectResult);
     redirectRequest.loadRedirects(page);
 
     ApiLinksHereResult result = new ApiXmlLinksHereResult(wiki, httpClient);
@@ -1140,20 +1155,23 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieve a specific language link in a page.
    * (<code>action=query</code>, <code>prop=langlinks</code>).
-   * 
+   *
    * @param from Wiki in which the article is.
    * @param to Wiki to which the link is searched.
    * @param title Page title.
    * @return Page title in the destination wiki.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Properties#langlinks_.2F_ll">API:Properties#langlinks</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Properties#langlinks_.2F_ll">API:Properties#langlinks</a>
    */
   @Override
-  public String getLanguageLink(EnumWikipedia from, EnumWikipedia to, String title)
-      throws APIException {
-    ApiLanguageLinksResult result = new ApiXmlLanguageLinksResult(from, httpClient);
+  public String getLanguageLink(EnumWikipedia from, EnumWikipedia to,
+                                String title) throws APIException {
+    ApiLanguageLinksResult result =
+        new ApiXmlLanguageLinksResult(from, httpClient);
     ApiLanguageLinksRequest request = new ApiLanguageLinksRequest(from, result);
-    return request.getLanguageLink(DataManager.getPage(from, title, null, null, null), to);
+    return request.getLanguageLink(
+        DataManager.getPage(from, title, null, null, null), to);
   }
 
   // ==========================================================================
@@ -1163,15 +1181,17 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieves the list of abuse filters.
    * (<code>action=query</code>, <code>list=abusefilters</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Abusefilters">API:Abusefilters</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Abusefilters">API:Abusefilters</a>
    */
   @Override
   public List<AbuseFilter> retrieveAbuseFilters(EnumWikipedia wiki)
       throws APIException {
-    ApiAbuseFiltersResult result = new ApiXmlAbuseFiltersResult(wiki, httpClient);
+    ApiAbuseFiltersResult result =
+        new ApiXmlAbuseFiltersResult(wiki, httpClient);
     ApiAbuseFiltersRequest request = new ApiAbuseFiltersRequest(wiki, result);
     return request.loadAbuseFilters();
   }
@@ -1179,7 +1199,7 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieves the abuse log for a filter.
    * (<code>action=query</code>, <code>list=abuselog</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param filterId Filter identifier.
    * @param maxDuration Maximum number of days.
@@ -1187,24 +1207,24 @@ public class MediaWikiAPI implements API {
    * @see <a href="http://www.mediawiki.org/wiki/API:Abuselog">API:Abuselog</a>
    */
   @Override
-  public List<Page> retrieveAbuseLog(
-      EnumWikipedia wiki, Integer filterId,
-      Integer maxDuration)
-      throws APIException {
+  public List<Page> retrieveAbuseLog(EnumWikipedia wiki, Integer filterId,
+                                     Integer maxDuration) throws APIException {
     ApiAbuseLogResult result = new ApiXmlAbuseLogResult(wiki, httpClient);
     ApiAbuseLogRequest request = new ApiAbuseLogRequest(wiki, result);
     return request.loadAbuseLog(filterId, maxDuration);
   }
 
   /**
-   * Retrieves the back links of <code>page</code> and initialize redirect status.
+   * Retrieves the back links of <code>page</code> and initialize redirect
+   * status.
    * (<code>action=query</code>, <code>list=backlinks</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param page The page.
    * @param redirects True if it should also retrieve links through redirects.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Backlinks">API:Backlinks</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Backlinks">API:Backlinks</a>
    */
   /* @Override
   public void retrieveBackLinks(
@@ -1219,39 +1239,43 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieves the pages in which <code>page</code> is embedded.
    * (<code>action=query</code>, <code>list=categorymembers</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param category Category.
    * @param depth Depth of lookup for sub-categories.
    * @param limit Flag indicating if the number of results should be limited.
    * @param max Absolute maximum number of results
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Categorymembers">API:Categorymembers</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Categorymembers">API:Categorymembers</a>
    */
   @Override
-  public void retrieveCategoryMembers(
-      EnumWikipedia wiki, Page category,
-      int depth, boolean limit, int max) throws APIException {
-    ApiCategoryMembersResult result = new ApiXmlCategoryMembersResult(wiki, httpClient);
-    ApiCategoryMembersRequest request = new ApiCategoryMembersRequest(wiki, result);
+  public void retrieveCategoryMembers(EnumWikipedia wiki, Page category,
+                                      int depth, boolean limit, int max)
+      throws APIException {
+    ApiCategoryMembersResult result =
+        new ApiXmlCategoryMembersResult(wiki, httpClient);
+    ApiCategoryMembersRequest request =
+        new ApiCategoryMembersRequest(wiki, result);
     request.loadCategoryMembers(category, depth, limit, max);
   }
 
   /**
    * Retrieves the pages in which <code>page</code> is embedded.
    * (<code>action=query</code>, <code>list=embeddedin</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param page Page.
    * @param namespaces Limit to some name spaces.
    * @param limit Flag indicating if the number of results should be limited.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Embeddedin">API:Embeddedin</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Embeddedin">API:Embeddedin</a>
    */
   @Override
-  public void retrieveEmbeddedIn(
-      EnumWikipedia wiki, Page page,
-      List<Integer> namespaces, boolean limit) throws APIException {
+  public void retrieveEmbeddedIn(EnumWikipedia wiki, Page page,
+                                 List<Integer> namespaces, boolean limit)
+      throws APIException {
     ApiEmbeddedInResult result = new ApiXmlEmbeddedInResult(wiki, httpClient);
     ApiEmbeddedInRequest request = new ApiEmbeddedInRequest(wiki, result);
     request.loadEmbeddedIn(page, namespaces, limit);
@@ -1260,7 +1284,7 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieves the pages in the <code>category</code> Linter category.
    * (<code>action=query</code>, <code>list=linterrors</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param category Category.
    * @param namespace Optional name space.
@@ -1271,29 +1295,32 @@ public class MediaWikiAPI implements API {
    * @throws APIException Exception thrown by the API.
    */
   @Override
-  public List<Page> retrieveLinterCategory(
-      EnumWikipedia wiki, String category, Integer namespace, boolean withTemplates,
-      boolean limit, int max) throws APIException {
+  public List<Page> retrieveLinterCategory(EnumWikipedia wiki, String category,
+                                           Integer namespace,
+                                           boolean withTemplates, boolean limit,
+                                           int max) throws APIException {
     ApiLintErrorsResult result = new ApiXmlLintErrorsResult(wiki, httpClient);
     ApiLintErrorsRequest request = new ApiLintErrorsRequest(wiki, result);
-    return request.loadLintErrors(category, namespace, withTemplates, true, max);
+    return request.loadLintErrors(category, namespace, withTemplates, true,
+                                  max);
   }
 
   /**
    * Retrieves the pages which have a given property.
    * (<code>action=query</code>, <code>list=pageswithprop</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param property Property name.
    * @param limit Flag indicating if the number of results should be limited.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Pageswithprop">API:Pageswithprop</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Pageswithprop">API:Pageswithprop</a>
    */
   @Override
-  public List<Page> retrievePagesWithProp(
-      EnumWikipedia wiki,
-      String property, boolean limit) throws APIException {
-    ApiPagesWithPropResult result = new ApiXmlPagesWithPropResult(wiki, httpClient);
+  public List<Page> retrievePagesWithProp(EnumWikipedia wiki, String property,
+                                          boolean limit) throws APIException {
+    ApiPagesWithPropResult result =
+        new ApiXmlPagesWithPropResult(wiki, httpClient);
     ApiPagesWithPropRequest request = new ApiPagesWithPropRequest(wiki, result);
     return request.loadPagesWithProp(property, limit);
   }
@@ -1301,35 +1328,39 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieves the pages which are protected in creation indefinitely.
    * (<code>action=query</code>, <code>list=protectedtitles</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param namespaces Limit to some namespaces.
    * @param limit Flag indicating if the number of results should be limited.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Protectedtitles">API:Protectedtitles</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Protectedtitles">API:Protectedtitles</a>
    */
   @Override
-  public List<Page> getProtectedTitles(
-      EnumWikipedia wiki,
-      List<Integer> namespaces, boolean limit) throws APIException {
-    ApiProtectedTitlesResult result = new ApiXmlProtectedTitlesResult(wiki, httpClient);
-    ApiProtectedTitlesRequest request = new ApiProtectedTitlesRequest(wiki, result);
+  public List<Page> getProtectedTitles(EnumWikipedia wiki,
+                                       List<Integer> namespaces, boolean limit)
+      throws APIException {
+    ApiProtectedTitlesResult result =
+        new ApiXmlProtectedTitlesResult(wiki, httpClient);
+    ApiProtectedTitlesRequest request =
+        new ApiProtectedTitlesRequest(wiki, result);
     return request.loadProtectedTitles(namespaces, limit);
   }
 
   /**
    * Retrieves a special list of pages.
    * (<code>action=query</code>, <code>list=querypage</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param query Type of list.
    * @return List of pages depending on the query.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Querypage">API:Querypage</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Querypage">API:Querypage</a>
    */
   @Override
-  public List<Page> getQueryPages(
-      EnumWikipedia wiki, EnumQueryPage query) throws APIException {
+  public List<Page> getQueryPages(EnumWikipedia wiki, EnumQueryPage query)
+      throws APIException {
     ApiQueryPageResult result = new ApiXmlQueryPageResult(wiki, httpClient);
     ApiQueryPageRequest request = new ApiQueryPageRequest(wiki, result);
     return request.loadQueryPage(query);
@@ -1338,7 +1369,7 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieves random pages.
    * (<code>action=query</code>, <code>list=random</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param count Number of random pages.
    * @param redirects True if redirect pages are requested.
@@ -1346,9 +1377,8 @@ public class MediaWikiAPI implements API {
    * @see <a href="http://www.mediawiki.org/wiki/API:Random">API:Random</a>
    */
   @Override
-  public List<Page> getRandomPages(
-      EnumWikipedia wiki, int count,
-      boolean redirects) throws APIException {
+  public List<Page> getRandomPages(EnumWikipedia wiki, int count,
+                                   boolean redirects) throws APIException {
     ApiRandomPagesResult result = new ApiXmlRandomPagesResult(wiki, httpClient);
     ApiRandomPagesRequest request = new ApiRandomPagesRequest(wiki, result);
     return request.loadRandomList(count, redirects);
@@ -1357,19 +1387,21 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieves recent changes.
    * (<code>action=query</code>, <code>list=recentchanges</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param start The timestamp to start listing from.
    * @param recentChanges The list of recent changes to be filled.
    * @return The timestamp to use as a starting point for the next call.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Recentchanges">API:Recentchanges</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Recentchanges">API:Recentchanges</a>
    */
   @Override
-  public String getRecentChanges(
-      EnumWikipedia wiki,
-      String start, List<RecentChange> recentChanges) throws APIException {
-    ApiRecentChangesResult result = new ApiXmlRecentChangesResult(wiki, httpClient);
+  public String getRecentChanges(EnumWikipedia wiki, String start,
+                                 List<RecentChange> recentChanges)
+      throws APIException {
+    ApiRecentChangesResult result =
+        new ApiXmlRecentChangesResult(wiki, httpClient);
     ApiRecentChangesRequest request = new ApiRecentChangesRequest(wiki, result);
     return request.loadRecentChanges(start, recentChanges);
   }
@@ -1377,7 +1409,7 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieves similar pages.
    * (<code>action=query</code>, <code>list=search</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param page The page.
    * @param limit Flag indicating if the number of results should be limited.
@@ -1385,8 +1417,7 @@ public class MediaWikiAPI implements API {
    * @see <a href="http://www.mediawiki.org/wiki/API:Search">API:Search</a>
    */
   @Override
-  public void retrieveSimilarPages(
-      EnumWikipedia wiki, Page page, boolean limit)
+  public void retrieveSimilarPages(EnumWikipedia wiki, Page page, boolean limit)
       throws APIException {
     ApiSearchResult result = new ApiXmlSearchResult(wiki, httpClient);
     ApiSearchRequest request = new ApiSearchRequest(wiki, result);
@@ -1396,15 +1427,15 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieve user information.
    * (<code>action=query</code>, <code>list=users</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param name User name.
    * @throws APIException Exception thrown by the API.
    * @see <a href="http://www.mediawiki.org/wiki/API:Users">API:Users</a>
    */
   @Override
-  public User retrieveUser(
-      EnumWikipedia wiki, String name) throws APIException {
+  public User retrieveUser(EnumWikipedia wiki, String name)
+      throws APIException {
     ApiUsersResult result = new ApiXmlUsersResult(wiki, httpClient);
     ApiUsersRequest request = new ApiUsersRequest(wiki, result);
     return request.retrieveUser(name);
@@ -1413,17 +1444,18 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieve raw watch list.
    * (<code>action=query</code>, <code>list=watchlistraw</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Watchlistraw">API:Watchlistraw</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Watchlistraw">API:Watchlistraw</a>
    */
   @Override
-  public List<Page> retrieveRawWatchlist(EnumWikipedia wiki) throws APIException {
+  public List<Page> retrieveRawWatchlist(EnumWikipedia wiki)
+      throws APIException {
     ApiRawWatchlistResult result =
         new ApiXmlRawWatchlistResult(wiki, httpClient);
-    ApiRawWatchlistRequest request =
-        new ApiRawWatchlistRequest(wiki, result);
+    ApiRawWatchlistRequest request = new ApiRawWatchlistRequest(wiki, result);
     return request.loadWatchlistRaw();
   }
 
@@ -1434,17 +1466,19 @@ public class MediaWikiAPI implements API {
   /**
    * Expand templates in a text.
    * (<code>action=expandtemplates</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param title The title to use (for example in {{PAGENAME}}).
    * @param text The text with templates in it.
    * @return Text with templates expanded.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Parsing_wikitext#expandtemplates">API:Parsing wikitext</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Parsing_wikitext#expandtemplates">API:Parsing
+   *     wikitext</a>
    */
   @Override
-  public String expandTemplates(
-      EnumWikipedia wiki, String title, String text) throws APIException {
+  public String expandTemplates(EnumWikipedia wiki, String title, String text)
+      throws APIException {
     ApiExpandResult result = new ApiXmlExpandResult(wiki, httpClient);
     ApiExpandRequest request = new ApiExpandRequest(wiki, result);
     return request.expandTemplates(title, text);
@@ -1453,23 +1487,24 @@ public class MediaWikiAPI implements API {
   /**
    * Parse text.
    * (<code>action=parse</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param title The title to use (for example in {{PAGENAME}}).
    * @param text The text with templates in it.
    * @param full True to do a full parsing.
    * @return Parsed text.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Parsing_wikitext#parse">API:Parsing wikitext</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Parsing_wikitext#parse">API:Parsing
+   *     wikitext</a>
    */
   @Override
-  public String parseText(
-      EnumWikipedia wiki, String title, String text, boolean full) throws APIException {
+  public String parseText(EnumWikipedia wiki, String title, String text,
+                          boolean full) throws APIException {
     ApiParseResult result = new ApiXmlParseResult(wiki, httpClient);
     ApiParseRequest request = new ApiParseRequest(wiki, result);
     StringBuilder suffix = new StringBuilder();
-    while ((text != null) &&
-           (text.length() > 0) &&
+    while ((text != null) && (text.length() > 0) &&
            ("\n ".indexOf(text.charAt(text.length() - 1)) >= 0)) {
       suffix.append(text.charAt(text.length() - 1));
       text = text.substring(0, text.length() - 1);
@@ -1481,16 +1516,18 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieve list of sections.
    * (<code>action=parse</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param page Page.
    * @return List of sections.
    * @throws APIException Exception thrown by the API.
-   * @see <a href="http://www.mediawiki.org/wiki/API:Parsing_wikitext#parse">API:Parsing wikitext</a>
+   * @see <a
+   *     href="http://www.mediawiki.org/wiki/API:Parsing_wikitext#parse">API:Parsing
+   *     wikitext</a>
    */
   @Override
-  public List<Section> retrieveSections(
-      EnumWikipedia wiki, Page page) throws APIException {
+  public List<Section> retrieveSections(EnumWikipedia wiki, Page page)
+      throws APIException {
     ApiParseResult result = new ApiXmlParseResult(wiki, httpClient);
     ApiParseRequest request = new ApiParseRequest(wiki, result);
     return request.retrieveSections(page);
@@ -1503,7 +1540,7 @@ public class MediaWikiAPI implements API {
   /**
    * Purge the cache of <code>page</code>.
    * (<code>action=purge</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param page The page.
    * @throws APIException Exception thrown by the API.
@@ -1524,7 +1561,7 @@ public class MediaWikiAPI implements API {
   /**
    * Delete the <code>page</code>.
    * (<code>action=delete</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param page The page.
    * @param reason Reason for deleting the page.
@@ -1533,10 +1570,8 @@ public class MediaWikiAPI implements API {
    * @see <a href="http://www.mediawiki.org/wiki/API:Delete">API:Delete</a>
    */
   @Override
-  public void deletePage(
-      EnumWikipedia wiki, Page page,
-      String reason, boolean automatic)
-      throws APIException {
+  public void deletePage(EnumWikipedia wiki, Page page, String reason,
+                         boolean automatic) throws APIException {
     ApiDeleteResult result = new ApiXmlDeleteResult(wiki, httpClient);
     ApiDeleteRequest request = new ApiDeleteRequest(wiki, result);
     request.deletePage(page, reason, automatic);
@@ -1549,7 +1584,7 @@ public class MediaWikiAPI implements API {
   /**
    * Retrieve the TemplateData for <code>page</code>.
    * (<code>action=templatedata</code>).
-   * 
+   *
    * @param wiki Wiki.
    * @param page The page.
    * @return TemplateData for the page.
@@ -1559,7 +1594,8 @@ public class MediaWikiAPI implements API {
   @Override
   public TemplateData retrieveTemplateData(EnumWikipedia wiki, Page page)
       throws APIException {
-    ApiTemplateDataResult result = new ApiJsonTemplateDataResult(wiki, httpClient);
+    ApiTemplateDataResult result =
+        new ApiJsonTemplateDataResult(wiki, httpClient);
     ApiTemplateDataRequest request = new ApiTemplateDataRequest(wiki, result);
     return request.retrieveTemplateData(page);
   }
@@ -1581,9 +1617,8 @@ public class MediaWikiAPI implements API {
    * @param listener Recent changes listener.
    */
   @Override
-  public void addRecentChangesListener(
-      EnumWikipedia wiki,
-      RecentChangesListener listener) {
+  public void addRecentChangesListener(EnumWikipedia wiki,
+                                       RecentChangesListener listener) {
     RecentChangesManager rcManager = rcManagers.get(wiki);
     if (rcManager == null) {
       rcManager = new RecentChangesManager(wiki, this);
@@ -1594,14 +1629,13 @@ public class MediaWikiAPI implements API {
 
   /**
    * Removes a <code>RecentChangesListener</code> from the API.
-   * 
+   *
    * @param wiki Wiki.
    * @param listener Recent changes listener.
    */
   @Override
-  public void removeRecentChangesListener(
-      EnumWikipedia wiki,
-      RecentChangesListener listener) {
+  public void removeRecentChangesListener(EnumWikipedia wiki,
+                                          RecentChangesListener listener) {
     RecentChangesManager rcManager = rcManagers.get(wiki);
     if (rcManager != null) {
       rcManager.removeRecentChangesListener(listener);
@@ -1614,14 +1648,12 @@ public class MediaWikiAPI implements API {
 
   /**
    * Returns an initialized set of properties.
-   * 
+   *
    * @param action Action called in the MediaWiki API.
    * @param newApi New API (api.php) or not (query.php).
    * @return Properties.
    */
-  private Map<String, String> getProperties(
-      String action,
-      boolean newApi) {
+  private Map<String, String> getProperties(String action, boolean newApi) {
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(newApi ? "action" : "what", action);
     properties.put("format", "xml");
@@ -1630,7 +1662,7 @@ public class MediaWikiAPI implements API {
 
   /**
    * Returns the root element of the XML document returned by MediaWiki API.
-   * 
+   *
    * @param wikipedia Wikipedia.
    * @param properties Properties to drive the API.
    * @param maxTry Maximum number of tries.
@@ -1638,10 +1670,8 @@ public class MediaWikiAPI implements API {
    * @throws JDOMParseException Exception thrown due to the DOM.
    * @throws APIException Exception thrown by the API.
    */
-  private Element getRoot(
-      EnumWikipedia       wikipedia,
-      Map<String, String> properties,
-      int                 maxTry)
+  private Element getRoot(EnumWikipedia wikipedia,
+                          Map<String, String> properties, int maxTry)
       throws JDOMParseException, APIException {
     Element root = null;
     HttpMethod method = null;
@@ -1652,7 +1682,8 @@ public class MediaWikiAPI implements API {
         method = createHttpMethod(wikipedia, properties);
         int statusCode = httpClient.executeMethod(method);
         if (statusCode != HttpStatus.SC_OK) {
-          String message = "URL access returned " + HttpStatus.getStatusText(statusCode);
+          String message =
+              "URL access returned " + HttpStatus.getStatusText(statusCode);
           log.error(message);
           if (attempt >= maxTry) {
             log.warn("Error. Maximum attempts count reached.");
@@ -1727,20 +1758,20 @@ public class MediaWikiAPI implements API {
 
   /**
    * Check current time to see if edit is authorized (wait if needed).
-   * 
+   *
    * @param user Current user.
    * @param namespace Name space for the edit.
    */
   private void checkTimeForEdit(User user, Integer namespace) {
     Configuration config = Configuration.getConfiguration();
-    int minimumTime = config.getInt(null, ConfigurationValueInteger.TIME_BETWEEN_EDIT);
+    int minimumTime =
+        config.getInt(null, ConfigurationValueInteger.TIME_BETWEEN_EDIT);
     int maxEdits = 0;
     if ((namespace == null) || (namespace.intValue() % 2 == 0)) {
       config.getInt(null, ConfigurationValueInteger.MAX_EDITS_PER_MINUTE);
       if ((maxEdits > ConfigurationValueInteger.MAX_EDITS_PER_MINUTE_NORMAL) ||
           (maxEdits <= 0)) {
-        if (!user.isMemberOf("admin") &&
-            !user.isMemberOf("bot")) {
+        if (!user.isMemberOf("admin") && !user.isMemberOf("bot")) {
           maxEdits = ConfigurationValueInteger.MAX_EDITS_PER_MINUTE_NORMAL;
         }
       }
@@ -1779,21 +1810,19 @@ public class MediaWikiAPI implements API {
 
   /**
    * Create an HttpMethod.
-   * 
+   *
    * @param wikipedia Wikipedia.
    * @param properties Properties to drive the API.
    * @return HttpMethod.
    */
-  private HttpMethod createHttpMethod(
-      EnumWikipedia       wikipedia,
-      Map<String, String> properties) {
+  private HttpMethod createHttpMethod(EnumWikipedia wikipedia,
+                                      Map<String, String> properties) {
     boolean getMethod = canUseGetMethod(properties);
     Configuration config = Configuration.getConfiguration();
-    boolean useHttps = !config.getBoolean(null, ConfigurationValueBoolean.FORCE_HTTP_API);
+    boolean useHttps =
+        !config.getBoolean(null, ConfigurationValueBoolean.FORCE_HTTP_API);
     return Hc3HttpUtils.createHttpMethod(
-        wikipedia.getSettings().getApiURL(useHttps),
-        properties,
-        getMethod);
+        wikipedia.getSettings().getApiURL(useHttps), properties, getMethod);
   }
 
   /**
@@ -1816,7 +1845,7 @@ public class MediaWikiAPI implements API {
 
   /**
    * Check for errors reported by the API.
-   * 
+   *
    * @param root Document root.
    * @throws APIException Exception thrown by the API.
    */
@@ -1824,56 +1853,60 @@ public class MediaWikiAPI implements API {
     if (root == null) {
       return;
     }
-    
+
     // Check for errors
-    XPathExpression<Element> xpa = XPathFactory.instance().compile(
-        "/api/error", Filters.element());
+    XPathExpression<Element> xpa =
+        XPathFactory.instance().compile("/api/error", Filters.element());
     List<Element> listErrors = xpa.evaluate(root);
     if (listErrors != null) {
       Iterator<Element> iterErrors = listErrors.iterator();
       while (iterErrors.hasNext()) {
         Element currentNode = iterErrors.next();
-        String text = "Error reported: " + currentNode.getAttributeValue("code") + " - " + currentNode.getAttributeValue("info");
+        String text =
+            "Error reported: " + currentNode.getAttributeValue("code") + " - " +
+            currentNode.getAttributeValue("info");
         log.warn(text);
         throw new APIException(text, currentNode.getAttributeValue("code"));
       }
     }
-    
+
     // Check for warnings
-    xpa = XPathFactory.instance().compile(
-        "/api/warnings/*", Filters.element());
+    xpa = XPathFactory.instance().compile("/api/warnings/*", Filters.element());
     List<Element> listWarnings = xpa.evaluate(root);
     if (listWarnings != null) {
       Iterator iterWarnings = listWarnings.iterator();
       while (iterWarnings.hasNext()) {
-        Element currentNode = (Element) iterWarnings.next();
-        log.warn("Warning reported: " + currentNode.getName() + " - " + currentNode.getValue());
+        Element currentNode = (Element)iterWarnings.next();
+        log.warn("Warning reported: " + currentNode.getName() + " - " +
+                 currentNode.getValue());
       }
     }
   }
 
   /**
    * Ask for captcha answer.
-   * 
+   *
    * @param wikipedia Wikipedia.
    * @param captcha Captcha.
    * @return Answer.
    */
-  private String getCaptchaAnswer(
-      EnumWikipedia wikipedia,
-      CaptchaException captcha) {
+  private String getCaptchaAnswer(EnumWikipedia wikipedia,
+                                  CaptchaException captcha) {
     // TODO: Move Swing parts out of API
     if (captcha == null) {
       return null;
     }
-    if ((captcha.getQuestion() != null) && (captcha.getQuestion().trim().length() > 0)) {
+    if ((captcha.getQuestion() != null) &&
+        (captcha.getQuestion().trim().length() > 0)) {
       return Utilities.askForValue(
           null,
-          GT._T("This action is protected by a CAPTCHA.\nWhat is the answer to the following question ?") + "\n" + captcha.getQuestion(),
+          GT._T("This action is protected by a CAPTCHA.\nWhat is the answer to the following question ?")
+              + "\n" + captcha.getQuestion(),
           "", null);
     }
     if ((captcha.getURL() != null) && (captcha.getURL().trim().length() > 0)) {
-      Utilities.browseURL(wikipedia.getSettings().getHostURL(false) + captcha.getURL());
+      Utilities.browseURL(wikipedia.getSettings().getHostURL(false) +
+                          captcha.getURL());
       return Utilities.askForValue(
           null,
           GT._T("This action is protected by a CAPTCHA.\nWhat is the answer to the question displayed in your browser ?"),
@@ -1884,7 +1917,7 @@ public class MediaWikiAPI implements API {
 
   /**
    * Trace a document contents.
-   * 
+   *
    * @param doc Document.
    */
   private void traceDocument(Document doc) {

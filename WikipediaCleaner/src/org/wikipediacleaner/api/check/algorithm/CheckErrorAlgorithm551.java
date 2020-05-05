@@ -12,13 +12,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.wikipediacleaner.api.check.CheckErrorResult;
 import org.wikipediacleaner.api.constants.WPCConfiguration;
 import org.wikipediacleaner.api.data.PageAnalysis;
 import org.wikipediacleaner.api.data.PageElementTag;
 import org.wikipediacleaner.i18n.GT;
-
 
 /**
  * Algorithm for analyzing error 551 of check wikipedia project.
@@ -26,22 +24,21 @@ import org.wikipediacleaner.i18n.GT;
  */
 public class CheckErrorAlgorithm551 extends CheckErrorAlgorithmBase {
 
-  public CheckErrorAlgorithm551() {
-    super("Empty line");
-  }
+  public CheckErrorAlgorithm551() { super("Empty line"); }
 
   /**
    * Analyze a page to check if errors are present.
-   * 
+   *
    * @param analysis Page analysis.
    * @param errors Errors found in the page.
-   * @param onlyAutomatic True if analysis could be restricted to errors automatically fixed.
+   * @param onlyAutomatic True if analysis could be restricted to errors
+   *     automatically fixed.
    * @return Flag indicating if the error was found.
    */
   @Override
-  public boolean analyze(
-      PageAnalysis analysis,
-      Collection<CheckErrorResult> errors, boolean onlyAutomatic) {
+  public boolean analyze(PageAnalysis analysis,
+                         Collection<CheckErrorResult> errors,
+                         boolean onlyAutomatic) {
     if (analysis == null) {
       return false;
     }
@@ -62,9 +59,9 @@ public class CheckErrorAlgorithm551 extends CheckErrorAlgorithmBase {
         char currentChar = contents.charAt(currentIndex);
         if (currentChar == '<') {
           PageElementTag tag = analysis.isInTag(currentIndex);
-          if ((tag != null) &&
-              (tag.getBeginIndex() == currentIndex) &&
-              (PageElementTag.TAG_WIKI_NOWIKI.equals(tag.getNormalizedName()))) {
+          if ((tag != null) && (tag.getBeginIndex() == currentIndex) &&
+              (PageElementTag.TAG_WIKI_NOWIKI.equals(
+                  tag.getNormalizedName()))) {
             currentIndex = tag.getEndIndex();
             endTag = Math.max(endTag, tag.getCompleteEndIndex());
             something = true;
@@ -108,7 +105,7 @@ public class CheckErrorAlgorithm551 extends CheckErrorAlgorithmBase {
 
       // Go to the end of the line
       while ((currentIndex < contents.length()) &&
-          (contents.charAt(currentIndex) != '\n')) {
+             (contents.charAt(currentIndex) != '\n')) {
         currentIndex++;
       }
       if (currentIndex < contents.length()) {
@@ -121,8 +118,10 @@ public class CheckErrorAlgorithm551 extends CheckErrorAlgorithmBase {
         shouldReport = true;
       }
       if (shouldReport) {
-        if ((analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SOURCE, beginLine) != null) ||
-            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SYNTAXHIGHLIGHT, beginLine) != null)) {
+        if ((analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SOURCE,
+                                        beginLine) != null) ||
+            (analysis.getSurroundingTag(PageElementTag.TAG_WIKI_SYNTAXHIGHLIGHT,
+                                        beginLine) != null)) {
           shouldReport = false;
         }
       }
@@ -141,7 +140,8 @@ public class CheckErrorAlgorithm551 extends CheckErrorAlgorithmBase {
         }
 
         // Report error
-        CheckErrorResult errorResult = createCheckErrorResult(analysis, beginLine, currentIndex);
+        CheckErrorResult errorResult =
+            createCheckErrorResult(analysis, beginLine, currentIndex);
         errorResult.addReplacement("", automatic);
         errors.add(errorResult);
       }
@@ -152,7 +152,7 @@ public class CheckErrorAlgorithm551 extends CheckErrorAlgorithmBase {
 
   /**
    * Automatic fixing of all the errors in the page.
-   * 
+   *
    * @param analysis Page analysis.
    * @return Page contents after fix.
    */
@@ -174,8 +174,9 @@ public class CheckErrorAlgorithm551 extends CheckErrorAlgorithmBase {
 
   /**
    * Initialize settings for the algorithm.
-   * 
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
+   *
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#initializeSettings()
    */
   @Override
   protected void initializeSettings() {
@@ -194,7 +195,8 @@ public class CheckErrorAlgorithm551 extends CheckErrorAlgorithmBase {
 
   /**
    * @return Map of parameters (key=name, value=description).
-   * @see org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
+   * @see
+   *     org.wikipediacleaner.api.check.algorithm.CheckErrorAlgorithmBase#getParameters()
    */
   @Override
   public Map<String, String> getParameters() {

@@ -15,13 +15,11 @@ import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CodingErrorAction;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wikipediacleaner.api.request.login.ApiLoginRequest;
 import org.wikipediacleaner.utils.Configuration;
 import org.wikipediacleaner.utils.ConfigurationValueBoolean;
-
 
 /**
  * Utilities class for HTTP requests.
@@ -55,10 +53,8 @@ public class HttpUtils {
    */
   public static void updateConfiguration() {
     Configuration config = Configuration.getConfiguration();
-    DEBUG_TIME = config.getBoolean(
-        null, ConfigurationValueBoolean.DEBUG_TIME);
-    DEBUG_URL = config.getBoolean(
-        null, ConfigurationValueBoolean.DEBUG_URL);
+    DEBUG_TIME = config.getBoolean(null, ConfigurationValueBoolean.DEBUG_TIME);
+    DEBUG_URL = config.getBoolean(null, ConfigurationValueBoolean.DEBUG_URL);
   }
 
   // ==========================================================================
@@ -67,14 +63,15 @@ public class HttpUtils {
 
   /**
    * Add a parameter to the debug URL.
-   *  
+   *
    * @param debugUrl Current value of the debug URL.
    * @param first True if it's the first parameter.
    * @param key Name of the parameter.
    * @param value Value of the parameter.
    * @return True if it's still the first parameter.
    */
-  protected static boolean fillDebugUrl(StringBuilder debugUrl, boolean first, String key, String value) {
+  protected static boolean fillDebugUrl(StringBuilder debugUrl, boolean first,
+                                        String key, String value) {
     if (!DEBUG_URL || (debugUrl == null)) {
       return first;
     }
@@ -82,7 +79,8 @@ public class HttpUtils {
       return first;
     }
     int start = 0;
-    while ((start < value.length()) && Character.isWhitespace(value.charAt(start))) {
+    while ((start < value.length()) &&
+           Character.isWhitespace(value.charAt(start))) {
       start++;
     }
     if (value.indexOf('\n', start) > 0) {
@@ -110,7 +108,7 @@ public class HttpUtils {
 
   /**
    * Debug text.
-   * 
+   *
    * @param text Text to add to debug.
    */
   protected static void debugText(String text) {
@@ -135,24 +133,26 @@ public class HttpUtils {
 
   /**
    * Append bytes of a String to a buffer.
-   * 
+   *
    * @param buf Byte buffer.
    * @param data String.
    * @throws UnsupportedEncodingException
    */
-  private static void appendBytes(ByteArrayOutputStream buf, String data) throws UnsupportedEncodingException {
+  private static void appendBytes(ByteArrayOutputStream buf, String data)
+      throws UnsupportedEncodingException {
     byte[] b = data.getBytes("UTF8");
     buf.write(b, 0, b.length);
   }
 
   /**
    * Parse an encoded string into a byte array.
-   * 
+   *
    * @param segment String
    * @return Byte array.
    * @throws UnsupportedEncodingException
    */
-  private static byte[] parseEncodedString(String segment) throws UnsupportedEncodingException {
+  private static byte[] parseEncodedString(String segment)
+      throws UnsupportedEncodingException {
     ByteArrayOutputStream buf = new ByteArrayOutputStream(segment.length());
     int last = 0;
     int index = 0;
@@ -160,16 +160,19 @@ public class HttpUtils {
       if (segment.charAt(index) == '%') {
         appendBytes(buf, segment.substring(last, index));
         if ((index + 2 < segment.length()) &&
-            ("ABCDEFabcdef0123456789".indexOf(segment.charAt(index + 1)) >= 0) &&
-            ("ABCDEFabcdef0123456789".indexOf(segment.charAt(index + 2)) >= 0)) {
-          buf.write((byte) Integer.parseInt(segment.substring(index + 1, index + 3), 16));
+            ("ABCDEFabcdef0123456789".indexOf(segment.charAt(index + 1)) >=
+             0) &&
+            ("ABCDEFabcdef0123456789".indexOf(segment.charAt(index + 2)) >=
+             0)) {
+          buf.write((byte)Integer.parseInt(
+              segment.substring(index + 1, index + 3), 16));
           index += 3;
         } else if ((index + 1 < segment.length()) &&
                    (segment.charAt(index + 1) == '%')) {
-          buf.write((byte) '%');
+          buf.write((byte)'%');
           index += 2;
         } else {
-          buf.write((byte) '%');
+          buf.write((byte)'%');
           index++;
         }
         last = index;
@@ -183,12 +186,13 @@ public class HttpUtils {
 
   /**
    * Parse an encoded string, trying several characters sets.
-   * 
+   *
    * @param segment String to parse.
    * @param encodings Characters sets.
    * @return Decoded string.
    */
-  public static String parseEncodedString(String segment, Charset... encodings) {
+  public static String parseEncodedString(String segment,
+                                          Charset... encodings) {
     if ((segment == null) || (segment.indexOf('%') < 0)) {
       return segment;
     }
@@ -197,9 +201,10 @@ public class HttpUtils {
       for (Charset encoding : encodings) {
         try {
           if (encoding != null) {
-            return encoding.newDecoder().
-                onMalformedInput(CodingErrorAction.REPORT).
-                decode(ByteBuffer.wrap(data)).toString();
+            return encoding.newDecoder()
+                .onMalformedInput(CodingErrorAction.REPORT)
+                .decode(ByteBuffer.wrap(data))
+                .toString();
           }
         } catch (CharacterCodingException e) {
           // Incorrect encoding, try next one
@@ -213,7 +218,7 @@ public class HttpUtils {
 
   /**
    * Find if a given URL is for an article.
-   * 
+   *
    * @param url URL.
    * @param base Base URL.
    * @return Article name or null if it doesn't match an article.
@@ -251,8 +256,7 @@ public class HttpUtils {
     if (scheme == null) {
       return null;
     }
-    if (!scheme.equalsIgnoreCase("http") &&
-        !scheme.equalsIgnoreCase("https")) {
+    if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
       return null;
     }
 
@@ -260,7 +264,8 @@ public class HttpUtils {
     StringBuilder details = new StringBuilder();
     details.append("//");
     details.append(uri.getAuthority());
-    details.append(parseEncodedString(uri.getRawPath(), utf8Charset, iso88591Charset));
+    details.append(
+        parseEncodedString(uri.getRawPath(), utf8Charset, iso88591Charset));
     if (uri.getQuery() != null) {
       details.append("?");
       details.append(uri.getQuery());
@@ -287,7 +292,8 @@ public class HttpUtils {
     } else if (!detailsStr.endsWith(base.substring(paramIndex + 2))) {
       return null;
     } else {
-      result = detailsStr.substring(paramIndex, details.length() - base.length() + 2 + paramIndex);
+      result = detailsStr.substring(
+          paramIndex, details.length() - base.length() + 2 + paramIndex);
     }
     if (result != null) {
       result = result.replaceAll("\\_", " ");

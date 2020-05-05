@@ -5,21 +5,18 @@
  *  See README.txt file for licensing information.
  */
 
-
 package org.wikipediacleaner.api.http.hc5;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
-
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
-
 
 /**
  * Response handler for HTTP requests.
@@ -30,15 +27,15 @@ public class Hc5HttpResponseHandler
   /**
    * Default constructor.
    */
-  public Hc5HttpResponseHandler() {
-  }
+  public Hc5HttpResponseHandler() {}
 
   /**
    * @param response HTTP response.
    * @return HTTP response.
    * @throws HttpException Exception.
    * @throws IOException Exception.
-   * @see org.apache.hc.core5.http.io.HttpClientResponseHandler#handleResponse(org.apache.hc.core5.http.ClassicHttpResponse)
+   * @see
+   *     org.apache.hc.core5.http.io.HttpClientResponseHandler#handleResponse(org.apache.hc.core5.http.ClassicHttpResponse)
    */
   @Override
   public Hc5HttpResponse handleResponse(ClassicHttpResponse response)
@@ -48,7 +45,8 @@ public class Hc5HttpResponseHandler
       byte[] data = EntityUtils.toByteArray(response.getEntity());
       InputStream is = new ByteArrayInputStream(data);
       Header hContentEncoding = response.getHeader("Content-Encoding");
-      if ((hContentEncoding != null) && ("gzip".equals(hContentEncoding.getValue()))) {
+      if ((hContentEncoding != null) &&
+          ("gzip".equals(hContentEncoding.getValue()))) {
         is = new GZIPInputStream(is);
       }
       return new Hc5HttpResponse(status, is);

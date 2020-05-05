@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wikipediacleaner.api.API;
@@ -52,7 +51,6 @@ import org.wikipediacleaner.gui.swing.basic.BasicWorker;
 import org.wikipediacleaner.gui.swing.basic.Utilities;
 import org.wikipediacleaner.i18n.GT;
 
-
 /**
  * SwingWorker for listing Check Wiki errors from a dump.
  */
@@ -67,10 +65,16 @@ public class ListCWWorker extends BasicWorker {
   /** File containing the dump */
   private final File dumpFile;
 
-  /** Directory (or file with place holder for error number) in which the output is written */
+  /**
+   * Directory (or file with place holder for error number) in which the output
+   * is written
+   */
   private final File output;
 
-  /** Page name (with place holder for error number) in which the output is written */
+  /**
+   * Page name (with place holder for error number) in which the output is
+   * written
+   */
   private final String pageName;
 
   /** Algorithms for which to analyze pages */
@@ -98,22 +102,23 @@ public class ListCWWorker extends BasicWorker {
    * @param wiki Wiki.
    * @param window Window.
    * @param dumpFile File containing the dump to be analyzed.
-   * @param output Directory (or file with place holder for error number) in which the output is written.
+   * @param output Directory (or file with place holder for error number) in
+   *     which the output is written.
    * @param selectedAlgorithms List of selected algorithms.
    * @param selectedNamespaces List of selected namespaces.
-   * @param checkWiki True if last version of articles should be checked on wiki.
+   * @param checkWiki True if last version of articles should be checked on
+   *     wiki.
    */
-  public ListCWWorker(
-      EnumWikipedia wiki, BasicWindow window,
-      File dumpFile, File output,
-      List<CheckErrorAlgorithm> selectedAlgorithms,
-      Collection<Integer> selectedNamespaces,
-      boolean checkWiki) {
+  public ListCWWorker(EnumWikipedia wiki, BasicWindow window, File dumpFile,
+                      File output, List<CheckErrorAlgorithm> selectedAlgorithms,
+                      Collection<Integer> selectedNamespaces,
+                      boolean checkWiki) {
     super(wiki, window);
     this.dumpFile = dumpFile;
     this.output = output;
     this.pageName = null;
-    this.selectedAlgorithms = AlgorithmInformation.createList(selectedAlgorithms);
+    this.selectedAlgorithms =
+        AlgorithmInformation.createList(selectedAlgorithms);
     this.selectedNamespaces = new HashSet<>();
     if (selectedNamespaces != null) {
       this.selectedNamespaces.addAll(selectedNamespaces);
@@ -131,23 +136,26 @@ public class ListCWWorker extends BasicWorker {
    * @param wiki Wiki.
    * @param window Window.
    * @param dumpFile File containing the dump to be analyzed.
-   * @param pageName Page name (with place holder for error number) in which the output is written.
+   * @param pageName Page name (with place holder for error number) in which the
+   *     output is written.
    * @param selectedAlgorithms List of selected algorithms.
    * @param selectedNamespaces List of selected namespaces.
-   * @param checkWiki True if last version of articles should be checked on wiki.
-   * @param onlyRecheck True to just check the pages that have been previously reported.
+   * @param checkWiki True if last version of articles should be checked on
+   *     wiki.
+   * @param onlyRecheck True to just check the pages that have been previously
+   *     reported.
    */
-  public ListCWWorker(
-      EnumWikipedia wiki, BasicWindow window,
-      File dumpFile, String pageName,
-      List<CheckErrorAlgorithm> selectedAlgorithms,
-      Collection<Integer> selectedNamespaces,
-      boolean checkWiki, boolean onlyRecheck) {
+  public ListCWWorker(EnumWikipedia wiki, BasicWindow window, File dumpFile,
+                      String pageName,
+                      List<CheckErrorAlgorithm> selectedAlgorithms,
+                      Collection<Integer> selectedNamespaces, boolean checkWiki,
+                      boolean onlyRecheck) {
     super(wiki, window);
     this.dumpFile = dumpFile;
     this.output = null;
     this.pageName = pageName;
-    this.selectedAlgorithms = AlgorithmInformation.createList(selectedAlgorithms);
+    this.selectedAlgorithms =
+        AlgorithmInformation.createList(selectedAlgorithms);
     this.selectedNamespaces = new HashSet<>();
     if (selectedNamespaces != null) {
       this.selectedNamespaces.addAll(selectedNamespaces);
@@ -161,9 +169,9 @@ public class ListCWWorker extends BasicWorker {
     this.onlyRecheck = onlyRecheck;
   }
 
-  /** 
-   * Compute the value to be returned by the <code>get</code> method. 
-   * 
+  /**
+   * Compute the value to be returned by the <code>get</code> method.
+   *
    * @return Object returned by the <code>get</code> method.
    * @see org.wikipediacleaner.gui.swing.basic.BasicWorker#construct()
    */
@@ -186,13 +194,16 @@ public class ListCWWorker extends BasicWorker {
     if ((selectedAlgorithms == null) || selectedAlgorithms.isEmpty()) {
       return null;
     }
-    CWPageProcessor pageProcessor = new CWPageProcessor(getWikipedia(), this, selectedNamespaces);
+    CWPageProcessor pageProcessor =
+        new CWPageProcessor(getWikipedia(), this, selectedNamespaces);
     if (onlyRecheck) {
       try {
         List<Page> outputPages = new ArrayList<>();
         for (AlgorithmInformation algorithm : selectedAlgorithms) {
-          String truePageName = MessageFormat.format(pageName, algorithm.algorithm.getErrorNumberString());
-          Page page = DataManager.getPage(getWikipedia(), truePageName, null, null, null);
+          String truePageName = MessageFormat.format(
+              pageName, algorithm.algorithm.getErrorNumberString());
+          Page page = DataManager.getPage(getWikipedia(), truePageName, null,
+                                          null, null);
           outputPages.add(page);
         }
         API api = APIFactory.getAPI();
@@ -242,9 +253,8 @@ public class ListCWWorker extends BasicWorker {
     buffer.append(" / errors detected: " + countDetections);
     buffer.append(" Analysis: " + analysisTime.toString());
     for (AlgorithmInformation algorithm : selectedAlgorithms) {
-      buffer.append(
-          " Algorithm " + algorithm.algorithm.getErrorNumberString() +
-          ": " + (algorithm.getTimeSpent() / 1000000000));
+      buffer.append(" Algorithm " + algorithm.algorithm.getErrorNumberString() +
+                    ": " + (algorithm.getTimeSpent() / 1000000000));
     }
     log.info(buffer.toString());
   }
@@ -272,8 +282,8 @@ public class ListCWWorker extends BasicWorker {
       }
       line.append("* ");
       line.append(PageElementInternalLink.createInternalLink(
-          Namespace.isColonNeeded(detection.namespace),
-          detection.pageName, null));
+          Namespace.isColonNeeded(detection.namespace), detection.pageName,
+          null));
       if (detection.notices != null) {
         boolean first = true;
         for (String notice : detection.notices) {
@@ -360,15 +370,14 @@ public class ListCWWorker extends BasicWorker {
               } else {
                 line.appendCodePoint(codePoint);
               }
-            } 
+            }
             index = notice.offsetByCodePoints(index, 1);
           }
           line.append("</nowiki>");
         }
       }
       line.append("\n");
-      if ((maxSize == null) ||
-          (buffer.length() + line.length() < maxSize)) {
+      if ((maxSize == null) || (buffer.length() + line.length() < maxSize)) {
         buffer.append(line);
       } else {
         pagesToRemove.add(detection);
@@ -380,11 +389,12 @@ public class ListCWWorker extends BasicWorker {
 
   /**
    * Output result of the analysis.
-   * 
+   *
    * @param algorithm Algorithm.
    * @param pages List of pages with detections.
    */
-  private void outputResult(CheckErrorAlgorithm algorithm, Collection<Detection> pages) {
+  private void outputResult(CheckErrorAlgorithm algorithm,
+                            Collection<Detection> pages) {
     if ((algorithm == null) || (pages == null)) {
       return;
     }
@@ -408,36 +418,40 @@ public class ListCWWorker extends BasicWorker {
 
   /**
    * Output result of the analysis to a file.
-   * 
+   *
    * @param algorithm Algorithm.
    * @param pages List of detections to put in the result.
    * @param outputPage Page name.
    * @throws APIException Error with MediaWiki API.
    */
-  private void outputResultToPage(
-      CheckErrorAlgorithm algorithm, List<Detection> pages,
-      String outputPage) throws APIException {
+  private void outputResultToPage(CheckErrorAlgorithm algorithm,
+                                  List<Detection> pages, String outputPage)
+      throws APIException {
 
     // Determine page to which the error should be written
     if (outputPage == null) {
       return;
     }
-    String truePageName = MessageFormat.format(pageName, algorithm.getErrorNumberString());
-    logCW.info("Writing dump analysis results for error " + algorithm.getErrorNumberString() + " to page " + truePageName);
+    String truePageName =
+        MessageFormat.format(pageName, algorithm.getErrorNumberString());
+    logCW.info("Writing dump analysis results for error " +
+               algorithm.getErrorNumberString() + " to page " + truePageName);
 
     // Retrieve page information
-    Page page = DataManager.getPage(getWikipedia(), truePageName, null, null, null);
+    Page page =
+        DataManager.getPage(getWikipedia(), truePageName, null, null, null);
     API api = APIFactory.getAPI();
-    api.retrieveContents(getWikipedia(), Collections.singletonList(page), false, false);
+    api.retrieveContents(getWikipedia(), Collections.singletonList(page), false,
+                         false);
     String initialContents = page.getContents();
     Integer initialRevisionId = page.getRevisionId();
-    if ((initialContents == null) ||
-        (initialRevisionId == null)) {
+    if ((initialContents == null) || (initialRevisionId == null)) {
       throw new APIException("Unable to read page " + truePageName);
     }
 
     // Generate result
-    logCW.info("Preparing results of dump analysis for error " + algorithm.getErrorNumberString());
+    logCW.info("Preparing results of dump analysis for error " +
+               algorithm.getErrorNumberString());
     int nbPages = pages.size();
     Long maxSize = getWikipedia().getWikiConfiguration().getMaxArticleSize();
     List<Detection> tmpPages = new ArrayList<>(pages);
@@ -448,7 +462,8 @@ public class ListCWWorker extends BasicWorker {
       attemptCount++;
 
       // Check that page hasn't been modified
-      api.retrieveContents(getWikipedia(), Collections.singletonList(page), false, false);
+      api.retrieveContents(getWikipedia(), Collections.singletonList(page),
+                           false, false);
       String contents = page.getContents();
       if (!initialRevisionId.equals(page.getRevisionId()) ||
           !initialContents.equals(contents)) {
@@ -459,7 +474,8 @@ public class ListCWWorker extends BasicWorker {
       // Find place holders in the page
       int begin = -1;
       int end = -1;
-      for (ContentsComment comment : page.getAnalysis(contents, true).getComments()) {
+      for (ContentsComment comment :
+           page.getAnalysis(contents, true).getComments()) {
         String value = comment.getComment().trim();
         if ("BOT BEGIN".equals(value)) {
           if (begin < 0) {
@@ -470,7 +486,8 @@ public class ListCWWorker extends BasicWorker {
         }
       }
       if ((begin < 0) || (end < 0) || (end < begin)) {
-        throw new APIException("Page " + truePageName + " doesn't have place holders for the result");
+        throw new APIException("Page " + truePageName +
+                               " doesn't have place holders for the result");
       }
 
       // Build new text for the page
@@ -480,7 +497,8 @@ public class ListCWWorker extends BasicWorker {
         StringBuilder newText = new StringBuilder();
         newText.append(contents.substring(0, begin));
         newText.append("\n");
-        newText.append(generateResult(tmpPages, maxSize - begin - contents.length() + end));
+        newText.append(generateResult(tmpPages, maxSize - begin -
+                                                    contents.length() + end));
         newText.append(contents.substring(end));
         text = newText.toString();
         if (getWikipedia().getWikiConfiguration().isArticleTooLong(text)) {
@@ -495,10 +513,11 @@ public class ListCWWorker extends BasicWorker {
       // Update page
       try {
         if (!text.equals(contents)) {
-          api.updatePage(
-              getWikipedia(), page, text,
-              "Dump analysis for error n°" + algorithm.getErrorNumberString() + " (" + nbPages + " pages)",
-              true, true, false);
+          api.updatePage(getWikipedia(), page, text,
+                         "Dump analysis for error n°" +
+                             algorithm.getErrorNumberString() + " (" + nbPages +
+                             " pages)",
+                         true, true, false);
         }
         return;
       } catch (APIException e) {
@@ -533,14 +552,13 @@ public class ListCWWorker extends BasicWorker {
 
   /**
    * Output result of the analysis to a file.
-   * 
+   *
    * @param algorithm Algorithm.
    * @param pages List of detections to put in the result.
    * @param outputPath Output directory (or file if it contains a {0}).
    */
-  private void outputResultToFile(
-      CheckErrorAlgorithm algorithm, List<Detection> pages,
-      File outputPath) {
+  private void outputResultToFile(CheckErrorAlgorithm algorithm,
+                                  List<Detection> pages, File outputPath) {
 
     // Determine file to which the error list should be written
     if (outputPath == null) {
@@ -549,18 +567,22 @@ public class ListCWWorker extends BasicWorker {
     File outputFile = null;
     if (!outputPath.getName().contains("{0}")) {
       outputFile = new File(
-          outputPath,
-          "CW_" + getWikipedia().getSettings().getCodeCheckWiki() + "_" + algorithm.getErrorNumberString() + ".txt");
+          outputPath, "CW_" + getWikipedia().getSettings().getCodeCheckWiki() +
+                          "_" + algorithm.getErrorNumberString() + ".txt");
     } else {
-      outputFile = new File(MessageFormat.format(output.getAbsolutePath(), algorithm.getErrorNumberString()));
+      outputFile = new File(MessageFormat.format(
+          output.getAbsolutePath(), algorithm.getErrorNumberString()));
     }
 
     // Generate result
-    logCW.info("Preparing results of dump analysis for error " + algorithm.getErrorNumberString());
+    logCW.info("Preparing results of dump analysis for error " +
+               algorithm.getErrorNumberString());
     String result = generateResult(pages, null);
 
     // Write the file
-    logCW.info("Writing dump analysis results for error " + algorithm.getErrorNumberString() + " to file " + outputFile.getName());
+    logCW.info("Writing dump analysis results for error " +
+               algorithm.getErrorNumberString() + " to file " +
+               outputFile.getName());
     try (FileOutputStream fo = new FileOutputStream(outputFile, false);
          OutputStreamWriter osw = new OutputStreamWriter(fo, "UTF8");
          BufferedWriter writer = new BufferedWriter(osw)) {
@@ -573,11 +595,11 @@ public class ListCWWorker extends BasicWorker {
   /**
    * Called on the event dispatching thread (not on the worker thread)
    * after the <code>construct</code> method has returned.
-   * 
+   *
    * @see org.wikipediacleaner.gui.swing.basic.BasicWorker#finished()
    */
   /**
-   * 
+   *
    * @see org.wikipediacleaner.gui.swing.basic.BasicWorker#finished()
    */
   @Override
@@ -586,20 +608,18 @@ public class ListCWWorker extends BasicWorker {
 
     // Build final message
     StringBuilder message = new StringBuilder();
-    message.append(GT.__(
-        "{0} page has been analyzed",
-        "{0} pages have been analyzed",
-        countAnalyzed, Integer.toString(countAnalyzed)));
+    message.append(GT.__("{0} page has been analyzed",
+                         "{0} pages have been analyzed", countAnalyzed,
+                         Integer.toString(countAnalyzed)));
     for (AlgorithmInformation algorithmInfo : selectedAlgorithms) {
       CheckErrorAlgorithm algorithm = algorithmInfo.algorithm;
       Map<String, Detection> pages = algorithmInfo.getDetections();
       message.append("\n");
       message.append(GT.__(
           "{0} page has been detected for algorithm {1}",
-          "{0} pages have been detected for algorithm {1}",
-          pages.size(), new Object[] {
-            pages.size(),
-            algorithm.getErrorNumberString() + " - " + algorithm.getShortDescription()}));
+          "{0} pages have been detected for algorithm {1}", pages.size(),
+          new Object[] {pages.size(), algorithm.getErrorNumberString() + " - " +
+                                          algorithm.getShortDescription()}));
     }
 
     // Log final message
@@ -607,8 +627,8 @@ public class ListCWWorker extends BasicWorker {
 
     // Display final message
     if (getWindow() != null) {
-      Utilities.displayInformationMessage(
-          getWindow().getParentComponent(), message.toString());
+      Utilities.displayInformationMessage(getWindow().getParentComponent(),
+                                          message.toString());
     }
   }
 
@@ -620,13 +640,12 @@ public class ListCWWorker extends BasicWorker {
     /**
      * @param listener Listener to MediaWiki events.
      */
-    public CWController(MediaWikiListener listener) {
-      super(listener);
-    }
+    public CWController(MediaWikiListener listener) { super(listener); }
 
     /**
      * @param task Task to be performed in background.
-     * @see org.wikipediacleaner.api.MediaWikiController#addTask(java.util.concurrent.Callable)
+     * @see
+     *     org.wikipediacleaner.api.MediaWikiController#addTask(java.util.concurrent.Callable)
      */
     @Override
     public void addTask(Callable<?> task) {
@@ -649,7 +668,8 @@ public class ListCWWorker extends BasicWorker {
      */
     private void cleanUpDone() {
       while (getFirstResultIfDone() != null) {
-        // Do nothing, done result is simply removed from the list of tasks to clean up done tasks
+        // Do nothing, done result is simply removed from the list of tasks to
+        // clean up done tasks
       }
     }
 
@@ -682,9 +702,8 @@ public class ListCWWorker extends BasicWorker {
      * @param page Page.
      * @param checkWiki True if last version should be checked on wiki.
      */
-    public CWPageCallable(
-        EnumWikipedia wiki, MediaWikiListener listener, API api,
-        Page page) {
+    public CWPageCallable(EnumWikipedia wiki, MediaWikiListener listener,
+                          API api, Page page) {
       super(wiki, listener, api);
       this.page = page;
     }
@@ -698,7 +717,7 @@ public class ListCWWorker extends BasicWorker {
       PageAnalysis analysis = page.getAnalysis(page.getContents(), false);
       analysis.performFullPageAnalysis(analysisTime);
       Page currentPage = null;
-      PageAnalysis currentAnalysis = null; 
+      PageAnalysis currentAnalysis = null;
       for (AlgorithmInformation algorithm : selectedAlgorithms) {
         List<CheckErrorResult> errors = new ArrayList<>();
         boolean detected = false;
@@ -717,14 +736,17 @@ public class ListCWWorker extends BasicWorker {
           if (checkWiki) {
             try {
               if (currentPage == null) {
-                currentPage = DataManager.getPage(wiki, page.getTitle(), null, null, null);
+                currentPage = DataManager.getPage(wiki, page.getTitle(), null,
+                                                  null, null);
               }
               if (currentAnalysis == null) {
-                api.retrieveContents(wiki, Collections.singleton(currentPage), false, false);
+                api.retrieveContents(wiki, Collections.singleton(currentPage),
+                                     false, false);
                 if (currentPage.getContents().equals(page.getContents())) {
-                  currentAnalysis = analysis; 
+                  currentAnalysis = analysis;
                 } else {
-                  currentAnalysis = currentPage.getAnalysis(currentPage.getContents(), false);
+                  currentAnalysis =
+                      currentPage.getAnalysis(currentPage.getContents(), false);
                   currentAnalysis.performFullPageAnalysis(analysisTime);
                 }
               }
@@ -735,7 +757,8 @@ public class ListCWWorker extends BasicWorker {
               } else {
                 errors.clear();
                 long beginTime = System.nanoTime();
-                if (algorithm.algorithm.analyze(currentAnalysis, errors, false)) {
+                if (algorithm.algorithm.analyze(currentAnalysis, errors,
+                                                false)) {
                   detectionConfirmed = true;
                 }
                 long endTime = System.nanoTime();
@@ -751,10 +774,9 @@ public class ListCWWorker extends BasicWorker {
 
           // Memorize detection
           if (detectionConfirmed) {
-            logCW.info(
-                "Detection confirmed for " + page.getTitle() +
-                ": " + algorithm.algorithm.getErrorNumberString() +
-                " - " + algorithm.algorithm.getShortDescription());
+            logCW.info("Detection confirmed for " + page.getTitle() + ": " +
+                       algorithm.algorithm.getErrorNumberString() + " - " +
+                       algorithm.algorithm.getShortDescription());
             algorithm.addDetection(currentPage, errors);
             countDetections++;
           }
@@ -799,10 +821,8 @@ public class ListCWWorker extends BasicWorker {
      * @param listener Listener.
      * @param namespaces Namespaces to be analyzed.
      */
-    public CWPageProcessor(
-        EnumWikipedia wiki,
-        MediaWikiListener listener,
-        Set<Integer> namespaces) {
+    public CWPageProcessor(EnumWikipedia wiki, MediaWikiListener listener,
+                           Set<Integer> namespaces) {
       this.wiki = wiki;
       this.listener = listener;
       this.namespaces = new HashSet<>();
@@ -824,7 +844,7 @@ public class ListCWWorker extends BasicWorker {
 
     /**
      * Add a page to the list of pages to check.
-     * 
+     *
      * @param page Page to be checked.
      */
     public void addPage(Page page) {
@@ -842,7 +862,8 @@ public class ListCWWorker extends BasicWorker {
 
     /**
      * @param page Page.
-     * @see org.wikipediacleaner.api.dump.PageProcessor#processPage(org.wikipediacleaner.api.data.Page)
+     * @see
+     *     org.wikipediacleaner.api.dump.PageProcessor#processPage(org.wikipediacleaner.api.data.Page)
      */
     @Override
     public void processPage(Page page) {
@@ -857,9 +878,7 @@ public class ListCWWorker extends BasicWorker {
     /**
      * @return True if all tasks are completed.
      */
-    public boolean hasFinished() {
-      return controller.hasFinished();
-    }
+    public boolean hasFinished() { return controller.hasFinished(); }
   }
 
   /**
@@ -892,8 +911,8 @@ public class ListCWWorker extends BasicWorker {
         for (CheckErrorResult error : errors) {
           String contents = page.getContents();
           if (contents != null) {
-            notices.add(new String(contents.substring(
-                error.getStartPosition(), error.getEndPosition())));
+            notices.add(new String(contents.substring(error.getStartPosition(),
+                                                      error.getEndPosition())));
           }
           ErrorLevel currentLevel = error.getErrorLevel();
           if (currentLevel.ordinal() < tmpLevel.ordinal()) {
@@ -975,11 +994,12 @@ public class ListCWWorker extends BasicWorker {
 
     /**
      * Create a list for information about processing algorithms.
-     * 
+     *
      * @param algorithms List of algorithms.
      * @return List of information initialized.
      */
-    public static List<AlgorithmInformation> createList(List<CheckErrorAlgorithm> algorithms) {
+    public static List<AlgorithmInformation>
+    createList(List<CheckErrorAlgorithm> algorithms) {
       List<AlgorithmInformation> list = new ArrayList<>(algorithms.size());
       for (CheckErrorAlgorithm algorithm : algorithms) {
         list.add(new AlgorithmInformation(algorithm));
@@ -990,9 +1010,7 @@ public class ListCWWorker extends BasicWorker {
     /**
      * @return Errors found.
      */
-    public Map<String, Detection> getDetections() {
-      return detections;
-    }
+    public Map<String, Detection> getDetections() { return detections; }
 
     /**
      * @param page Page.
@@ -1005,15 +1023,11 @@ public class ListCWWorker extends BasicWorker {
     /**
      * @param time Time spent.
      */
-    public void addTimeSpent(long time) {
-      timeSpent += time;
-    }
+    public void addTimeSpent(long time) { timeSpent += time; }
 
     /**
      * @return Time spent.
      */
-    public long getTimeSpent() {
-      return timeSpent;
-    }
+    public long getTimeSpent() { return timeSpent; }
   }
 }

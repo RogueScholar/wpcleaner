@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
-
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -23,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.wikipediacleaner.api.APIException;
 import org.wikipediacleaner.api.ResponseManager;
 import org.wikipediacleaner.api.http.HttpServer;
-
 
 /**
  * Manage interactions with the tool server.
@@ -52,7 +50,7 @@ public class Hc3HttpServer implements HttpServer {
 
   /**
    * Create an HttpServer object.
-   * 
+   *
    * @param httpClient HTTP client.
    * @param baseUrl Base URL.
    */
@@ -63,23 +61,20 @@ public class Hc3HttpServer implements HttpServer {
 
   /**
    * Send a POST request to the Tool Server.
-   * 
+   *
    * @param path Path on the tool server.
    * @param properties Request properties.
    * @param manager Response manager.
    * @throws APIException Exception thrown by the API.
    */
   @Override
-  public void sendPost(
-      String              path,
-      Map<String, String> properties,
-      ResponseManager     manager) throws APIException {
+  public void sendPost(String path, Map<String, String> properties,
+                       ResponseManager manager) throws APIException {
     HttpMethod method = null;
     InputStream inputStream = null;
     int statusCode = HttpStatus.SC_SEE_OTHER;
     int count = 0;
-    while ((statusCode != HttpStatus.SC_OK) &&
-           (count < MAX_ATTEMPTS)) {
+    while ((statusCode != HttpStatus.SC_OK) && (count < MAX_ATTEMPTS)) {
       if (count > 0) {
         try {
           Thread.sleep(2000 * count);
@@ -105,7 +100,8 @@ public class Hc3HttpServer implements HttpServer {
             manager.manageResponse(inputStream);
           }
         } else {
-          log.warn("Error accessing url: " + statusCode + "-" + HttpStatus.getStatusText(statusCode));
+          log.warn("Error accessing url: " + statusCode + "-" +
+                   HttpStatus.getStatusText(statusCode));
           for (Header header : method.getResponseHeaders()) {
             log.warn("  Header " + header.getName() + ": " + header.getValue());
           }
@@ -145,27 +141,26 @@ public class Hc3HttpServer implements HttpServer {
       }
     }
     if (statusCode != HttpStatus.SC_OK) {
-      throw new APIException("URL access returned " + HttpStatus.getStatusText(statusCode));
+      throw new APIException("URL access returned " +
+                             HttpStatus.getStatusText(statusCode));
     }
   }
 
   /**
    * Send a GET request to the Tool Server.
-   * 
+   *
    * @param path Path on the tool server.
    * @param manager Response manager.
    * @throws APIException Exception thrown by the API.
    */
   @Override
-  public void sendGet(
-      String          path,
-      ResponseManager manager) throws APIException {
+  public void sendGet(String path, ResponseManager manager)
+      throws APIException {
     HttpMethod method = null;
     InputStream inputStream = null;
     int statusCode = HttpStatus.SC_SEE_OTHER;
     int count = 0;
-    while ((statusCode != HttpStatus.SC_OK) &&
-           (count < MAX_ATTEMPTS)) {
+    while ((statusCode != HttpStatus.SC_OK) && (count < MAX_ATTEMPTS)) {
       if (count > 0) {
         try {
           Thread.sleep(2000 * count);
@@ -194,7 +189,8 @@ public class Hc3HttpServer implements HttpServer {
             manager.manageResponse(inputStream);
           }
         } else {
-          log.warn("Error accessing url: " + statusCode + "-" + HttpStatus.getStatusText(statusCode));
+          log.warn("Error accessing url: " + statusCode + "-" +
+                   HttpStatus.getStatusText(statusCode));
           waitBeforeRetrying(count);
         }
         try {
@@ -222,7 +218,8 @@ public class Hc3HttpServer implements HttpServer {
       }
     }
     if (statusCode != HttpStatus.SC_OK) {
-      throw new APIException("URL access returned " + HttpStatus.getStatusText(statusCode));
+      throw new APIException("URL access returned " +
+                             HttpStatus.getStatusText(statusCode));
     }
   }
 
