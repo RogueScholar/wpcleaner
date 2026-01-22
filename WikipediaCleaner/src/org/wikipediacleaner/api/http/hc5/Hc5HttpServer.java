@@ -89,7 +89,7 @@ public class Hc5HttpServer implements HttpServer {
           return;
         }
       } catch (IOException e) {
-        log.error("IOException (" + url + "): " + e.getMessage());
+        log.error("IOException ({}: {}", url, e.getMessage());
       }
     }
     throw new APIException("POST returned " + statusCode);
@@ -130,7 +130,7 @@ public class Hc5HttpServer implements HttpServer {
           return;
         }
       } catch (IOException e) {
-        log.error("IOException (" + url + "): " + e.getMessage());
+        log.error("IOException ({}): {}", url, e.getMessage());
       }
     }
     throw new APIException("GET returned " + statusCode);
@@ -149,7 +149,7 @@ public class Hc5HttpServer implements HttpServer {
    */
   private void waitBeforeRetrying(int count) {
     try {
-      Thread.sleep(10000 * Math.min(count, 1));
+      Thread.sleep(10000L * Math.min(count, 1));
     } catch (InterruptedException e) {
       log.warn("Waiting before retrying");
     }

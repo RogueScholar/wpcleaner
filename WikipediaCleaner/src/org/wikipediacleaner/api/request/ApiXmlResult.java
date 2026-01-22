@@ -10,7 +10,6 @@ package org.wikipediacleaner.api.request;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -220,13 +219,11 @@ public abstract class ApiXmlResult extends BasicApiResult {
         "/api/error", Filters.element());
     List<Element> listErrors = xpa.evaluate(root);
     if (listErrors != null) {
-      Iterator<Element> iterErrors = listErrors.iterator();
-      while (iterErrors.hasNext()) {
-        Element currentNode = iterErrors.next();
+      for (Element currentNode : listErrors) {
         String text =
             "Error reported: " +
-            currentNode.getAttributeValue("code") + " - " +
-            currentNode.getAttributeValue("info");
+                currentNode.getAttributeValue("code") + " - " +
+                currentNode.getAttributeValue("info");
         log.warn(text);
         throw new APIException(text, currentNode.getAttributeValue("code"));
       }
@@ -237,10 +234,8 @@ public abstract class ApiXmlResult extends BasicApiResult {
         "/api/warnings/*", Filters.element());
     List<Element> listWarnings = xpa.evaluate(root);
     if (listWarnings != null) {
-      Iterator<Element> iterWarnings = listWarnings.iterator();
-      while (iterWarnings.hasNext()) {
-        Element currentNode = iterWarnings.next();
-        log.warn("Warning reported: " + currentNode.getName() + " - " + currentNode.getValue());
+      for (Element currentNode : listWarnings) {
+        log.warn("Warning reported: {} - {}", currentNode.getName(), currentNode.getValue());
       }
     }
   }
@@ -269,11 +264,10 @@ public abstract class ApiXmlResult extends BasicApiResult {
       results = xpa.evaluate(root);
     }
     if (results != null) {
-      for (Object currentNode : results) {
-        List attributes = ((Element) currentNode).getAttributes();
+      for (Element currentNode : results) {
+        List<Attribute> attributes = currentNode.getAttributes();
         if (attributes != null) {
-          for (Object currentAttribute : attributes) {
-            Attribute attribute = (Attribute) currentAttribute;
+          for (Attribute attribute : attributes) {
             properties.put(attribute.getName(), attribute.getValue());
             result = true;
           }
@@ -339,7 +333,7 @@ public abstract class ApiXmlResult extends BasicApiResult {
     if (useDisambig) {
       Element pageProps = pageNode.getChild("pageprops");
       boolean dabPage = (pageProps != null) && (pageProps.getAttribute("disambiguation") != null);
-      page.setDisambiguationPage(Boolean.valueOf(dabPage));
+      page.setDisambiguationPage(dabPage);
     }
     return page;
   }

@@ -597,7 +597,7 @@ public class MediaWikiAPI implements API {
           retrieveTokens(wikipedia);
         }
       } catch (JDOMParseException e) {
-        log.error("Error updating page: " + e.getMessage());
+        log.error("Error updating page: {}", e.getMessage());
         throw new APIException("Error parsing XML", e);
       }
     } while (result == null);
@@ -1833,7 +1833,7 @@ public class MediaWikiAPI implements API {
     List<Element> listWarnings = xpa.evaluate(root);
     if (listWarnings != null) {
       for (Element currentNode : listWarnings) {
-        log.warn("Warning reported: " + currentNode.getName() + " - " + currentNode.getValue());
+        log.warn("Warning reported: {} - {}", currentNode.getName(), currentNode.getValue());
       }
     }
   }

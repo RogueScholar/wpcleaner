@@ -41,9 +41,9 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
   /** Logger */
   final static Logger static_log = LoggerFactory.getLogger(BasicWindow.class);
 
-  static private ImageIcon icon;
+  static private final ImageIcon icon;
   private JFrame parentComponent;
-  private ProgressPanel glassPane;
+  private final ProgressPanel glassPane;
   private Logger log;
   private EnumWikipedia wikipedia;
 
@@ -81,16 +81,13 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
       final int                 closeOperation,
       final Class               windowClass,
       final BasicWindowListener creation) {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          internalCreateWindow(
-              name, wikipedia,
-              closeOperation, windowClass, creation);
-        } catch (Throwable t) {
-          static_log.error("Error displaying window " + name, t);
-        }
+    SwingUtilities.invokeLater(() -> {
+      try {
+        internalCreateWindow(
+            name, wikipedia,
+            closeOperation, windowClass, creation);
+      } catch (Throwable t) {
+        static_log.error("Error displaying window {}", name, t);
       }
     });
   }
@@ -120,11 +117,8 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
     Logger log = LoggerFactory.getLogger(windowClass);
     try {
       window = (BasicWindow) windowClass.newInstance();
-    } catch (InstantiationException e) {
-      log.error("Error creating window: " + e.getMessage());
-      return;
-    } catch (IllegalAccessException e) {
-      log.error("Error creating window: " + e.getMessage());
+    } catch (InstantiationException | IllegalAccessException e) {
+      log.error("Error creating window: {}", e.getMessage());
       return;
     } catch (ClassCastException e) {
       return;
@@ -227,22 +221,14 @@ public abstract class BasicWindow implements ActionListener, PageProvider {
   public Integer getVersion() {
     try {
       Field field = getClass().getField("WINDOW_VERSION");
-      if (field != null) {
-        Object object = field.get(null);
-        if (object instanceof Integer) {
-          return (Integer) object;
-        }
+      Object object = field.get(null);
+      if (object instanceof Integer) {
+        return (Integer) object;
       }
-    } catch (IllegalAccessException e) {
-      logError("Error trying to retrieve field WINDOW_VERSION", e);
-    } catch (IllegalArgumentException e) {
+    } catch (IllegalAccessException | IllegalArgumentException | NullPointerException | SecurityException e) {
       logError("Error trying to retrieve field WINDOW_VERSION", e);
     } catch (NoSuchFieldException e) {
       // Normal : the field is optional
-    } catch (NullPointerException e) {
-      logError("Error trying to retrieve field WINDOW_VERSION", e);
-    } catch (SecurityException e) {
-      logError("Error trying to retrieve field WINDOW_VERSION", e);
     }
     return null;
   }

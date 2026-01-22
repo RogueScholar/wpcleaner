@@ -63,7 +63,7 @@ import org.wikipediacleaner.utils.ConfigurationValueShortcut.ShortcutProperties;
  */
 public class Utilities {
 
-  private static Logger log = LoggerFactory.getLogger(Utilities.class);
+  private static final Logger log = LoggerFactory.getLogger(Utilities.class);
 
   public final static int YES_ALL_OPTION = 101;
 
@@ -203,7 +203,7 @@ public class Utilities {
     }
     StringBuilder sb = new StringBuilder();
     for (String parameterName : parametersName) {
-      if (sb.length() > 0) {
+      if (!sb.isEmpty()) {
         sb.append(", ");
       }
       sb.append("'");
@@ -223,7 +223,7 @@ public class Utilities {
    */
   public static void displayMissingConfiguration(Component parent, String message) {
     String fullMessage = GT._T("This function requires some configuration.");
-    if ((message != null) && (message.trim().length() > 0)) {
+    if ((message != null) && (!message.trim().isEmpty())) {
       fullMessage += "\n" + message;
     }
     int answer = displayYesNoWarning(
@@ -586,7 +586,7 @@ public class Utilities {
       String message, boolean showMessage,
       ShortcutProperties shortcut) {
     ImageIcon icon = getImageIcon(iconName, size);
-    JButton button = null;
+    JButton button;
     String label = getLabelWithoutMnemonic(message);
     String fullLabel = (shortcut != null) ? label + shortcut.getDescription() : label;
     if (icon != null) {
@@ -594,7 +594,6 @@ public class Utilities {
         button = new JButton(label, icon);
       } else {
         button = new JButton(icon);
-        label = null;
       }
     } else {
       button = new JButton(label);
@@ -636,7 +635,7 @@ public class Utilities {
       String iconName, EnumImageSize size,
       String message, boolean showMessage) {
     ImageIcon icon = getImageIcon(iconName, size);
-    JToggleButton button = null;
+    JToggleButton button;
     if (icon != null) {
       if (showMessage) {
         button = new JToggleButton(getLabelWithoutMnemonic(message), icon);
@@ -886,7 +885,7 @@ public class Utilities {
       Method method = desktop.getMethod("isDesktopSupported", (Class[]) null);
       return (Boolean) method.invoke(null, (Object[]) null);
     } catch (Throwable e) {
-      log.error("Throwable using Desktop.isDesktopSupported(): " + e.getClass().getName() + " - " + e.getMessage());
+      log.error("Throwable using Desktop.isDesktopSupported(): {} - {}", e.getClass().getName(), e.getMessage());
     }
     return false;
   }
@@ -910,11 +909,11 @@ public class Utilities {
         final Class<?> desktopClass = Class.forName("java.awt.Desktop");
         Method method = desktopClass.getMethod("getDesktop", (Class[]) null);
         final Object desktop = method.invoke(null, (Object[]) null);
-        method = desktopClass.getMethod("browse", new Class[] { URI.class });
-        method.invoke(desktop, new Object[] { uri });
+        method = desktopClass.getMethod("browse", URI.class);
+        method.invoke(desktop, uri);
         return;
       } catch (Throwable e) {
-        log.error("Throwable using Desktop.browse(): " + e.getClass().getName() + " - " + e.getMessage());
+        log.error("Throwable using Desktop.browse(): {} - {}", e.getClass().getName(), e.getMessage());
       }
     }
 
@@ -924,9 +923,9 @@ public class Utilities {
       try {
         Class.forName("com.apple.eio.FileManager")
             .getDeclaredMethod("openURL", new Class<?>[] {String.class})
-            .invoke(null, new Object[] {uri.toString()});
+            .invoke(null, uri.toString());
       } catch (Throwable e) {
-        log.error("Throwable on " + osName + " for browseURL(): " + e.getClass().getName() + " - " + e.getMessage());
+        log.error("Throwable on {} for browseURL(): {} - {}", osName, e.getClass().getName(), e.getMessage());
       }
       return;
     } else if (osName.startsWith("Windows")) {
@@ -934,7 +933,7 @@ public class Utilities {
         Runtime.getRuntime()
             .exec("rundll32 url.dll,FileProtocolHandler " + uri.toString());
       } catch (Throwable e) {
-        log.error("Throwable on " + osName + " for browseURL(): " + e.getClass().getName() + " - " + e.getMessage());
+        log.error("Throwable on {} for browseURL(): {} - {}", osName, e.getClass().getName(), e.getMessage());
       }
       return;
     } else {
@@ -945,10 +944,10 @@ public class Utilities {
             return;
           }
         } catch (Throwable e) {
-          log.error("Throwable on " + osName + " for browseURL() with browser " + b + ": " + e.getClass().getName() + " - " + e.getMessage());
+          log.error("Throwable on {} for browseURL() with browser {}: {} - {}", osName, b, e.getClass().getName(), e.getMessage());
         }
       }
-      log.error("Unable to find an altenative browser for browseURL() among " + Arrays.toString(BROWSERS));
+      log.error("Unable to find an alternative browser for browseURL() among {}", Arrays.toString(BROWSERS));
     }
 
     if (defaultAction != null) {
@@ -1021,7 +1020,7 @@ public class Utilities {
       browseURL(new URI(url), defaultAction);
     } catch (URISyntaxException e) {
       // Nothing to be done
-      log.error("Error viewing page: " + e.getMessage());
+      log.error("Error viewing page: {}", e.getMessage());
     }
   }
 
@@ -1050,24 +1049,24 @@ public class Utilities {
   public static void addRowSorter(JTable table, TableModel model) {
     try {
       Class<?> tableRowSorterClass = Class.forName("javax.swing.table.TableRowSorter");
-      Constructor ctor = tableRowSorterClass.getConstructor(new Class[] { TableModel.class });
+      Constructor ctor = tableRowSorterClass.getConstructor(TableModel.class);
       Object rowSorter = ctor.newInstance(model);
       Class rowSorterClass = Class.forName("javax.swing.RowSorter");
-      Method method = table.getClass().getMethod("setRowSorter", new Class[] { rowSorterClass });
-      method.invoke(table, new Object[] { rowSorter });
+      Method method = table.getClass().getMethod("setRowSorter", rowSorterClass);
+      method.invoke(table, rowSorter);
     } catch (ClassNotFoundException e) {
-      log.debug("ClassNotFoundException: " + e.getMessage());
+      log.debug("ClassNotFoundException: {}", e.getMessage());
       // Nothing to be done, JVM < 6
     } catch (NoSuchMethodException e) {
-      log.error("NoSuchMethodException: " + e.getMessage());
+      log.error("NoSuchMethodException: {}", e.getMessage());
     } catch (InvocationTargetException e) {
-      log.error("InvocationTargetException: " + e.getMessage());
+      log.error("InvocationTargetException: {}", e.getMessage());
     } catch (IllegalAccessException e) {
-      log.error("IllegalAccessException: " + e.getMessage());
+      log.error("IllegalAccessException: {}", e.getMessage());
     } catch (ClassCastException e) {
-      log.error("ClassCastException: " + e.getMessage());
+      log.error("ClassCastException: {}", e.getMessage());
     } catch (Throwable e) {
-      log.error("Throwable: " + e.getClass().getName() + " - " + e.getMessage());
+      log.error("Throwable: {} - {}", e.getClass().getName(), e.getMessage());
     }
   }
 
@@ -1081,20 +1080,20 @@ public class Utilities {
    */
   public static int convertRowIndexToModel(JTable table, int row) {
     try {
-      Method method = table.getClass().getMethod("convertRowIndexToModel", new Class[] { int.class });
-      Object result = method.invoke(table, new Object[] { row });
-      row = ((Integer) result).intValue();
+      Method method = table.getClass().getMethod("convertRowIndexToModel", int.class);
+      Object result = method.invoke(table, row);
+      row = (Integer) result;
     } catch (NoSuchMethodException e) {
-      log.debug("NoSuchMethodException: " + e.getMessage());
+      log.debug("NoSuchMethodException: {}", e.getMessage());
       // Nothing to be done, JVM < 6
     } catch (InvocationTargetException e) {
-      log.error("InvocationTargetException: " + e.getMessage());
+      log.error("InvocationTargetException: {}", e.getMessage());
     } catch (IllegalAccessException e) {
-      log.error("IllegalAccessException: " + e.getMessage());
+      log.error("IllegalAccessException: {}", e.getMessage());
     } catch (ClassCastException e) {
-      log.error("ClassCastException: " + e.getMessage());
+      log.error("ClassCastException: {}", e.getMessage());
     } catch (Throwable e) {
-      log.error("Throwable: " + e.getClass().getName() + " - " + e.getMessage());
+      log.error("Throwable: {} - {}", e.getClass().getName(), e.getMessage());
     }
     return row;
   }

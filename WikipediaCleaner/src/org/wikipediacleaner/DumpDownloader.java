@@ -138,18 +138,18 @@ public class DumpDownloader {
       String password = System.getProperty("user.name")+"@"+InetAddress.getLocalHost().getHostName();
       if (!ftp.login(username, password)) {
         reply = ftp.getReplyCode();
-        log.error("FTP server refused login for anonymous: " + reply);
+        log.error("FTP server refused login for anonymous: {}", reply);
         return CODE_ERROR;
       }
 
       // List dumps hosted by the server
       if (!ftp.changeWorkingDirectory(baseDir)) {
         reply = ftp.getReplyCode();
-        log.error("FTP server refused change working directory to " + baseDir + ": " + reply);
+        log.error("FTP server refused change working directory to {}: {}", baseDir, reply);
         return CODE_ERROR;
       }
       if (!ftp.changeWorkingDirectory(wikiCode)) {
-        log.error("FTP server refused change working directory to " + wikiCode + ": " + reply);
+        log.error("FTP server refused change working directory to {}: {}", wikiCode, reply);
         return CODE_ERROR;
       }
       List<String> dumps = new ArrayList<>();
@@ -182,27 +182,27 @@ public class DumpDownloader {
           File tmpFile = new File(localDir, fileName + "tmp");
           File destFile = new File(localDir, fileName);
           if (destFile.exists()) {
-            log.info("Dump file already exists: " + destFile.getAbsolutePath());
+            log.info("Dump file already exists: {}", destFile.getAbsolutePath());
             return CODE_NOTHING_TO_DO;
           }
 
           try {
             // Download
-            log.info("Downloading : " + dump + "/" + fileName);
+            log.info("Downloading : {}/{}", dump, fileName);
             output = new BufferedOutputStream(new FileOutputStream(tmpFile));
             if (ftp.retrieveFile(dump + "/" + fileName, output)) {
               output.close();
-              log.info("Retrieved dump file " + fileName);
+              log.info("Retrieved dump file {}", fileName);
               if (destFile.exists()) {
                 destFile.delete();
               }
               if (tmpFile.renameTo(destFile)) {
                 return CODE_OK;
               }
-              log.warn("Unable to rename file from " + tmpFile.getAbsolutePath() + " to " + destFile.getAbsolutePath());
+              log.warn("Unable to rename file from {} to {}", tmpFile.getAbsolutePath(), destFile.getAbsolutePath());
             } else {
               reply = ftp.getReplyCode();
-              log.warn("Unable to retrieve file " + fileName + ": " + reply);
+              log.warn("Unable to retrieve file {}: {}", fileName, reply);
             }
             result = CODE_ERROR;
           } catch (IOException e) {

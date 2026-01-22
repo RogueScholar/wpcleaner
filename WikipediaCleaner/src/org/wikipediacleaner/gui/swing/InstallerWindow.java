@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.util.Properties;
 
@@ -76,16 +77,13 @@ public class InstallerWindow
   /** Logger */
   static final Logger log = LoggerFactory.getLogger(Installer.class);
 
-  public static final Integer WINDOW_VERSION = Integer.valueOf(1);
+  public static final Integer WINDOW_VERSION = 1;
 
   /** Text field for the base directory for installation */
   private JTextField textBaseDirectory;
 
   /** Component for selecting the wiki */
   private WikiSelector wikiSelector;
-
-  /** Component for selecting the language */
-  private LanguageSelector languageSelector;
 
   /** Component for selecting the user */
   private UserNameSelector userNameSelector;
@@ -228,7 +226,7 @@ public class InstallerWindow
        * Gives notification that an attribute or set of attributes changed.
        *
        * @param e the document event
-       * @see DocumentListener#changeUpdate(DocumentEvent)
+       * @see DocumentListener#changedUpdate(DocumentEvent)
        */
       @Override
       public void changedUpdate(DocumentEvent e) {
@@ -280,7 +278,7 @@ public class InstallerWindow
     constraints.gridy++;
 
     // Language
-    languageSelector = new LanguageSelector(getParentComponent());
+    LanguageSelector languageSelector = new LanguageSelector(getParentComponent());
     constraints.gridx = 0;
     constraints.weightx = 0;
     panel.add(languageSelector.getLabel(), constraints);
@@ -361,7 +359,7 @@ public class InstallerWindow
    */
   private String getExplanations() {
     String directory = textBaseDirectory.getText();
-    if ((directory == null) || (directory.trim().length() == 0)) {
+    if ((directory == null) || (directory.trim().isEmpty())) {
       directory = SystemUtils.getUserHome().getAbsolutePath();
     }
     StringBuilder buffer = new StringBuilder();
@@ -699,7 +697,7 @@ public class InstallerWindow
 
     // Check installation directory
     String directoryName = textBaseDirectory.getText();
-    if ((directoryName == null) || (directoryName.trim().length() == 0)) {
+    if ((directoryName == null) || (directoryName.trim().isEmpty())) {
       displayWarning(
           GT._T("You must select an installation folder."),
           textBaseDirectory);
@@ -768,10 +766,10 @@ public class InstallerWindow
     private String warningMessage;
 
     /** Credentials */
-    private Properties credentials;
+    private final Properties credentials;
 
     /** Flag for selecting beta version */
-    private boolean beta;
+    private final boolean beta;
 
     /**
      * @param wiki Wiki.
@@ -791,7 +789,7 @@ public class InstallerWindow
     /**
      * Called on the event dispatching thread (not on the worker thread)
      * after the <code>construct</code> method has returned.
-     * @see org.wikipediacleaner.gui.swing.utils.SwingWorker#finished()
+     * @see org.wikipediacleaner.gui.swing.basic.SwingWorker#finished()
      */
     @Override
     public void finished() {
@@ -811,7 +809,7 @@ public class InstallerWindow
      * Compute the value to be returned by the <code>get</code> method. 
      * 
      * @return Result of the worker.
-     * @see org.wikipediacleaner.gui.swing.utils.SwingWorker#construct()
+     * @see org.wikipediacleaner.gui.swing.basic.SwingWorker#construct()
      */
     @Override
     public Object construct() {
@@ -860,7 +858,7 @@ public class InstallerWindow
           warningMessage =
               GT._T("Unable to create file {0}", "credentials.txt") + "\n" +
               GT._T("Error: {0}", e.getLocalizedMessage());
-          log.error("Error while creating credentials.txt: " + e.getMessage());
+          log.error("Error while creating credentials.txt: {}", e.getMessage());
           return Boolean.FALSE;
         }
       }
@@ -885,13 +883,13 @@ public class InstallerWindow
           warningMessage =
               GT._T("Problem running getdown installer") + "\n" +
               GT._T("Exit code: {0}", Integer.toString(result));
-          log.error("Error running getdown installer (" + result + ")");
+          log.error("Error running getdown installer ({})", result);
         }
       } catch (InterruptedException | IOException e) {
         warningMessage =
             GT._T("Problem running {0}", "getdown") + "\n" +
             GT._T("Error: {0}", e.getLocalizedMessage());
-        log.error("Error running getdown installer: " + e.getMessage());
+        log.error("Error running getdown installer: {}", e.getMessage());
         return Boolean.FALSE;
       }
 
@@ -946,7 +944,7 @@ public class InstallerWindow
         warningMessage =
             GT._T("Problem creating desktop file") + "\n" +
             GT._T("Error: {0}", e.getLocalizedMessage());
-        log.error("Error creating shortcut: " + e.getMessage());
+        log.error("Error creating shortcut: {}", e.getMessage());
       }
 
       // Run WPCleaner
@@ -967,7 +965,7 @@ public class InstallerWindow
         warningMessage =
             GT._T("Problem running {0}", Version.PROGRAM) + "\n" +
             GT._T("Error: {0}", e.getLocalizedMessage());
-        log.error("Error running: " + e.getMessage());
+        log.error("Error running: {}", e.getMessage());
         return Boolean.FALSE;
       }
 
@@ -1009,7 +1007,7 @@ public class InstallerWindow
       log.info("Creating WPCleaner.desktop");
       File desktopFile = new File(directory, "WPCleaner.desktop");
       try (FileOutputStream fos = new FileOutputStream(desktopFile);
-           OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF8");
+           OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
            BufferedWriter writer = new BufferedWriter(osw)) {
         writer.write("[Desktop Entry]\n");
         writer.write("Type=Application\n");

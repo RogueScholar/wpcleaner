@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.wikipediacleaner.api.constants.EnumQueryResult;
 import org.wikipediacleaner.api.impl.MediaWikiAPI;
 
+import java.io.Serial;
+
 
 /**
  * Generic API Exception.
@@ -21,6 +23,7 @@ public class APIException extends Exception {
   /**
    * 
    */
+  @Serial
   private static final long serialVersionUID = 6413874942788957653L;
 
   /**
@@ -127,7 +130,7 @@ public class APIException extends Exception {
    */
   public boolean shouldRetry() {
     EnumQueryResult result = getQueryResult();
-    return (result != null) ? result.shouldRetry() : false;
+    return result != null && result.shouldRetry();
   }
 
   /**
@@ -146,7 +149,7 @@ public class APIException extends Exception {
     if (result != null) {
       final Logger log = LoggerFactory.getLogger(MediaWikiAPI.class);
       if (log != null) {
-        log.warn("Waiting after error '" + code + "'");
+        log.warn("Waiting after error '{}'", code);
       }
       result.waitForRetry();
     }

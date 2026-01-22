@@ -9,7 +9,6 @@ package org.wikipediacleaner.api.check.algorithm.a0xx.a07x.a078;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,11 +84,7 @@ public class CheckErrorAlgorithm078 extends CheckErrorAlgorithmBase {
           }
 
           // Store <references> tag
-          List<PageElement> existingReferences = referencesByGroup.get(groupName);
-          if (existingReferences == null) {
-            existingReferences = new ArrayList<>();
-            referencesByGroup.put(groupName, existingReferences);
-          }
+          List<PageElement> existingReferences = referencesByGroup.computeIfAbsent(groupName, k -> new ArrayList<>());
           existingReferences.add(referencesTag);
         }
       }
@@ -104,11 +99,7 @@ public class CheckErrorAlgorithm078 extends CheckErrorAlgorithmBase {
         PageElementTemplate template = analysis.isInTemplate(beginIndex);
         if (template != null) {
           String groupName = "";
-          List<PageElement> existingReferences = referencesByGroup.get(groupName);
-          if (existingReferences == null) {
-            existingReferences = new ArrayList<>();
-            referencesByGroup.put(groupName, existingReferences);
-          }
+          List<PageElement> existingReferences = referencesByGroup.computeIfAbsent(groupName, k -> new ArrayList<>());
           existingReferences.add(template);
         }
       }
@@ -124,15 +115,14 @@ public class CheckErrorAlgorithm078 extends CheckErrorAlgorithmBase {
         result = true;
 
         // Find first suggested references for the group
-        Collections.sort(referencesForGroup, new IntervalComparator());
+        referencesForGroup.sort(new IntervalComparator());
         PageElement suggestedReferences = referencesForGroup.get(referencesForGroup.size() - 1);
 
         // Report errors
         for (PageElement referencesElement : referencesForGroup) {
           int beginIndex = referencesElement.getBeginIndex();
           int endIndex = referencesElement.getEndIndex();
-          if (referencesElement instanceof PageElementTag) {
-            PageElementTag tag = (PageElementTag) referencesElement;
+          if (referencesElement instanceof PageElementTag tag) {
             beginIndex = tag.getCompleteBeginIndex();
             endIndex = tag.getCompleteEndIndex();
           }
@@ -170,7 +160,7 @@ public class CheckErrorAlgorithm078 extends CheckErrorAlgorithmBase {
         for (String templateRegexp : tmpList) {
           String patternText = null;
           try {
-            if (templateRegexp.length() > 0) {
+            if (!templateRegexp.isEmpty()) {
               char firstLetter = templateRegexp.charAt(0);
               if (Character.isUpperCase(firstLetter) || Character.isLowerCase(firstLetter)) {
                 templateRegexp =
@@ -181,7 +171,7 @@ public class CheckErrorAlgorithm078 extends CheckErrorAlgorithmBase {
             patternText = "\\{\\{" + templateRegexp;
             patterns.add(Pattern.compile(patternText));
           } catch (PatternSyntaxException e) {
-            log.warn(e.getMessage() + " (" + patternText + ")");
+            log.warn("{} ({})", e.getMessage(), patternText);
           }
         }
       }

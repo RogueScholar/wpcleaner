@@ -105,9 +105,9 @@ public class Hc3HttpServer implements HttpServer {
             manager.manageResponse(inputStream);
           }
         } else {
-          log.warn("Error accessing url: " + statusCode + "-" + HttpStatus.getStatusText(statusCode));
+          log.warn("Error accessing url: {}-{}", statusCode, HttpStatus.getStatusText(statusCode));
           for (Header header : method.getResponseHeaders()) {
-            log.warn("  Header " + header.getName() + ": " + header.getValue());
+            log.warn("  Header {}: {}", header.getName(), header.getValue());
           }
           if ((statusCode == HttpStatus.SC_MOVED_TEMPORARILY) ||
               (statusCode == HttpStatus.SC_TEMPORARY_REDIRECT)) {
@@ -126,17 +126,17 @@ public class Hc3HttpServer implements HttpServer {
           //
         }
       } catch (HttpException e) {
-        log.warn("IOException: " + e.getMessage());
+        log.warn("HttpException: {}", e.getMessage());
         throw new APIException("HttpException: " + e.getMessage());
       } catch (IOException e) {
-        log.warn("IOException: " + e.getMessage());
+        log.warn("IOException: {}", e.getMessage());
         throw new APIException("IOException: " + e.getMessage());
       } finally {
         if (inputStream != null) {
           try {
             inputStream.close();
           } catch (IOException e) {
-            log.warn("Error closing stream: " + e.getMessage());
+            log.warn("Error closing stream: {}", e.getMessage());
           }
         }
         if (method != null) {
@@ -194,7 +194,7 @@ public class Hc3HttpServer implements HttpServer {
             manager.manageResponse(inputStream);
           }
         } else {
-          log.warn("Error accessing url: " + statusCode + "-" + HttpStatus.getStatusText(statusCode));
+          log.warn("Error accessing url: {}-{}", statusCode, HttpStatus.getStatusText(statusCode));
           waitBeforeRetrying(count);
         }
         try {
@@ -213,7 +213,7 @@ public class Hc3HttpServer implements HttpServer {
           try {
             inputStream.close();
           } catch (IOException e) {
-            log.warn("Error closing stream: " + e.getMessage());
+            log.warn("Error closing stream: {}", e.getMessage());
           }
         }
         if (method != null) {
@@ -239,7 +239,7 @@ public class Hc3HttpServer implements HttpServer {
    */
   private void waitBeforeRetrying(int count) {
     try {
-      Thread.sleep(10000 * Math.min(count, 1));
+      Thread.sleep(10000L * Math.min(count, 1));
     } catch (InterruptedException e) {
       log.warn("Waiting before retrying");
     }

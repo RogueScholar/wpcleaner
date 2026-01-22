@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +117,7 @@ public class HttpUtils {
    */
   protected static void debugText(String text) {
     if (DEBUG_TIME) {
-      log.info("" + System.currentTimeMillis() + ": " + text);
+      log.info("{}: {}", System.currentTimeMillis(), text);
     } else {
       log.info(text);
     }
@@ -126,23 +127,17 @@ public class HttpUtils {
   // Configuration
   // ==========================================================================
 
-  private static Charset utf8Charset = null;
-  private static Charset iso88591Charset = null;
-
-  static {
-    utf8Charset = Charset.forName("UTF8");
-    iso88591Charset = Charset.forName("ISO-8859-1");
-  }
+  private static final Charset utf8Charset = StandardCharsets.UTF_8;
+  private static final Charset iso88591Charset = StandardCharsets.ISO_8859_1;
 
   /**
    * Append bytes of a String to a buffer.
    * 
    * @param buf Byte buffer.
    * @param data String.
-   * @throws UnsupportedEncodingException
    */
-  private static void appendBytes(ByteArrayOutputStream buf, String data) throws UnsupportedEncodingException {
-    byte[] b = data.getBytes("UTF8");
+  private static void appendBytes(ByteArrayOutputStream buf, String data) {
+    byte[] b = data.getBytes(StandardCharsets.UTF_8);
     buf.write(b, 0, b.length);
   }
 
@@ -151,7 +146,6 @@ public class HttpUtils {
    * 
    * @param segment String
    * @return Byte array.
-   * @throws UnsupportedEncodingException
    */
   private static byte[] parseEncodedString(String segment) throws UnsupportedEncodingException {
     ByteArrayOutputStream buf = new ByteArrayOutputStream(segment.length());
@@ -229,11 +223,11 @@ public class HttpUtils {
     }
 
     // Create URI
-    URI uri = null;
+    URI uri;
     try {
       uri = new URI(url);
     } catch (URISyntaxException e) {
-      url = url.replaceAll("\\&\\#x20\\;", "_");
+      url = url.replaceAll("&#x20;", "_");
       try {
         uri = new URI(url);
       } catch (URISyntaxException e2) {
@@ -310,19 +304,17 @@ public class HttpUtils {
     }
 
     // Check that URL ends correctly
-    String result = null;
-    if ((base_suffix == null) || (base_suffix.length() == 0)) {
+    String result;
+    if ((base_suffix == null) || (base_suffix.isEmpty())) {
       result = url.substring(base_prefix.length());
     } else if (!url.endsWith(base_suffix)) {
       return null;
     } else {
       result = url.substring(base_prefix.length(), url.length() - base_suffix.length());
     }
-    if (result != null) {
-      result = result.replaceAll("\\_", " ");
-      if (result.endsWith("/")) {
-        result = result.substring(0, result.length() - 1);
-      }
+    result = result.replaceAll("_", " ");
+    if (result.endsWith("/")) {
+      result = result.substring(0, result.length() - 1);
     }
     return result;
     

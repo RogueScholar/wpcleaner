@@ -89,7 +89,7 @@ public abstract class UpdateWarningTools {
   private boolean simulation;
 
   /** Processor for warnings on talk pages */
-  private WarningProcessor warningProcessor;
+  private final WarningProcessor warningProcessor;
 
   /** List of articles titles supposed to have the error. */
   private Set<String> articles;
@@ -227,7 +227,7 @@ public abstract class UpdateWarningTools {
           (modifiers != null) ? modifiers.get(page.getTitle()) : null,
           stats);
       if (updated) {
-        // log.debug("Page " + page.getTitle() + " has been updated.");
+        // log.debug("Page {} has been updated.", page.getTitle());
       }
       if (stats != null) {
         stats.addAnalyzedPage(page);
@@ -236,7 +236,6 @@ public abstract class UpdateWarningTools {
         }
       }
     }
-    return;
   }
 
   /**
@@ -278,10 +277,7 @@ public abstract class UpdateWarningTools {
       return false;
     }
     String warningTemplate = configuration.getString(warningProcessor.getWarningTemplate());
-    if ((warningTemplate == null) || (warningTemplate.trim().length() == 0)) {
-      return false;
-    }
-    return true;
+    return (warningTemplate != null) && (!warningTemplate.trim().isEmpty());
   }
 
   /**
@@ -313,7 +309,7 @@ public abstract class UpdateWarningTools {
       return false;
     }
     String warningTemplate = configuration.getString(warningProcessor.getWarningTemplate());
-    if ((warningTemplate == null) || (warningTemplate.trim().length() == 0)) {
+    if ((warningTemplate == null) || (warningTemplate.trim().isEmpty())) {
       if (!simulation) {
         return false;
       }
@@ -344,7 +340,7 @@ public abstract class UpdateWarningTools {
 
       // If we force the use of "To do" sub-page, the warning must be on it
       if ((page.getNamespace() != null) &&
-          (page.getNamespace().intValue() == Namespace.MAIN)) {
+          (page.getNamespace() == Namespace.MAIN)) {
         if (configuration.getBoolean(WPCConfigurationBoolean.TODO_SUBPAGE_FORCE)) {
           return manageWarningOnTodoSubpage(
               pageAnalysis, pageRevId, todoSubpage, talkPage,
@@ -514,7 +510,7 @@ public abstract class UpdateWarningTools {
       }
       setText(warningProcessor.getMessageUpdateWarning(todoSubpage.getTitle()));
       StringBuilder tmp = new StringBuilder(contents);
-      if ((tmp.length() > 0) && (tmp.charAt(tmp.length() - 1) != '\n')) {
+      if ((!tmp.isEmpty()) && (tmp.charAt(tmp.length() - 1) != '\n')) {
         tmp.append('\n');
       }
       tmp.append("* ");
@@ -539,7 +535,7 @@ public abstract class UpdateWarningTools {
         index--;
       }
       if (index > 0) {
-        tmp.append(contents.substring(0, index));
+        tmp.append(contents, 0, index);
         tmp.append('\n');
       }
       tmp.append("* ");
@@ -635,7 +631,7 @@ public abstract class UpdateWarningTools {
       setText(warningProcessor.getMessageUpdateWarning(talkPage.getTitle()));
       StringBuilder tmp = new StringBuilder();
       if (indexStart > 0) {
-        tmp.append(contents.substring(0, indexStart));
+        tmp.append(contents, 0, indexStart);
         if (tmp.charAt(tmp.length() - 1) != '\n') {
           tmp.append("\n");
         }
@@ -671,13 +667,13 @@ public abstract class UpdateWarningTools {
       StringBuilder tmp = new StringBuilder();
       int indexStart = templateTodo.getBeginIndex();
       if (indexStart > 0) {
-        tmp.append(contents.substring(0, indexStart));
+        tmp.append(contents, 0, indexStart);
         if (tmp.charAt(tmp.length() - 1) != '\n') {
           tmp.append("\n");
         }
       }
       StringBuilder tmpParameter = new StringBuilder(parameter);
-      if ((tmpParameter.length() == 0) ||
+      if ((tmpParameter.isEmpty()) ||
           (tmpParameter.charAt(tmpParameter.length() - 1) != '\n')) {
         tmpParameter.append("\n");
       }
@@ -701,10 +697,10 @@ public abstract class UpdateWarningTools {
     // Update warning if necessary
     if (isModified(elements, templateWarning)) {
       StringBuilder tmp = new StringBuilder();
-      tmp.append(contents.substring(0, templateTodo.getBeginIndex()));
+      tmp.append(contents, 0, templateTodo.getBeginIndex());
       StringBuilder tmpParameter = new StringBuilder();
       if (templateWarning.getBeginIndex() > 0) {
-        tmpParameter.append(parameter.substring(0, templateWarning.getBeginIndex()));
+        tmpParameter.append(parameter, 0, templateWarning.getBeginIndex());
       }
       addWarning(tmpParameter, pageRevId, elements);
       int endIndex = parameter.indexOf('\n', templateWarning.getEndIndex());
@@ -736,7 +732,7 @@ public abstract class UpdateWarningTools {
       return false;
     }
     String contents = todoSubpage.getContents();
-    if ((contents == null) || (contents.trim().equals(""))) {
+    if ((contents == null) || (contents.trim().isEmpty())) {
       return false;
     }
     PageAnalysis analysis = todoSubpage.getAnalysis(contents, true);
@@ -755,14 +751,14 @@ public abstract class UpdateWarningTools {
       index--;
     }
     if (index > 0) {
-      tmp.append(contents.substring(0, index));
+      tmp.append(contents, 0, index);
     }
     index = template.getEndIndex();
     while ((index < contents.length()) && (contents.charAt(index) != '\n')) {
       index++;
     }
     if (index < contents.length()) {
-      if (tmp.length() > 0) {
+      if (!tmp.isEmpty()) {
         tmp.append('\n');
       }
       tmp.append(contents.substring(index));
@@ -771,14 +767,14 @@ public abstract class UpdateWarningTools {
     // Remove the warning
     String newContents = tmp.toString();
     String reason = warningProcessor.getWarningCommentDone();
-    if ((newContents.trim().length() == 0) &&
+    if ((newContents.trim().isEmpty()) &&
         (wiki.getConnection().getUser() != null) &&
         (wiki.getConnection().getUser().hasRight(User.RIGHT_DELETE))) {
       api.deletePage(wiki, todoSubpage, reason, automaticEdit);
     } else {
-      if (newContents.trim().length() == 0) {
+      if (newContents.trim().isEmpty()) {
         String delete = configuration.getString(WPCConfigurationString.TODO_SUBPAGE_DELETE);
-        if ((delete != null) && (delete.trim().length() > 0)) {
+        if ((delete != null) && (!delete.trim().isEmpty())) {
           newContents = delete;
         }
       }
@@ -858,12 +854,12 @@ public abstract class UpdateWarningTools {
       StringBuilder tmp = new StringBuilder();
       int indexStart = (templatePrevious != null) ? templatePrevious.getEndIndex() : 0;
       if (indexStart > 0) {
-        tmp.append(contents.substring(0, indexStart));
+        tmp.append(contents, 0, indexStart);
         if (tmp.charAt(tmp.length() - 1) != '\n') {
           tmp.append("\n");
         }
       }
-      tmp.append(TemplateBuilder.from(todoTemplates.get(0)).toString());
+      tmp.append(TemplateBuilder.from(todoTemplates.get(0)));
       if (indexStart < contents.length()) {
         if (contents.charAt(indexStart) != '\n') {
           tmp.append("\n");
@@ -886,7 +882,7 @@ public abstract class UpdateWarningTools {
       setText(warningProcessor.getMessageRemoveWarning(talkPage.getTitle()));
       StringBuilder tmp = new StringBuilder();
       if (templateTodo.getBeginIndex() > 0) {
-        tmp.append(contents.substring(0, templateTodo.getBeginIndex()));
+        tmp.append(contents, 0, templateTodo.getBeginIndex());
       }
       String tmpParameter = "";
       int index = templateWarning.getBeginIndex();
@@ -901,13 +897,13 @@ public abstract class UpdateWarningTools {
         index++;
       }
       if (index < parameter.length()) {
-        if (tmpParameter.length() > 0) {
+        if (!tmpParameter.isEmpty()) {
           tmpParameter += "\n";
         }
         tmpParameter += parameter.substring(index);
       }
-      if (tmpParameter.length() > 0) {
-        if ((tmp.length() > 0) && (tmp.charAt(tmp.length() - 1) != '\n')) {
+      if (!tmpParameter.isEmpty()) {
+        if ((!tmp.isEmpty()) && (tmp.charAt(tmp.length() - 1) != '\n')) {
           tmp.append('\n');
         }
         tmp.append(templateTodo.getParameterReplacement("1", tmpParameter, null));
@@ -918,20 +914,20 @@ public abstract class UpdateWarningTools {
         if (todoLinkTemplates != null) {
           for (String templateName : todoLinkTemplates) {
             List<PageElementTemplate> tmpTemplates = analysis.getTemplates(templateName);
-            if ((tmpTemplates != null) && (tmpTemplates.size() > 0)) {
+            if ((tmpTemplates != null) && (!tmpTemplates.isEmpty())) {
               templateTodoLink = tmpTemplates.get(0);
             }
           }
         }
         if (templateTodoLink == null) {
-          if ((tmp.length() > 0) && (tmp.charAt(tmp.length() - 1) != '\n')) {
+          if ((!tmp.isEmpty()) && (tmp.charAt(tmp.length() - 1) != '\n')) {
             tmp.append('\n');
           }
           tmp.append(templateTodo.getParameterReplacement("1", null, null));
         }
       }
       if (templateTodo.getEndIndex() < contents.length()) {
-        if ((tmp.length() > 0) && (tmp.charAt(tmp.length() - 1) != '\n')) {
+        if ((!tmp.isEmpty()) && (tmp.charAt(tmp.length() - 1) != '\n')) {
           if (contents.charAt(templateTodo.getEndIndex()) != '\n') {
             tmp.append('\n');
           }
@@ -987,7 +983,7 @@ public abstract class UpdateWarningTools {
         setText(warningProcessor.getMessageRemoveWarning(talkPage.getTitle()));
         StringBuilder tmp = new StringBuilder();
         if (templateTodo.getBeginIndex() > 0) {
-          tmp.append(contents.substring(0, templateTodo.getBeginIndex()));
+          tmp.append(contents, 0, templateTodo.getBeginIndex());
         }
         String tmpParameter = "";
         int index = templateWarning.getBeginIndex() - parameterStartIndex;
@@ -1002,15 +998,13 @@ public abstract class UpdateWarningTools {
           index++;
         }
         if (index < parameter.length()) {
-          if (tmpParameter.length() > 0) {
+          if (!tmpParameter.isEmpty()) {
             tmpParameter += "\n";
           }
           tmpParameter += parameter.substring(index);
         }
-        if (tmpParameter.length() > 0) {
+        if (!tmpParameter.isEmpty()) {
           tmp.append(templateTodo.getParameterReplacement("1", tmpParameter, null));
-        } else {
-          //
         }
         if (templateTodo.getEndIndex() < contents.length()) {
           tmp.append(contents.substring(templateTodo.getEndIndex()));
@@ -1046,7 +1040,7 @@ public abstract class UpdateWarningTools {
     for (String param : params) {
       boolean found = false;
       paramNum = 1;
-      while ((found == false) && (template.getParameterValue(Integer.toString(paramNum)) != null)) {
+      while ((!found) && (template.getParameterValue(Integer.toString(paramNum)) != null)) {
         if (param.equals(template.getParameterValue(Integer.toString(paramNum)))) {
           found = true;
         }
@@ -1072,16 +1066,16 @@ public abstract class UpdateWarningTools {
       Integer pageRevId, Collection<String> params) {
     TemplateBuilder builder = TemplateBuilder.from(" " + configuration.getString(warningProcessor.getWarningTemplate()) + " ");
     if (pageRevId != null) {
-      builder.addParam(" revisionid", pageRevId.toString() + " ");
+      builder.addParam(" revisionid", pageRevId + " ");
     }
     for (String param : params) {
       builder.addParam(" " + param + " ");
     }
-    talkText.append(builder.toString());
+    talkText.append(builder);
     talkText.append(" -- ~~~~~");
     String comment = configuration.getString(warningProcessor.getWarningTemplateComment());
     if (comment != null) {
-      talkText.append(CommentBuilder.from(comment).toString());
+      talkText.append(CommentBuilder.from(comment));
     }
   }
 
@@ -1127,7 +1121,7 @@ public abstract class UpdateWarningTools {
    * @param analysis Page analysis.
    * @return First warning template in the page.
    */
-  private final PageElementTemplate getFirstWarningTemplate(PageAnalysis analysis) {
+  private PageElementTemplate getFirstWarningTemplate(PageAnalysis analysis) {
     if (analysis == null) {
       return null;
     }
@@ -1200,7 +1194,7 @@ public abstract class UpdateWarningTools {
 
     // Prepare elements
     String message = createMessage(article, msgElements, wpcConfig, templateParam);
-    if ((message == null) || (message.trim().length() == 0)) {
+    if ((message == null) || (message.trim().isEmpty())) {
       return;
     }
     String globalListTemplate = wpcConfig.getString(WPCConfigurationString.MSG_GLOBAL_LIST_TEMPLATE);
@@ -1211,7 +1205,7 @@ public abstract class UpdateWarningTools {
       try {
         title = MessageFormat.format(title, article);
       } catch (IllegalArgumentException e) {
-        log.warn("Parameter " + titleParam.getAttributeName() + " has an incorrect format");
+        log.warn("Parameter {} has an incorrect format", titleParam.getAttributeName());
       }
     }
     Configuration config = Configuration.getConfiguration();
@@ -1241,16 +1235,16 @@ public abstract class UpdateWarningTools {
         if (section == null) {
           // Add the title
           StringBuilder fullMessage = new StringBuilder();
-          if ((globalTemplate != null) && (globalTemplate.trim().length() > 0)) {
-            fullMessage.append(TemplateBuilder.from(globalTemplate.trim()).toString());
+          if ((globalTemplate != null) && (!globalTemplate.trim().isEmpty())) {
+            fullMessage.append(TemplateBuilder.from(globalTemplate.trim()));
             fullMessage.append("\n");
-            if ((signature != null) && (signature.trim().length() > 0)) {
+            if ((signature != null) && (!signature.trim().isEmpty())) {
               fullMessage.append(signature.trim());
               fullMessage.append("\n\n");
             }
           }
-          if ((globalListTemplate != null) && (globalListTemplate.trim().length() > 0)) {
-            fullMessage.append(TemplateBuilder.from(globalListTemplate.trim()).toString());
+          if ((globalListTemplate != null) && (!globalListTemplate.trim().isEmpty())) {
+            fullMessage.append(TemplateBuilder.from(globalListTemplate.trim()));
             fullMessage.append("\n");
           }
           if (title != null) {
@@ -1288,7 +1282,7 @@ public abstract class UpdateWarningTools {
               message, true, true, automaticEdit, false);
         } else {
           // TODO: No global title, no title => Should append the message at the end
-          log.warn("Should add " + message + " in " + userTalk);
+          log.warn("Should add {} in {}", message, userTalk);
         }
       }
     } catch (APIException e) {
@@ -1311,16 +1305,16 @@ public abstract class UpdateWarningTools {
     String[] templateElements = wpcConfig.getStringArray(templateParam);
     if ((templateElements == null) ||
         (templateElements.length == 0) ||
-        (templateElements[0].trim().length() == 0)) {
+        (templateElements[0].trim().isEmpty())) {
       return null;
     }
     TemplateBuilder builder = TemplateBuilder.from(templateElements[0].trim());
-    if ((templateElements.length > 1) && (templateElements[1].trim().length() > 0)) {
+    if ((templateElements.length > 1) && (!templateElements[1].trim().isEmpty())) {
       builder.addParam(templateElements[1].trim(), article);
     }
-    if ((templateElements.length > 2) && (templateElements[2].trim().length() > 0)) {
+    if ((templateElements.length > 2) && (!templateElements[2].trim().isEmpty())) {
       String wpcUser = wpcConfig.getString(WPCConfigurationString.USER);
-      if ((wpcUser != null) && (wpcUser.trim().length() > 0)) {
+      if ((wpcUser != null) && (!wpcUser.trim().isEmpty())) {
         builder.addParam(templateElements[2].trim(), wpcUser);
       }
     }
@@ -1444,17 +1438,14 @@ public abstract class UpdateWarningTools {
   }
 
   /**
-   * @return True if the analyze should stop.
+   * @return True if the analysis should stop.
    */
   protected boolean shouldStop() {
     if (window == null) {
       return false;
     }
-    if ((window.getParentComponent() == null) ||
-        (window.getParentComponent().isDisplayable() == false)) {
-      return true;
-    }
-    return false;
+    return (window.getParentComponent() == null) ||
+        (!window.getParentComponent().isDisplayable());
   }
 
   /**

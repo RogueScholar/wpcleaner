@@ -36,22 +36,22 @@ public class PageHandler extends DefaultHandler {
   private boolean isInTitle;
 
   /** Page title */
-  private StringBuilder title;
+  private final StringBuilder title;
 
   /** True when parsing name space */
   private boolean isInNamespace;
 
   /** Name space */
-  private StringBuilder namespace;
+  private final StringBuilder namespace;
 
   /** True when parsing a page id */
   private boolean isInPageId;
 
   /** Page id */
-  private StringBuilder pageId;
+  private final StringBuilder pageId;
 
   /** Redirect */
-  private StringBuilder redirect;
+  private final StringBuilder redirect;
 
   /** True when parsing a revision */
   private boolean isInRevision;
@@ -60,13 +60,13 @@ public class PageHandler extends DefaultHandler {
   private boolean isInRevisionId;
 
   /** Revision id */
-  private StringBuilder revisionId;
+  private final StringBuilder revisionId;
 
   /** True when parsing a revision text */
   private boolean isInRevisionText;
 
   /** Revision text */
-  private StringBuilder revisionText;
+  private final StringBuilder revisionText;
 
   /** Page processor */
   private PageProcessor processor;
@@ -191,14 +191,14 @@ public class PageHandler extends DefaultHandler {
               namespaceId);
           currentPage.setNamespace(namespaceId);
           currentPage.setContents(revisionText.toString());
-          if (redirect.length() > 0) {
+          if (!redirect.isEmpty()) {
             PageRedirect redirects = currentPage.getRedirects();
             redirects.isRedirect(true);
             redirects.add(DataManager.createSimplePage(processor.getWiki(), redirect.toString(), null, null, null), null);
           }
           processor.processPage(currentPage);
         } catch (NumberFormatException e) {
-          log.error("Problem in endElement: " + e.getMessage());
+          log.error("Problem in endElement: {}", e.getMessage());
         }
       }
       isInPage = false;
@@ -246,7 +246,7 @@ public class PageHandler extends DefaultHandler {
    * @see org.xml.sax.ContentHandler#characters
    */
   @Override
-  public void characters(char ch[], int start, int length) throws SAXException {
+  public void characters(char[] ch, int start, int length) throws SAXException {
     if (isInPage) {
       if (isInRevision) {
         if (isInRevisionId) {
