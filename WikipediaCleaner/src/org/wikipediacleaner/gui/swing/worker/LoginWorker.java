@@ -10,10 +10,12 @@ package org.wikipediacleaner.gui.swing.worker;
 
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wikipediacleaner.api.API;
 import org.wikipediacleaner.api.APIException;
 import org.wikipediacleaner.api.APIFactory;
@@ -46,7 +48,7 @@ public class LoginWorker extends BasicWorker {
 
   private final Component focusComponent;
   private final EnumLanguage language;
-  private String username;
+  private final String fullUsername;
   private final char[] password;
   private final int saveUser;
   private final boolean login;
@@ -58,7 +60,7 @@ public class LoginWorker extends BasicWorker {
    * @param window Window.
    * @param focusComponent Component with the focus.
    * @param language Language.
-   * @param username User name.
+   * @param fullUsername User name.
    * @param password Password.
    * @param saveUser True if user should be memorized.
    * @param login True if login is requested.
@@ -68,7 +70,7 @@ public class LoginWorker extends BasicWorker {
       EnumWikipedia wikipedia,
       BasicWindow window, Component focusComponent,
       EnumLanguage language,
-      String username,
+      String fullUsername,
       char[] password,
       int saveUser,
       boolean login,
@@ -76,7 +78,7 @@ public class LoginWorker extends BasicWorker {
     super(wikipedia, window);
     this.focusComponent = focusComponent;
     this.language = language;
-    this.username = username.trim();
+    this.fullUsername = fullUsername.trim();
     this.password = password;
     this.saveUser = saveUser;
     this.login = login;
@@ -91,9 +93,7 @@ public class LoginWorker extends BasicWorker {
   public void finished() {
     super.finished();
     if (password != null) {
-      for (int i = 0; i < password.length; i++) {
-        password[i] = '\0';
-      }
+      Arrays.fill(password, '\0');
     }
     if (focusComponent != null) {
       focusComponent.requestFocusInWindow();
@@ -111,16 +111,17 @@ public class LoginWorker extends BasicWorker {
       EnumWikipedia wiki = getWikipedia();
 
       // Login
+      String compactUsername = StringUtils.substringBefore(fullUsername, "@");
       if (!reloadOnly) {
         setText(GT._T("Login"));
-        LoginResult result = api.login(wiki, username, new String(password), login);
+        LoginResult result = api.login(wiki, fullUsername, new String(password), login);
         if (login) {
           if ((result == null) || (!result.isLoginSuccessful())) {
             throw new APIException("Login unsuccessful: " + ((result != null) ? result.toString() : ""));
           }
         }
-        User user = api.retrieveUser(wiki, username);
-        username = (user != null) ? user.getName() : null;
+        User user = api.retrieveUser(wiki, compactUsername);
+        compactUsername = (user != null) ? user.getName() : null;
         wiki.getConnection().setUser(user);
         api.retrieveTokens(wiki);
         logged = true;
@@ -128,7 +129,7 @@ public class LoginWorker extends BasicWorker {
 
       // Load configuration
       setText(GT._T("Loading configuration"));
-      api.loadConfiguration(wiki, username);
+      api.loadConfiguration(wiki, compactUsername);
 
       // Saving settings
       Configuration configuration = Configuration.getConfiguration();
@@ -137,13 +138,13 @@ public class LoginWorker extends BasicWorker {
       if (login && !reloadOnly && (saveUser != ConfigurationConstants.VALUE_SAVE_USER_NO_CHANGE)) {
         Properties props = configuration.getProperties(wiki, Configuration.PROPERTIES_USERS);
         if (saveUser == ConfigurationConstants.VALUE_SAVE_USER_NONE) {
-          props.remove(username);
+          props.remove(fullUsername);
           configuration.setString(wiki, ConfigurationValueString.LAST_USER, (String) null);
         } else {
           props.setProperty(
-              username,
+              fullUsername,
               (saveUser == ConfigurationConstants.VALUE_SAVE_USER_BOTH) ? new String(password) : "");
-          configuration.setString(wiki, ConfigurationValueString.LAST_USER, username);
+          configuration.setString(wiki, ConfigurationValueString.LAST_USER, fullUsername);
         }
         configuration.setProperties(wiki, Configuration.PROPERTIES_USERS, props);
         configuration.setInt(
